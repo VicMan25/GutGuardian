@@ -21,7 +21,7 @@ class Opcion extends Model
     {
         return [
             'valor_numerico' => 'integer',
-            'orden'          => 'integer',
+            'orden' => 'integer',
         ];
     }
 

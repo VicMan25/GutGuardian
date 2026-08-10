@@ -24,7 +24,7 @@ class Perfil extends Model
     protected function casts(): array
     {
         return [
-            'edad'     => 'integer',
+            'edad' => 'integer',
             'semestre' => 'integer',
         ];
     }

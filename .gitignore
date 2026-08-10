@@ -22,3 +22,15 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# ------------------------------------------------------------
+# Datos reales de participantes — NUNCA subir al repositorio
+# (Ley 1581 de 2012 — habeas data / datos sensibles de salud)
+# ------------------------------------------------------------
+ml/datos/
+/storage/app/datos/
+*.participantes.csv
+*.participantes.xlsx
+*.participantes.json
+dataset_real.*
+encuestas_reales.*

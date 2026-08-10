@@ -1,59 +1,137 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# GutGuardián
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplicativo web para monitorear hábitos alimentarios y sintomatología gastrointestinal
+en estudiantes de la Universidad Mariana. Clasifica el nivel de riesgo digestivo en tres
+categorías mediante regresión logística multinomial.
 
-## About Laravel
+> **Aviso legal:** esta herramienta es de autocuidado y tamizaje. No emite diagnósticos
+> médicos ni sustituye la consulta con un profesional de salud
+> (Resolución 3100 de 2019 — Software como Dispositivo Médico).
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Requisitos
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| Herramienta | Versión mínima |
+|-------------|---------------|
+| PHP | 8.2 |
+| Composer | 2.x |
+| MySQL | 8.0 |
+| Node.js | 20.x |
+| npm | 10.x |
 
-## Learning Laravel
+> En Windows se recomienda XAMPP 8.2. Habilitar la extensión `ext-gd` en `php.ini`
+> para que la exportación Excel funcione.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Instalación local
 
-## Laravel Sponsors
+### 1. Clonar el repositorio
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```bash
+git clone <url-del-repo> gutguardian
+cd gutguardian
+```
 
-### Premium Partners
+### 2. Instalar dependencias PHP
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```bash
+composer install
+```
 
-## Contributing
+### 3. Configurar el entorno
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-## Code of Conduct
+Editar `.env` y ajustar las credenciales de MySQL:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```
+DB_DATABASE=gutguardian
+DB_USERNAME=root
+DB_PASSWORD=tu_contraseña
+```
 
-## Security Vulnerabilities
+### 4. Crear la base de datos
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+En MySQL (o desde phpMyAdmin en XAMPP):
 
-## License
+```sql
+CREATE DATABASE gutguardian CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 5. Ejecutar migraciones y sembrar roles
+
+```bash
+php artisan migrate --seed
+```
+
+### 6. Instalar dependencias de frontend y compilar assets
+
+```bash
+npm install
+npm run build
+```
+
+Para desarrollo con recarga automática:
+
+```bash
+npm run dev
+```
+
+### 7. Levantar el servidor de desarrollo
+
+```bash
+php artisan serve
+```
+
+La aplicación estará disponible en `http://localhost:8000`.
+
+---
+
+## Comandos frecuentes
+
+```bash
+# Restablecer la BD completa (destruye todos los datos)
+php artisan migrate:fresh --seed
+
+# Ejecutar tests
+php artisan test
+
+# Formatear código con Pint
+./vendor/bin/pint
+
+# Análisis estático con Larastan
+./vendor/bin/phpstan analyse
+```
+
+---
+
+## Estructura de módulos
+
+```
+app/Modules/
+├── Auth/        Consentimiento informado
+├── Usuarios/    Perfiles y programas académicos
+├── Encuestas/   Instrumento de 20 preguntas, diligenciamiento y respuestas
+├── Analitica/   Motor de inferencia multinomial (PredictorService)
+├── Reportes/    Visualización, gráficas (Chart.js), exportación PDF/Excel
+└── Panel/       Administración institucional y alertas
+```
+
+---
+
+## Importante — datos sensibles
+
+Los 347 registros reales de participantes **nunca** deben subirse a este repositorio.
+Trabajar en desarrollo con factories y datos sintéticos (`php artisan db:seed`).
+Los patrones de archivos de datos reales están explícitamente excluidos en `.gitignore`.
+
+---
+
+## Licencia
+
+Uso académico — trabajo de grado, Universidad Mariana, 2025–2026.

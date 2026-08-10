@@ -26,12 +26,12 @@ class EvaluacionRiesgo extends Model
     protected function casts(): array
     {
         return [
-            'categoria'    => 'integer',
-            'prob_0'       => 'float',
-            'prob_1'       => 'float',
-            'prob_2'       => 'float',
+            'categoria' => 'integer',
+            'prob_0' => 'float',
+            'prob_1' => 'float',
+            'prob_2' => 'float',
             'contribuciones' => 'array',
-            'evaluado_at'  => 'datetime',
+            'evaluado_at' => 'datetime',
         ];
     }
 

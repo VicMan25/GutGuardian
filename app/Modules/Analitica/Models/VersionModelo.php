@@ -22,10 +22,10 @@ class VersionModelo extends Model
     protected function casts(): array
     {
         return [
-            'entrenado_at'   => 'datetime',
-            'activo'         => 'boolean',
-            'coeficientes'   => 'array',
-            'metricas'       => 'array',
+            'entrenado_at' => 'datetime',
+            'activo' => 'boolean',
+            'coeficientes' => 'array',
+            'metricas' => 'array',
             'mapa_variables' => 'array',
         ];
     }
