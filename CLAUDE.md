@@ -236,7 +236,82 @@ histórica** de los registros del estudiante y ajustar la redacción en la monog
 
 ## 11. Estado actual
 
-- [x] Sprint 0 — pendiente de arranque
+- [x] Sprint 0 — completado
 - [ ] Sprint 1 · [ ] Sprint 2 · [ ] Sprint 3 · [ ] Sprint 4 · [ ] Sprint 5 · [ ] Sprint 6
 - [ ] **BLOQUEANTE:** regla operativa de la variable dependiente Y (requiere a Enfermería)
 - [ ] Dataset de 347 registros exportado y limpio para entrenamiento
+
+---
+
+## 12. Sistema de diseño
+
+### Tokens de color (CSS variables + utilidades Tailwind `gg-*`)
+
+| Token CSS               | Hex       | Tailwind           | Uso                              |
+|-------------------------|-----------|--------------------|----------------------------------|
+| `--gg-papel`            | `#F6F7F4` | `gg-papel`         | Fondo de página                  |
+| `--gg-superficie`       | `#FFFFFF` | `gg-superficie`    | Tarjetas y formularios           |
+| `--gg-tinta`            | `#16302B` | `gg-tinta`         | Texto principal                  |
+| `--gg-tinta-suave`      | `#5A6560` | `gg-tinta-suave`   | Texto secundario, equivalencias  |
+| `--gg-borde`            | `#E0E3DC` | `gg-borde`         | Bordes hairline                  |
+| `--gg-primario`         | `#1F5C4A` | `gg-primario`      | Marca, acciones, anillo de foco  |
+| `--gg-primario-suave`   | `#E6EFEA` | `gg-primario-suave`| Fondo de opción seleccionada     |
+| `--gg-riesgo-bajo`      | `#3E7D64` | `gg-riesgo-bajo`   | Segmento 0 de la pista           |
+| `--gg-riesgo-medio`     | `#C08A2E` | `gg-riesgo-medio`  | Segmento 1 de la pista (ámbar)   |
+| `--gg-riesgo-alto`      | `#9C4A32` | `gg-riesgo-alto`   | Segmento 2 (arcilla, NO rojo)    |
+
+### Tipografías
+
+| Familia                | Peso    | Tailwind          | Usos permitidos                                  |
+|------------------------|---------|-------------------|--------------------------------------------------|
+| Bricolage Grotesque    | 400/500 | `font-display`    | Solo títulos de pantalla y cifras grandes        |
+| Source Sans 3          | 400/500 | `font-sans`       | Todo el cuerpo de texto                          |
+| IBM Plex Mono          | 400     | `font-mono`       | Códigos de participante, probabilidades, OR      |
+
+**Escala tipográfica:** `12 / 13 / 14 / 16 / 17 / 22 / 28 / 36 px` (Tailwind: `2xs xs sm base md xl 2xl 3xl`).
+Solo pesos 400 y 500. Formato oración en todos los textos.
+
+### Radios y bordes
+
+- Controles interactivos: `rounded-control` (8 px)
+- Tarjetas: `rounded-tarjeta` (12 px)
+- Bordes: 1 px. Sin sombras, salvo el anillo de foco (`outline: 2px solid --gg-primario`).
+- Sin degradados.
+
+### Layouts
+
+| Layout                          | Cuándo usarlo                                     |
+|---------------------------------|---------------------------------------------------|
+| `layouts/publico.blade.php`     | Login, registro, consentimiento                   |
+| `layouts/estudiante.blade.php`  | Encuesta y resultado (1 col, `max-w-[640px]`)     |
+| `layouts/profesional.blade.php` | Panel institucional (sidebar + contenido denso)   |
+
+### Inventario de componentes Blade
+
+| Componente              | Archivo                          | Descripción                                                     |
+|-------------------------|----------------------------------|-----------------------------------------------------------------|
+| `escala-frecuencia`     | `components/escala-frecuencia`   | Selector segmentado 4 niveles; Nunca=0…Siempre=3                |
+| `escala-dolor`          | `components/escala-dolor`        | Variante 1-5 para P13                                           |
+| `matriz-sintomas`       | `components/matriz-sintomas`     | Acordeón (móvil) / tabla (desktop) para P11, P12, P16, P17     |
+| `opcion-multiple`       | `components/opcion-multiple`     | Checkboxes con "Ninguna" excluyente. Para P14, P15, P18, P20   |
+| `pista-riesgo`          | `components/pista-riesgo`        | 3 segmentos + marcador + contribuciones + aviso-no-diagnostico  |
+| `tarjeta`               | `components/tarjeta`             | Contenedor superficie, sin sombra                               |
+| `boton`                 | `components/boton`               | Variantes: primario, secundario, fantasma                       |
+| `campo-texto`           | `components/campo-texto`         | Input con label, error y ayuda integrados                       |
+| `alerta`               | `components/alerta`              | Tipos: exito, error, aviso, info. Cierre opcional con Alpine    |
+| `aviso-no-diagnostico`  | `components/aviso-no-diagnostico`| **Obligatorio** junto a todo resultado. Res. 3100/2019          |
+| `barra-progreso`        | `components/barra-progreso`      | Progreso por sección (no por pregunta individual)               |
+
+### Reglas de calidad de la interfaz
+
+- Responsive desde 360 px.
+- Foco de teclado visible en todo control interactivo.
+- Contraste WCAG AA en todos los textos.
+- Respetar `prefers-reduced-motion` (CSS global en `app.css`).
+- **Prohibido** el color rojo (`#E53E3E` y similares) en la escala de riesgo.
+- El componente `aviso-no-diagnostico` no puede modificarse sin autorización del comité de ética.
+
+### Galería de componentes
+
+Ruta `/ui-kit` (solo entorno `local`). Muestra todos los estados de todos los componentes.
+Evidencia de los lineamientos de interfaz exigidos por el Sprint 0.

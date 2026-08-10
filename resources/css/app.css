@@ -1,3 +1,104 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    :root {
+        --gg-papel:           #F6F7F4;
+        --gg-superficie:      #FFFFFF;
+        --gg-tinta:           #16302B;
+        --gg-tinta-suave:     #5A6560;
+        --gg-borde:           #E0E3DC;
+        --gg-primario:        #1F5C4A;
+        --gg-primario-suave:  #E6EFEA;
+        --gg-riesgo-bajo:     #3E7D64;
+        --gg-riesgo-medio:    #C08A2E;
+        --gg-riesgo-alto:     #9C4A32;
+    }
+
+    html {
+        background-color: var(--gg-papel);
+        color: var(--gg-tinta);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Anillo de foco único en todo el sistema — no agregar focus rings en otro lugar */
+    *:focus-visible {
+        outline: 2px solid var(--gg-primario);
+        outline-offset: 2px;
+    }
+
+    /* Quitar el outline de Tailwind/forms que duplica el anillo */
+    [type='text']:focus,
+    [type='email']:focus,
+    [type='password']:focus,
+    [type='number']:focus,
+    textarea:focus,
+    select:focus {
+        outline: 2px solid var(--gg-primario);
+        outline-offset: 0;
+        border-color: var(--gg-primario);
+        box-shadow: none;
+        ring-color: transparent;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
+}
+
+@layer components {
+    /* ----------------------------------------------------------------
+       Segmento de escala — estado seleccionado con anillo inset
+    ---------------------------------------------------------------- */
+    .gg-seg-activo {
+        background-color: var(--gg-primario-suave);
+        color: var(--gg-primario);
+        font-weight: 500;
+        box-shadow: inset 0 0 0 2px var(--gg-primario);
+    }
+
+    /* ----------------------------------------------------------------
+       Aviso de no-diagnóstico — borde lateral primario
+    ---------------------------------------------------------------- */
+    .gg-aviso-nodiag {
+        background-color: #F0F5F2;
+        border: 1px solid var(--gg-borde);
+        border-left: 3px solid var(--gg-primario);
+        border-radius: 8px;
+    }
+
+    /* ----------------------------------------------------------------
+       Tabla de la vista profesional — filas alternas
+    ---------------------------------------------------------------- */
+    .gg-tabla tbody tr:nth-child(even) {
+        background-color: var(--gg-papel);
+    }
+
+    .gg-tabla tbody tr:hover {
+        background-color: var(--gg-primario-suave);
+    }
+
+    .gg-tabla th {
+        background-color: var(--gg-papel);
+        color: var(--gg-tinta-suave);
+        font-size: 12px;
+        font-weight: 500;
+        text-transform: none;
+        letter-spacing: 0;
+        border-bottom: 1px solid var(--gg-borde);
+    }
+
+    .gg-tabla td {
+        border-bottom: 1px solid var(--gg-borde);
+        font-size: 14px;
+    }
+}
