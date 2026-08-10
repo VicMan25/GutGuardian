@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <title>{{ $titulo ?? 'Encuesta' }} — GutGuardián</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500&family=IBM+Plex+Mono:wght@400&family=Source+Sans+3:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    {{ $head ?? '' }}
+</head>
+<body class="min-h-full font-sans antialiased bg-gg-papel text-gg-tinta">
+
+    {{-- Barra de navegación mínima --}}
+    <header class="sticky top-0 z-20 bg-gg-superficie border-b border-gg-borde">
+        <div class="max-w-estudiante mx-auto px-4 h-14 flex items-center justify-between gap-4">
+
+            <a href="{{ route('estudiante.inicio') }}"
+               class="font-display text-md font-medium text-gg-primario tracking-tight shrink-0"
+               aria-label="GutGuardián — inicio">
+                GutGuardián
+            </a>
+
+            @if(isset($progreso))
+                <div class="flex-1 min-w-0">
+                    {{ $progreso }}
+                </div>
+            @endif
+
+            {{-- Usuario + cerrar sesión --}}
+            <div class="shrink-0 flex items-center gap-3">
+                @auth
+                <span class="hidden sm:block text-xs text-gg-tinta-suave truncate max-w-[160px]">
+                    {{ Auth::user()->name }}
+                </span>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit"
+                            class="text-xs text-gg-tinta-suave hover:text-gg-tinta transition-colors duration-150">
+                        Salir
+                    </button>
+                </form>
+                @endauth
+            </div>
+
+        </div>
+    </header>
+
+    {{-- Contenido principal — columna única, ancho máximo 640 px --}}
+    <main class="max-w-estudiante mx-auto px-4 py-8">
+        {{ $slot }}
+    </main>
+
+    {{-- Pie: aviso legal siempre visible --}}
+    <footer class="max-w-estudiante mx-auto px-4 pb-10">
+        <p class="text-2xs text-gg-tinta-suave text-center">
+            GutGuardián no emite diagnóstico clínico.
+            Res. 3100 de 2019 · Universidad Mariana, Pasto.
+        </p>
+    </footer>
+
+</body>
+</html>
