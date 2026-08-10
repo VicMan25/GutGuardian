@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
+use App\Http\Controllers\Auth\ConsentimientoController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\NewPasswordController;
@@ -36,6 +37,9 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
+    Route::get('consentimiento', [ConsentimientoController::class, 'show'])->name('consentimiento.show');
+    Route::post('consentimiento', [ConsentimientoController::class, 'store'])->name('consentimiento.store');
+
     Route::get('verify-email', EmailVerificationPromptController::class)
         ->name('verification.notice');
 
