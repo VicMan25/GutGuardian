@@ -23,7 +23,7 @@
             :error="$errors->first('email')"
         />
 
-        <x-boton variante="primario" type="submit" class="w-full justify-center">
+        <x-boton variante="primario" tipo="submit" class="w-full justify-center">
             Enviar enlace
         </x-boton>
     </form>

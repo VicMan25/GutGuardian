@@ -35,7 +35,7 @@
             :error="$errors->first('password_confirmation')"
         />
 
-        <x-boton variante="primario" type="submit" class="w-full justify-center">
+        <x-boton variante="primario" tipo="submit" class="w-full justify-center">
             Guardar contraseña
         </x-boton>
     </form>

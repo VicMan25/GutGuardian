@@ -71,14 +71,14 @@
             </span>
         </label>
 
-        <x-boton variante="primario" type="submit" class="w-full justify-center">
+        <x-boton variante="primario" tipo="submit" class="w-full justify-center">
             Acepto y continuar
         </x-boton>
     </form>
 
     <form method="POST" action="{{ route('logout') }}" class="mt-3">
         @csrf
-        <x-boton variante="fantasma" type="submit" class="w-full justify-center text-gg-tinta-suave">
+        <x-boton variante="fantasma" tipo="submit" class="w-full justify-center text-gg-tinta-suave">
             No acepto — cerrar sesión
         </x-boton>
     </form>
