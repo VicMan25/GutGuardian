@@ -64,7 +64,8 @@ test('user can delete their account', function () {
         ->assertRedirect('/');
 
     $this->assertGuest();
-    $this->assertNull($user->fresh());
+    // Con SoftDeletes el registro persiste; verificamos que fue desactivado lógicamente
+    $this->assertSoftDeleted($user);
 });
 
 test('correct password must be provided to delete account', function () {
