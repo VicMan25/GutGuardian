@@ -1,25 +1,37 @@
-<x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
-    </div>
+<x-layouts.publico titulo="Recuperar contraseña">
 
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+    @if(session('status'))
+        <x-alerta tipo="exito" class="mb-6">{{ session('status') }}</x-alerta>
+    @endif
 
-    <form method="POST" action="{{ route('password.email') }}">
+    <h1 class="font-display text-xl font-medium text-gg-tinta mb-2">Recuperar contraseña</h1>
+    <p class="text-sm text-gg-tinta-suave mb-6">
+        Escribe tu correo y te enviaremos un enlace para restablecer tu contraseña.
+    </p>
+
+    <form method="POST" action="{{ route('password.email') }}" class="space-y-5">
         @csrf
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
+        <x-campo-texto
+            nombre="email"
+            etiqueta="Correo electrónico"
+            tipo="email"
+            :valor="old('email')"
+            requerido
+            autocomplete="email"
+            autofocus
+            :error="$errors->first('email')"
+        />
 
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Email Password Reset Link') }}
-            </x-primary-button>
-        </div>
+        <x-boton variante="primario" type="submit" class="w-full justify-center">
+            Enviar enlace
+        </x-boton>
     </form>
-</x-guest-layout>
+
+    <p class="mt-6 text-center text-sm text-gg-tinta-suave">
+        <a href="{{ route('login') }}" class="text-gg-primario hover:underline">
+            Volver al inicio de sesión
+        </a>
+    </p>
+
+</x-layouts.publico>
