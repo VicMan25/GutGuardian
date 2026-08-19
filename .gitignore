@@ -34,3 +34,9 @@ ml/datos/
 *.participantes.json
 dataset_real.*
 encuestas_reales.*
+
+# ------------------------------------------------------------
+# Artefactos de Python (ml/)
+# ------------------------------------------------------------
+ml/__pycache__/
+*.pyc

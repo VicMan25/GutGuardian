@@ -1,7 +1,12 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
+import { Chart, LineController, LineElement, PointElement, LinearScale, CategoryScale, Legend, Tooltip } from 'chart.js';
+
+Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Legend, Tooltip);
+Chart.defaults.font.family = "'Source Sans 3', system-ui, sans-serif";
 
 window.Alpine = Alpine;
+window.Chart = Chart;
 
 // ================================================================
 // escalaFrecuencia — selector segmentado de 4 niveles
@@ -107,9 +112,9 @@ Alpine.data('opcionMultiple', (seleccionadosInicial = [], idNinguna = null) => (
 // matrizSintomas — acordeón en móvil, tabla en desktop
 // Usado en P11, P12, P16, P17
 // ================================================================
-Alpine.data('matrizSintomas', (totalItems = 0) => ({
-    expandido: 0,
-    respuestas: {},
+Alpine.data('matrizSintomas', (totalItems = 0, respuestasIniciales = {}) => ({
+    expandido: Object.keys(respuestasIniciales).length === totalItems ? null : 0,
+    respuestas: { ...respuestasIniciales },
     totalItems,
 
     expandir(idx) {
@@ -137,6 +142,22 @@ Alpine.data('matrizSintomas', (totalItems = 0) => ({
 
     todosRespondidos() {
         return this.totalRespondidos() === this.totalItems;
+    },
+}));
+
+// ================================================================
+// selectorUnico — radios verticales para preguntas 'single' con
+// opciones propias (no la escala de 4 niveles): SD1-SD4, P08.
+// ================================================================
+Alpine.data('selectorUnico', (seleccionadoInicial = null) => ({
+    seleccionado: seleccionadoInicial,
+
+    marcado(id) {
+        return this.seleccionado === id;
+    },
+
+    seleccionar(id) {
+        this.seleccionado = id;
     },
 }));
 

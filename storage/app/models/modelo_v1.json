@@ -1,0 +1,334 @@
+{
+  "version": "1.0",
+  "nombre": "Modelo multinomial GutGuardián — placeholder de ingeniería (Sprint 4)",
+  "entrenado_at": "2026-08-17T03:35:09.794406+00:00",
+  "categoria_base": 0,
+  "categorias": [
+    0,
+    1,
+    2
+  ],
+  "orden_variables": [
+    "edad",
+    "semestre",
+    "genero_femenino",
+    "genero_otro",
+    "p01_frutas",
+    "p02_ensaladas",
+    "p03_integrales",
+    "p04_embutidos",
+    "p05_empaquetados",
+    "p06_azucares",
+    "p07_frituras",
+    "p08_tiempos_comida",
+    "p09_alcohol",
+    "p09_tabaco",
+    "p10_lavado_manos",
+    "p14_antecedentes_personales_count",
+    "p15_antecedentes_familiares_count",
+    "p16_medicamentos_recientes_count",
+    "p17_medicamentos_frecuentes_count",
+    "p18_practica_deporte",
+    "p18_factores_riesgo_count",
+    "p19_frecuencia_deporte"
+  ],
+  "mapa_variables": {
+    "edad": {
+      "etiqueta": "Rango de edad"
+    },
+    "semestre": {
+      "etiqueta": "Semestre académico"
+    },
+    "genero_femenino": {
+      "etiqueta": "Género femenino (ref.: masculino)"
+    },
+    "genero_otro": {
+      "etiqueta": "Género no binario / otro (ref.: masculino)"
+    },
+    "p01_frutas": {
+      "etiqueta": "Consumo de frutas"
+    },
+    "p02_ensaladas": {
+      "etiqueta": "Consumo de ensaladas frescas"
+    },
+    "p03_integrales": {
+      "etiqueta": "Consumo de alimentos integrales"
+    },
+    "p04_embutidos": {
+      "etiqueta": "Consumo de embutidos"
+    },
+    "p05_empaquetados": {
+      "etiqueta": "Consumo de alimentos empaquetados"
+    },
+    "p06_azucares": {
+      "etiqueta": "Consumo de azúcares refinados"
+    },
+    "p07_frituras": {
+      "etiqueta": "Consumo de frituras"
+    },
+    "p08_tiempos_comida": {
+      "etiqueta": "Tiempos de comida al día"
+    },
+    "p09_alcohol": {
+      "etiqueta": "Consumo de alcohol"
+    },
+    "p09_tabaco": {
+      "etiqueta": "Consumo de tabaco"
+    },
+    "p10_lavado_manos": {
+      "etiqueta": "Lavado de manos antes de comer"
+    },
+    "p14_antecedentes_personales_count": {
+      "etiqueta": "Cantidad de antecedentes personales"
+    },
+    "p15_antecedentes_familiares_count": {
+      "etiqueta": "Cantidad de antecedentes familiares"
+    },
+    "p16_medicamentos_recientes_count": {
+      "etiqueta": "Medicamentos consumidos recientemente"
+    },
+    "p17_medicamentos_frecuentes_count": {
+      "etiqueta": "Medicamentos de consumo frecuente"
+    },
+    "p18_practica_deporte": {
+      "etiqueta": "Práctica de deporte"
+    },
+    "p18_factores_riesgo_count": {
+      "etiqueta": "Factores de estilo de vida de riesgo"
+    },
+    "p19_frecuencia_deporte": {
+      "etiqueta": "Frecuencia de práctica deportiva"
+    }
+  },
+  "coeficientes": {
+    "1": {
+      "intercepto": -4.819614597899618,
+      "beta": {
+        "edad": 0.10106466315391721,
+        "semestre": 0.17101951978013133,
+        "genero_femenino": -0.1526361520394026,
+        "genero_otro": -1.6655718099492596,
+        "p01_frutas": -0.4198598973971079,
+        "p02_ensaladas": -0.3977816242260215,
+        "p03_integrales": -0.5015558113308426,
+        "p04_embutidos": 0.4824751183378131,
+        "p05_empaquetados": 0.11454751449549065,
+        "p06_azucares": 0.4284975342247969,
+        "p07_frituras": 0.18397894905770174,
+        "p08_tiempos_comida": -0.11927132621504383,
+        "p09_alcohol": 0.9880248189312139,
+        "p09_tabaco": 0.3387098005550759,
+        "p10_lavado_manos": 0.05829506812983267,
+        "p14_antecedentes_personales_count": 0.3082650333912012,
+        "p15_antecedentes_familiares_count": -0.054240357229408245,
+        "p16_medicamentos_recientes_count": 0.3195355632450879,
+        "p17_medicamentos_frecuentes_count": 0.542094994052375,
+        "p18_practica_deporte": -0.6863092705788336,
+        "p18_factores_riesgo_count": 0.4979806272557427,
+        "p19_frecuencia_deporte": -0.2101310287235755
+      }
+    },
+    "2": {
+      "intercepto": -4.6875677137550875,
+      "beta": {
+        "edad": 0.20477372145326544,
+        "semestre": 0.16377577274753097,
+        "genero_femenino": 0.5529612163099615,
+        "genero_otro": -0.23561965814318048,
+        "p01_frutas": -0.558526513527789,
+        "p02_ensaladas": -0.8555745129606253,
+        "p03_integrales": -0.5876390004695676,
+        "p04_embutidos": 0.49066892069315987,
+        "p05_empaquetados": 0.17692348599654675,
+        "p06_azucares": 0.23176129724901703,
+        "p07_frituras": 0.25902116582810003,
+        "p08_tiempos_comida": -0.12521231478682224,
+        "p09_alcohol": 0.9734214832094606,
+        "p09_tabaco": 0.6194039457789998,
+        "p10_lavado_manos": -0.29857244833503077,
+        "p14_antecedentes_personales_count": 0.33650367340924353,
+        "p15_antecedentes_familiares_count": -0.03763040789018668,
+        "p16_medicamentos_recientes_count": 0.49565961341788184,
+        "p17_medicamentos_frecuentes_count": 0.5309805740480984,
+        "p18_practica_deporte": -0.09273894910031932,
+        "p18_factores_riesgo_count": 0.34524436978450485,
+        "p19_frecuencia_deporte": -0.4222918893356693
+      }
+    }
+  },
+  "metricas": {
+    "validacion_cruzada": {
+      "k_folds": 5,
+      "exactitud_promedio": 0.5839332748024584,
+      "exactitud_desviacion": 0.0516016431800221,
+      "exactitudes_por_fold": [
+        0.6764705882352942,
+        0.5441176470588235,
+        0.6029411764705882,
+        0.5588235294117647,
+        0.5373134328358209
+      ]
+    },
+    "exactitud_test": 0.6,
+    "auc_macro_ovr_test": 0.7850909201483912,
+    "matriz_confusion_test": [
+      [
+        20,
+        4,
+        3
+      ],
+      [
+        7,
+        12,
+        10
+      ],
+      [
+        0,
+        10,
+        19
+      ]
+    ],
+    "categorias_matriz_confusion": [
+      0,
+      1,
+      2
+    ],
+    "calibracion_test": [
+      {
+        "categoria": 0,
+        "bin": "0.0-0.2",
+        "n": 52,
+        "prob_predicha_media": 0.0381822299186969,
+        "frecuencia_observada": 0.09615384615384616
+      },
+      {
+        "categoria": 0,
+        "bin": "0.2-0.4",
+        "n": 5,
+        "prob_predicha_media": 0.2916330030419873,
+        "frecuencia_observada": 0.4
+      },
+      {
+        "categoria": 0,
+        "bin": "0.4-0.6",
+        "n": 6,
+        "prob_predicha_media": 0.47982908510937516,
+        "frecuencia_observada": 0.6666666666666666
+      },
+      {
+        "categoria": 0,
+        "bin": "0.6-0.8",
+        "n": 7,
+        "prob_predicha_media": 0.6920006593247743,
+        "frecuencia_observada": 0.2857142857142857
+      },
+      {
+        "categoria": 0,
+        "bin": "0.8-1.0",
+        "n": 15,
+        "prob_predicha_media": 0.9518563380759782,
+        "frecuencia_observada": 0.9333333333333333
+      },
+      {
+        "categoria": 1,
+        "bin": "0.0-0.2",
+        "n": 27,
+        "prob_predicha_media": 0.08170765070338122,
+        "frecuencia_observada": 0.18518518518518517
+      },
+      {
+        "categoria": 1,
+        "bin": "0.2-0.4",
+        "n": 27,
+        "prob_predicha_media": 0.3015036196856671,
+        "frecuencia_observada": 0.4444444444444444
+      },
+      {
+        "categoria": 1,
+        "bin": "0.4-0.6",
+        "n": 16,
+        "prob_predicha_media": 0.48885142396578324,
+        "frecuencia_observada": 0.375
+      },
+      {
+        "categoria": 1,
+        "bin": "0.6-0.8",
+        "n": 14,
+        "prob_predicha_media": 0.6649967018713971,
+        "frecuencia_observada": 0.35714285714285715
+      },
+      {
+        "categoria": 1,
+        "bin": "0.8-1.0",
+        "n": 1,
+        "prob_predicha_media": 0.8456200234928968,
+        "frecuencia_observada": 1.0
+      },
+      {
+        "categoria": 2,
+        "bin": "0.0-0.2",
+        "n": 28,
+        "prob_predicha_media": 0.050407102897193946,
+        "frecuencia_observada": 0.0
+      },
+      {
+        "categoria": 2,
+        "bin": "0.2-0.4",
+        "n": 22,
+        "prob_predicha_media": 0.30090524260351525,
+        "frecuencia_observada": 0.4090909090909091
+      },
+      {
+        "categoria": 2,
+        "bin": "0.4-0.6",
+        "n": 12,
+        "prob_predicha_media": 0.4973728153874985,
+        "frecuencia_observada": 0.5
+      },
+      {
+        "categoria": 2,
+        "bin": "0.6-0.8",
+        "n": 16,
+        "prob_predicha_media": 0.6990606862791633,
+        "frecuencia_observada": 0.5
+      },
+      {
+        "categoria": 2,
+        "bin": "0.8-1.0",
+        "n": 7,
+        "prob_predicha_media": 0.8638392735405471,
+        "frecuencia_observada": 0.8571428571428571
+      }
+    ],
+    "vif": {
+      "edad": 1.0757581098060618,
+      "semestre": 1.0672257679995667,
+      "genero_femenino": 1.249890837459874,
+      "genero_otro": 1.2672361855751058,
+      "p01_frutas": 1.248724632741459,
+      "p02_ensaladas": 1.281402602896995,
+      "p03_integrales": 1.3335124075978326,
+      "p04_embutidos": 1.188041365212237,
+      "p05_empaquetados": 1.2681564696324332,
+      "p06_azucares": 1.3888302272570796,
+      "p07_frituras": 1.2298412728937835,
+      "p08_tiempos_comida": 1.1165402246471337,
+      "p09_alcohol": 1.3132848520302696,
+      "p09_tabaco": 1.2281570091057694,
+      "p10_lavado_manos": 1.2152442946848399,
+      "p14_antecedentes_personales_count": 1.2066435420225088,
+      "p15_antecedentes_familiares_count": 1.225475472738235,
+      "p16_medicamentos_recientes_count": 1.7698818668656697,
+      "p17_medicamentos_frecuentes_count": 1.4347899516642497,
+      "p18_practica_deporte": 1.1541713432113085,
+      "p18_factores_riesgo_count": 1.3001976484731521,
+      "p19_frecuencia_deporte": 1.2886309328680448
+    },
+    "n_train": 254,
+    "n_test": 85,
+    "n_total": 339,
+    "n_predictores": 22,
+    "limitacion_epv": "339 registros con 3 clases y 22 predictores: ratio de eventos-por-variable ajustado. Se recomienda regularización o reducción adicional de variables antes de uso clínico real."
+  },
+  "limitaciones": "Modelo entrenado sobre un dataset SINTÉTICO de prueba de concepto, no sobre los 347 registros reales de participantes. La variable dependiente se derivó con una regla PLACEHOLDER (ver ml/comun.py) pendiente de validación por el equipo de Enfermería (bloqueante documentado en CLAUDE.md §7 y §11). No usar para tamizaje real hasta reentrenar con datos y regla clínica definitivos."
+}

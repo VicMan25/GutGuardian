@@ -29,10 +29,13 @@ class DiligenciamientoPolicy
     }
 
     /**
-     * Solo el propietario puede actualizar (continuar) su diligenciamiento en curso.
+     * Solo el propietario puede actualizar (continuar) su diligenciamiento, y
+     * solo mientras no esté completado: un diligenciamiento cerrado es un
+     * registro clínico inmutable (HU-006, CLAUDE.md §5 — nunca editar tras cerrar).
      */
     public function update(User $user, Diligenciamiento $diligenciamiento): bool
     {
-        return $user->id === $diligenciamiento->user_id;
+        return $user->id === $diligenciamiento->user_id
+            && $diligenciamiento->estado !== 'completado';
     }
 }

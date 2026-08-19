@@ -27,9 +27,19 @@
 @php
 $uid        = 'mx-' . Str::random(8);
 $totalItems = count($items);
+
+// El estado de Alpine indexa las respuestas por posición dentro de $items (idx),
+// pero el prop $respuestas llega indexado por item_pregunta_id (para poder
+// prellenar al reanudar un diligenciamiento). Se traduce aquí una sola vez.
+$respuestasPorIndice = [];
+foreach ($items as $idx => $item) {
+    if (array_key_exists($item['id'], $respuestas)) {
+        $respuestasPorIndice[$idx] = $respuestas[$item['id']];
+    }
+}
 @endphp
 
-<div x-data="matrizSintomas({{ $totalItems }})" class="w-full">
+<div x-data="matrizSintomas({{ $totalItems }}, {{ json_encode($respuestasPorIndice) }})" class="w-full">
 
     {{-- Encabezado de pregunta --}}
     @if($pregunta)

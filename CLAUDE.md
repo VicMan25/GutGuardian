@@ -237,9 +237,30 @@ histórica** de los registros del estudiante y ajustar la redacción en la monog
 ## 11. Estado actual
 
 - [x] Sprint 0 — completado
-- [ ] Sprint 1 · [ ] Sprint 2 · [ ] Sprint 3 · [ ] Sprint 4 · [ ] Sprint 5 · [ ] Sprint 6
-- [ ] **BLOQUEANTE:** regla operativa de la variable dependiente Y (requiere a Enfermería)
-- [ ] Dataset de 347 registros exportado y limpio para entrenamiento
+- [x] Sprint 1 — autenticación, registro, consentimiento (Ley 1581), roles y policies HU-021 implementados y con tests
+- [x] Sprint 2 — captura y persistencia de encuestas (HU-004/005/006): `EncuestaController`
+      (iniciar/reanudar, guardar por sección, confirmar, finalizar), persistencia por tipo de
+      pregunta (escala/single/multiple/matriz), inmutabilidad tras completar
+      (`DiligenciamientoPolicy`), componente `selector-unico` nuevo para preguntas tipo
+      `single`. Corrigió además un bug preexistente en `matriz-sintomas` que impedía
+      prellenar respuestas al reanudar.
+- [x] Sprint 3 — seguimiento y visualización individual (HU-007/008/011/012/013, alcance
+      inferido a falta de texto de aceptación — ver módulo `Reportes`): `/historial` (HU-007),
+      `/seguimiento` con Chart.js — evolución del riesgo con los colores de estado ya
+      existentes (HU-008), evolución del dolor abdominal (HU-013) y grid de 6 síntomas con
+      frecuencia/temporalidad (HU-011/012). Paleta de las gráficas de síntomas validada con
+      la skill dataviz (`scripts/validate_palette.js`) para no chocar con la escala de riesgo.
+- [~] Sprint 4 — pipeline `ml/` (preparación, entrenamiento MNLogit, VIF, exportación) y
+      `PredictorService`/`ExplicabilidadService` en Laravel implementados y con tests Pest
+      (casos conocidos de softmax). Corre de punta a punta sobre datos **sintéticos**; no
+      reemplaza el modelo real. Ver bloqueante abajo.
+- [ ] Sprint 5 · [ ] Sprint 6
+- [ ] **BLOQUEANTE (sigue abierto):** regla operativa real de la variable dependiente Y
+      (requiere a Enfermería). `ml/comun.py::derivar_categoria_riesgo` implementa una regla
+      PLACEHOLDER documentada solo para poder ejercitar el pipeline de ingeniería — no usar
+      para tamizaje real.
+- [ ] Dataset de 347 registros exportado y limpio para entrenamiento (el pipeline actual
+      corre sobre `ml/generar_dataset_sintetico.py`, no sobre datos reales)
 
 ---
 

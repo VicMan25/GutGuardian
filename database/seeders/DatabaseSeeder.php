@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             RolesPermisosSeeder::class,
             ProgramasSeeder::class,
             InstrumentoSeeder::class,
+            VersionModeloSeeder::class,
         ]);
     }
 }
