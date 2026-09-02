@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\AlertaController;
 use App\Http\Controllers\EncuestaController;
 use App\Http\Controllers\EstudianteInicioController;
 use App\Http\Controllers\HistorialController;
+use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\ResultadoController;
 use App\Http\Controllers\SeguimientoController;
 use Illuminate\Support\Facades\Auth;
@@ -29,9 +31,21 @@ Route::get('/', function () {
 Route::middleware(['auth', 'consentimiento', 'role:estudiante'])->group(function () {
     Route::get('/inicio', [EstudianteInicioController::class, 'show'])->name('estudiante.inicio');
 
-    // Seguimiento y visualización individual (HU-007, 008, 011, 012, 013)
+    // Seguimiento y visualización individual — HU-008 y HU-011 reales; el resto
+    // de /seguimiento es funcionalidad complementaria sin HU numerada (ver
+    // docs/HISTORIAS_USUARIO.md, nota 3).
     Route::get('/historial', [HistorialController::class, 'show'])->name('historial.show');
     Route::get('/seguimiento', [SeguimientoController::class, 'show'])->name('seguimiento.show');
+
+    // HU-007: resumen de respuestas registradas (resuelto por estudiante.inicio)
+
+    // HU-012: alertas internas de cambio de nivel de riesgo
+    Route::get('/alertas', [AlertaController::class, 'index'])->name('alertas.index');
+    Route::patch('/alertas/{alerta}/leer', [AlertaController::class, 'marcarLeida'])->name('alertas.marcarLeida');
+
+    // HU-013: actualización del perfil sociodemográfico del estudiante
+    Route::get('/perfil', [PerfilController::class, 'edit'])->name('perfil.edit');
+    Route::put('/perfil', [PerfilController::class, 'update'])->name('perfil.update');
 
     // Captura y persistencia de encuestas (HU-004, HU-005, HU-006)
     Route::get('/encuesta', [EncuestaController::class, 'iniciar'])->name('encuesta.iniciar');

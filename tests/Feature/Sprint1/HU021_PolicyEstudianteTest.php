@@ -19,9 +19,9 @@ describe('HU-021 — Policy: aislamiento de datos entre estudiantes', function (
 
         $instrumento = Instrumento::first();
         $diligenciamiento = Diligenciamiento::create([
-            'user_id'        => $estudiante->id,
+            'user_id' => $estudiante->id,
             'instrumento_id' => $instrumento->id,
-            'estado'         => 'en_progreso',
+            'estado' => 'en_progreso',
         ]);
 
         $puede = Gate::forUser($estudiante)->allows('view', $diligenciamiento);
@@ -37,9 +37,9 @@ describe('HU-021 — Policy: aislamiento de datos entre estudiantes', function (
 
         // Diligenciamiento pertenece a estudiante A
         $diligenciamiento = Diligenciamiento::create([
-            'user_id'        => $estudianteA->id,
+            'user_id' => $estudianteA->id,
             'instrumento_id' => $instrumento->id,
-            'estado'         => 'en_progreso',
+            'estado' => 'en_progreso',
         ]);
 
         // Estudiante B intenta ver el diligenciamiento de A
@@ -48,16 +48,16 @@ describe('HU-021 — Policy: aislamiento de datos entre estudiantes', function (
     });
 
     it('un profesional de salud puede ver el diligenciamiento de cualquier estudiante', function () {
-        $estudiante  = User::factory()->create();
+        $estudiante = User::factory()->create();
         $profesional = User::factory()->create();
         $estudiante->assignRole('estudiante');
         $profesional->assignRole('profesional_salud');
 
         $instrumento = Instrumento::first();
         $diligenciamiento = Diligenciamiento::create([
-            'user_id'        => $estudiante->id,
+            'user_id' => $estudiante->id,
             'instrumento_id' => $instrumento->id,
-            'estado'         => 'completado',
+            'estado' => 'completado',
         ]);
 
         $puede = Gate::forUser($profesional)->allows('view', $diligenciamiento);
@@ -71,9 +71,9 @@ describe('HU-021 — Policy: aislamiento de datos entre estudiantes', function (
 
         $instrumento = Instrumento::first();
         $diligenciamiento = Diligenciamiento::create([
-            'user_id'        => $estudianteA->id,
+            'user_id' => $estudianteA->id,
             'instrumento_id' => $instrumento->id,
-            'estado'         => 'en_progreso',
+            'estado' => 'en_progreso',
         ]);
 
         $puede = Gate::forUser($estudianteB)->allows('update', $diligenciamiento);

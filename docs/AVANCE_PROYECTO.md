@@ -574,3 +574,85 @@ tests/Feature/
 4. Reentrenar y re-exportar `modelo_v1.json` en cuanto existan (1) y (2), y
    documentar en la monografía que la versión actual es una prueba de
    concepto de ingeniería, no un modelo validado.
+
+---
+
+## 10. Corrección de empalme HU (post Sprint 4)
+
+Antes de iniciar el Sprint 5 se extrajo `docs/HISTORIAS_USUARIO.md` —el texto
+verbatim de las 25 HU del documento de tesis, con sus criterios Dado/Cuando/
+Entonces— para tener la fuente exacta del backlog de Sprint 5. Esa extracción
+reveló que el Sprint 3, tal como quedó documentado en la sección 3 de este
+mismo archivo, tenía las etiquetas HU cruzadas contra el documento real.
+
+### 10.1 Qué estaba mal
+
+| Etiqueta usada en Sprint 3 | Lo que de verdad implementa | HU real correspondiente |
+|---|---|---|
+| "HU-007" (`/historial`, lista cronológica completa) | Consulta del historial de registros | **HU-011** |
+| "HU-011/HU-012" (grid de 6 síntomas, frecuencia/temporalidad) | No corresponde a ninguna HU del documento | — (complementaria) |
+| "HU-013" (evolución del dolor abdominal, P13) | No corresponde a ninguna HU del documento | — (complementaria) |
+
+Como consecuencia, tres HU reales habían quedado **sin construir**: la
+verdadera HU-007 ("resumen de mis últimas respuestas"), la verdadera HU-012
+("alerta interna cuando cambia mi nivel de riesgo") y la verdadera HU-013
+("actualizar mis datos de perfil").
+
+### 10.2 Qué se corrigió
+
+- **Renombrado sin cambiar comportamiento:** `HU007_HistorialTest.php` →
+  `HU011_HistorialTest.php`; los dos archivos de funcionalidad complementaria
+  (`HU011_HU012_SeguimientoSintomasTest.php`, `HU013_EvolucionDolorTest.php`)
+  perdieron el prefijo HU en su nombre y en el texto de sus `describe()`, y los
+  docblocks de `HistorialController`, `SeguimientoController` y
+  `SeguimientoService` quedaron alineados con la tabla de arriba.
+
+- **HU-007 real** ("resumen de respuestas registradas") ya estaba prácticamente
+  cubierta por `EstudianteInicioController` + `estudiante/inicio.blade.php`
+  (resultado más reciente, estado vacío, aislado por estudiante). Se le agregó
+  el docblock correcto y `tests/Feature/Sprint3/HU007_ResumenRespuestasTest.php`.
+
+- **HU-012 real** ("alertas internas de riesgo") — nuevo
+  `App\Modules\Panel\Services\AlertaService::generarSiCambioDeRiesgo()`: compara
+  la evaluación recién calculada contra la anterior del mismo estudiante y solo
+  genera `Alerta` si la categoría cambió (nunca en la primera evaluación). Se
+  invoca desde `ResultadoController::evaluar()`, justo después de persistir la
+  `EvaluacionRiesgo`. Nuevos `AlertaController` (`/alertas`, marcar como leída),
+  `AlertaPolicy` (registrada en `AppServiceProvider`) y vista
+  `estudiante/alertas.blade.php`. El modelo `Alerta` y la tabla `alertas` ya
+  existían desde el diseño original del esquema (CLAUDE.md §5) — nadie los
+  usaba todavía.
+
+- **HU-013 real** ("actualización del perfil del estudiante") — nuevo
+  `PerfilController` (`/perfil`, ver/editar género, edad, programa, semestre)
+  reutilizando las mismas reglas de validación y el mismo patrón de formulario
+  del registro (`RegisteredUserController`, `auth/register.blade.php`). Opera
+  siempre sobre `$request->user()->perfil`, nunca sobre un `Perfil` por id de
+  ruta, así que no existe vector de acceso cruzado entre estudiantes que
+  requiera policy. Actualizar el perfil no toca `respuestas` ni
+  `diligenciamientos` ya guardados — son tablas independientes.
+
+- Navbar del layout de estudiante (`layouts/estudiante.blade.php`) ampliado con
+  enlaces a "Alertas" (con contador de no leídas) y "Perfil".
+
+### 10.3 Por qué no invalida el trabajo ya hecho
+
+El grid de síntomas y la gráfica de dolor abdominal no se eliminaron: siguen
+siendo funcionalidad útil del módulo `Reportes`, solo dejaron de reclamar un
+número de HU que no les correspondía. Con esta corrección, Sprint 3 cubre
+ahora, de forma exacta, las cinco HU reales que el backlog le asigna
+(HU-007/008/011/012/013).
+
+### 10.4 Tests (`tests/Feature/Sprint3/`, tras la corrección)
+
+| Archivo | HU | Casos cubiertos |
+|---|---|---|
+| `HU007_ResumenRespuestasTest.php` | HU-007 | Estado vacío, resultado más reciente (no uno viejo), aislamiento entre estudiantes, enlaces a historial/seguimiento. |
+| `HU008_EvolucionRiesgoTest.php` | HU-008 | Sin cambios — ya coincidía. |
+| `HU011_HistorialTest.php` | HU-011 | Renombrado desde `HU007_HistorialTest.php`, mismos casos. |
+| `HU012_AlertasRiesgoTest.php` | HU-012 | No genera alerta en la primera evaluación ni cuando la categoría no cambia; genera alerta con el mensaje correcto cuando cambia; indicador de no leída; marcar como leída; 403 sobre alerta ajena; aislamiento en el listado. |
+| `HU013_ActualizarPerfilTest.php` | HU-013 | Muestra datos actuales; actualiza con datos válidos; rechaza edad fuera de rango; rechaza campos vacíos; no altera respuestas históricas al actualizar. |
+| `SeguimientoSintomasTest.php` | — (complementaria) | Renombrado desde `HU011_HU012_SeguimientoSintomasTest.php`, mismos casos. |
+| `EvolucionDolorTest.php` | — (complementaria) | Renombrado desde `HU013_EvolucionDolorTest.php`, mismos casos. |
+
+Suite completa verificada tras la corrección: 143 tests, 347 assertions.

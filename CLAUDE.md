@@ -244,12 +244,19 @@ histórica** de los registros del estudiante y ajustar la redacción en la monog
       (`DiligenciamientoPolicy`), componente `selector-unico` nuevo para preguntas tipo
       `single`. Corrigió además un bug preexistente en `matriz-sintomas` que impedía
       prellenar respuestas al reanudar.
-- [x] Sprint 3 — seguimiento y visualización individual (HU-007/008/011/012/013, alcance
-      inferido a falta de texto de aceptación — ver módulo `Reportes`): `/historial` (HU-007),
-      `/seguimiento` con Chart.js — evolución del riesgo con los colores de estado ya
-      existentes (HU-008), evolución del dolor abdominal (HU-013) y grid de 6 síntomas con
-      frecuencia/temporalidad (HU-011/012). Paleta de las gráficas de síntomas validada con
-      la skill dataviz (`scripts/validate_palette.js`) para no chocar con la escala de riesgo.
+- [x] Sprint 3 — seguimiento y visualización individual, **HU-007/008/011/012/013 reales**
+      (corregidas tras extraer `docs/HISTORIAS_USUARIO.md` del documento de tesis — la primera
+      entrega de este sprint tenía las etiquetas cruzadas, ver esa nota de extracción #3):
+      `/inicio` resume el resultado más reciente del estudiante (HU-007), `/historial` lista
+      cronológicamente los diligenciamientos completados (HU-011), `/seguimiento` con Chart.js
+      grafica la evolución del riesgo con los colores de estado ya existentes (HU-008),
+      `/alertas` genera y muestra un aviso interno cuando el nivel de riesgo cambia entre
+      evaluaciones (HU-012, `AlertaService`) y `/perfil` permite actualizar género/edad/programa/
+      semestre sin alterar registros históricos (HU-013, `PerfilController`). La evolución del
+      dolor abdominal y el grid de 6 síntomas con frecuencia/temporalidad, ambos en
+      `/seguimiento`, son funcionalidad complementaria del módulo `Reportes` sin HU numerada en
+      el documento fuente. Paleta de las gráficas de síntomas validada con la skill dataviz
+      (`scripts/validate_palette.js`) para no chocar con la escala de riesgo.
 - [~] Sprint 4 — pipeline `ml/` (preparación, entrenamiento MNLogit, VIF, exportación) y
       `PredictorService`/`ExplicabilidadService` en Laravel implementados y con tests Pest
       (casos conocidos de softmax). Corre de punta a punta sobre datos **sintéticos**; no

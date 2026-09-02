@@ -14,8 +14,9 @@ class SeguimientoController extends Controller
     public function __construct(private readonly SeguimientoService $seguimiento) {}
 
     /**
-     * HU-008/HU-011/HU-012/HU-013: evolución del riesgo, del dolor abdominal
-     * y de los 6 síntomas rastreados por el instrumento.
+     * HU-008 (real): evolución del riesgo. El resto de las gráficas (dolor
+     * abdominal, grid de síntomas) es funcionalidad complementaria sin HU
+     * numerada en el documento fuente — ver docs/HISTORIAS_USUARIO.md, nota 3.
      */
     public function show(): View
     {

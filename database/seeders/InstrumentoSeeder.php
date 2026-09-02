@@ -14,6 +14,7 @@ class InstrumentoSeeder extends Seeder
     {
         if (DB::table('instrumentos')->where('version', '1.0')->exists()) {
             $this->command->info('InstrumentoSeeder: instrumento v1.0 ya existe, se omite.');
+
             return;
         }
 
@@ -34,10 +35,10 @@ class InstrumentoSeeder extends Seeder
     private function crearInstrumento(): int
     {
         return DB::table('instrumentos')->insertGetId([
-            'nombre'     => 'Instrumento de Monitoreo de Hábitos Alimentarios y Sintomatología Gastrointestinal',
-            'version'    => '1.0',
-            'tipo'       => 'mixto',
-            'activo'     => true,
+            'nombre' => 'Instrumento de Monitoreo de Hábitos Alimentarios y Sintomatología Gastrointestinal',
+            'version' => '1.0',
+            'tipo' => 'mixto',
+            'activo' => true,
             'created_at' => $this->ahora,
             'updated_at' => $this->ahora,
         ]);
@@ -55,8 +56,8 @@ class InstrumentoSeeder extends Seeder
         foreach ($secciones as $s) {
             $ids[] = DB::table('secciones')->insertGetId(array_merge($s, [
                 'instrumento_id' => $instrumentoId,
-                'created_at'     => $this->ahora,
-                'updated_at'     => $this->ahora,
+                'created_at' => $this->ahora,
+                'updated_at' => $this->ahora,
             ]));
         }
 
@@ -71,10 +72,10 @@ class InstrumentoSeeder extends Seeder
     {
         return DB::table('preguntas')->insertGetId([
             'seccion_id' => $seccionId,
-            'codigo'     => $codigo,
-            'enunciado'  => $enunciado,
-            'tipo'       => $tipo,
-            'orden'      => $orden,
+            'codigo' => $codigo,
+            'enunciado' => $enunciado,
+            'tipo' => $tipo,
+            'orden' => $orden,
             'created_at' => $this->ahora,
             'updated_at' => $this->ahora,
         ]);
@@ -85,12 +86,12 @@ class InstrumentoSeeder extends Seeder
     {
         foreach ($opciones as $orden => $opcion) {
             DB::table('opciones')->insert([
-                'pregunta_id'    => $preguntaId,
-                'etiqueta'       => $opcion[0],
+                'pregunta_id' => $preguntaId,
+                'etiqueta' => $opcion[0],
                 'valor_numerico' => $opcion[1],
-                'orden'          => $orden + 1,
-                'created_at'     => $this->ahora,
-                'updated_at'     => $this->ahora,
+                'orden' => $orden + 1,
+                'created_at' => $this->ahora,
+                'updated_at' => $this->ahora,
             ]);
         }
     }
@@ -101,10 +102,10 @@ class InstrumentoSeeder extends Seeder
         foreach ($etiquetas as $orden => $etiqueta) {
             DB::table('items_pregunta')->insert([
                 'pregunta_id' => $preguntaId,
-                'etiqueta'    => $etiqueta,
-                'orden'       => $orden + 1,
-                'created_at'  => $this->ahora,
-                'updated_at'  => $this->ahora,
+                'etiqueta' => $etiqueta,
+                'orden' => $orden + 1,
+                'created_at' => $this->ahora,
+                'updated_at' => $this->ahora,
             ]);
         }
     }

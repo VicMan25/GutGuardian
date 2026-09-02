@@ -49,7 +49,7 @@
             </div>
         </x-tarjeta>
 
-        {{-- Evolución del dolor abdominal (HU-013) --}}
+        {{-- Evolución del dolor abdominal (complementaria, sin HU numerada) --}}
         <x-tarjeta class="mb-6">
             <h2 class="text-sm font-medium text-gg-tinta mb-4">Evolución del dolor abdominal</h2>
             <div class="h-56">
@@ -75,7 +75,7 @@
             </div>
         </x-tarjeta>
 
-        {{-- Seguimiento de síntomas (HU-011/HU-012) --}}
+        {{-- Seguimiento de síntomas (complementaria, sin HU numerada) --}}
         <div class="mb-3">
             <h2 class="text-sm font-medium text-gg-tinta">Seguimiento de síntomas</h2>
             <p class="text-2xs text-gg-tinta-suave mt-0.5">

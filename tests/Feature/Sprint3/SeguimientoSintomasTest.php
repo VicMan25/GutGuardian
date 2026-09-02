@@ -11,7 +11,7 @@ use App\Modules\Reportes\Services\SeguimientoService;
 use Database\Seeders\InstrumentoSeeder;
 use Database\Seeders\RolesPermisosSeeder;
 
-function hu011RespuestaMatriz(Diligenciamiento $d, string $codigo, string $etiquetaItem, int $valor): void
+function sintomasRespuestaMatriz(Diligenciamiento $d, string $codigo, string $etiquetaItem, int $valor): void
 {
     $pregunta = Pregunta::where('codigo', $codigo)->first();
     $item = ItemPregunta::where('pregunta_id', $pregunta->id)->where('etiqueta', $etiquetaItem)->first();
@@ -22,7 +22,7 @@ function hu011RespuestaMatriz(Diligenciamiento $d, string $codigo, string $etiqu
     ]);
 }
 
-describe('HU-011/HU-012 — Seguimiento de temporalidad y frecuencia de síntomas', function () {
+describe('Seguimiento de síntomas (funcionalidad complementaria, sin HU numerada en el documento fuente) — temporalidad y frecuencia', function () {
 
     beforeEach(function () {
         $this->seed([RolesPermisosSeeder::class, InstrumentoSeeder::class]);
@@ -42,15 +42,15 @@ describe('HU-011/HU-012 — Seguimiento de temporalidad y frecuencia de síntoma
             'user_id' => $this->estudiante->id, 'instrumento_id' => $this->instrumento->id,
             'estado' => 'completado', 'completado_at' => now()->subDays(10),
         ]);
-        hu011RespuestaMatriz($d1, 'P12', 'Diarrea', 1);
-        hu011RespuestaMatriz($d1, 'P11', 'Diarrea', 3);
+        sintomasRespuestaMatriz($d1, 'P12', 'Diarrea', 1);
+        sintomasRespuestaMatriz($d1, 'P11', 'Diarrea', 3);
 
         $d2 = Diligenciamiento::create([
             'user_id' => $this->estudiante->id, 'instrumento_id' => $this->instrumento->id,
             'estado' => 'completado', 'completado_at' => now()->subDays(1),
         ]);
-        hu011RespuestaMatriz($d2, 'P12', 'Diarrea', 3);
-        hu011RespuestaMatriz($d2, 'P11', 'Diarrea', 5);
+        sintomasRespuestaMatriz($d2, 'P12', 'Diarrea', 3);
+        sintomasRespuestaMatriz($d2, 'P11', 'Diarrea', 5);
 
         $servicio = new SeguimientoService;
         $diligenciamientos = $servicio->diligenciamientosCompletados($this->estudiante);
@@ -73,8 +73,8 @@ describe('HU-011/HU-012 — Seguimiento de temporalidad y frecuencia de síntoma
             'user_id' => $this->estudiante->id, 'instrumento_id' => $this->instrumento->id,
             'estado' => 'completado', 'completado_at' => now(),
         ]);
-        hu011RespuestaMatriz($d, 'P12', 'Diarrea', 3);
-        hu011RespuestaMatriz($d, 'P12', 'Fiebre', 0);
+        sintomasRespuestaMatriz($d, 'P12', 'Diarrea', 3);
+        sintomasRespuestaMatriz($d, 'P12', 'Fiebre', 0);
 
         $servicio = new SeguimientoService;
         $diligenciamientos = $servicio->diligenciamientosCompletados($this->estudiante);
@@ -91,7 +91,7 @@ describe('HU-011/HU-012 — Seguimiento de temporalidad y frecuencia de síntoma
                 'user_id' => $this->estudiante->id, 'instrumento_id' => $this->instrumento->id,
                 'estado' => 'completado', 'completado_at' => $fecha,
             ]);
-            hu011RespuestaMatriz($d, 'P12', 'Diarrea', 1);
+            sintomasRespuestaMatriz($d, 'P12', 'Diarrea', 1);
         }
 
         $this->actingAs($this->estudiante)
@@ -109,7 +109,7 @@ describe('HU-011/HU-012 — Seguimiento de temporalidad y frecuencia de síntoma
             'user_id' => $otro->id, 'instrumento_id' => $this->instrumento->id,
             'estado' => 'completado', 'completado_at' => now(),
         ]);
-        hu011RespuestaMatriz($d, 'P12', 'Diarrea', 3);
+        sintomasRespuestaMatriz($d, 'P12', 'Diarrea', 3);
 
         $servicio = new SeguimientoService;
         $diligenciamientos = $servicio->diligenciamientosCompletados($this->estudiante);

@@ -64,10 +64,10 @@ describe('Ley 1581 — Consentimiento informado', function () {
         $user->assignRole('estudiante');
 
         Consentimiento::create([
-            'user_id'          => $user->id,
+            'user_id' => $user->id,
             'version_politica' => '1.0',
-            'aceptado_at'      => now(),
-            'ip'               => '127.0.0.1',
+            'aceptado_at' => now(),
+            'ip' => '127.0.0.1',
         ]);
 
         $this->actingAs($user)

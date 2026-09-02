@@ -95,7 +95,7 @@ describe('InstrumentoSeeder — instrumento de recolección v1.0', function () {
 
     it('P09 tiene 2 ítems (Alcohol y Tabaco)', function () {
         $preguntaId = DB::table('preguntas')->where('codigo', 'P09')->value('id');
-        $etiquetas  = DB::table('items_pregunta')
+        $etiquetas = DB::table('items_pregunta')
             ->where('pregunta_id', $preguntaId)
             ->orderBy('orden')
             ->pluck('etiqueta')
@@ -109,7 +109,7 @@ describe('InstrumentoSeeder — instrumento de recolección v1.0', function () {
 
         foreach (['P11', 'P12'] as $codigo) {
             $preguntaId = DB::table('preguntas')->where('codigo', $codigo)->value('id');
-            $etiquetas  = DB::table('items_pregunta')
+            $etiquetas = DB::table('items_pregunta')
                 ->where('pregunta_id', $preguntaId)
                 ->orderBy('orden')
                 ->pluck('etiqueta')
@@ -127,7 +127,7 @@ describe('InstrumentoSeeder — instrumento de recolección v1.0', function () {
 
         foreach (['P16', 'P17'] as $codigo) {
             $preguntaId = DB::table('preguntas')->where('codigo', $codigo)->value('id');
-            $etiquetas  = DB::table('items_pregunta')
+            $etiquetas = DB::table('items_pregunta')
                 ->where('pregunta_id', $preguntaId)
                 ->orderBy('orden')
                 ->pluck('etiqueta')
@@ -146,7 +146,7 @@ describe('InstrumentoSeeder — instrumento de recolección v1.0', function () {
 
     it('la escala de frecuencia estándar codifica Siempre=3 … Nunca=0', function () {
         $preguntaId = DB::table('preguntas')->where('codigo', 'P01')->value('id');
-        $opciones   = DB::table('opciones')
+        $opciones = DB::table('opciones')
             ->where('pregunta_id', $preguntaId)
             ->orderBy('orden')
             ->get(['etiqueta', 'valor_numerico']);
@@ -158,7 +158,7 @@ describe('InstrumentoSeeder — instrumento de recolección v1.0', function () {
 
     it('la escala de temporalidad codifica Última semana=5 … Nunca=0', function () {
         $preguntaId = DB::table('preguntas')->where('codigo', 'P11')->value('id');
-        $opciones   = DB::table('opciones')
+        $opciones = DB::table('opciones')
             ->where('pregunta_id', $preguntaId)
             ->orderBy('orden')
             ->get(['etiqueta', 'valor_numerico']);
@@ -170,7 +170,7 @@ describe('InstrumentoSeeder — instrumento de recolección v1.0', function () {
 
     it('P08 tiene 7 opciones de tiempos de comida (Ninguna=0 a Más de 5=6)', function () {
         $preguntaId = DB::table('preguntas')->where('codigo', 'P08')->value('id');
-        $opciones   = DB::table('opciones')
+        $opciones = DB::table('opciones')
             ->where('pregunta_id', $preguntaId)
             ->orderBy('orden')
             ->get(['etiqueta', 'valor_numerico']);
@@ -182,7 +182,7 @@ describe('InstrumentoSeeder — instrumento de recolección v1.0', function () {
 
     it('P13 tiene escala de dolor 1-5', function () {
         $preguntaId = DB::table('preguntas')->where('codigo', 'P13')->value('id');
-        $valores    = DB::table('opciones')
+        $valores = DB::table('opciones')
             ->where('pregunta_id', $preguntaId)
             ->orderBy('orden')
             ->pluck('valor_numerico')
@@ -207,7 +207,7 @@ describe('InstrumentoSeeder — instrumento de recolección v1.0', function () {
 
     it('SD4 tiene 10 opciones de semestre con valores 1 a 10', function () {
         $preguntaId = DB::table('preguntas')->where('codigo', 'SD4')->value('id');
-        $valores    = DB::table('opciones')
+        $valores = DB::table('opciones')
             ->where('pregunta_id', $preguntaId)
             ->orderBy('orden')
             ->pluck('valor_numerico')

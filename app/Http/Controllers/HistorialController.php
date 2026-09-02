@@ -11,7 +11,7 @@ class HistorialController extends Controller
     public function __construct(private readonly SeguimientoService $seguimiento) {}
 
     /**
-     * HU-007: historial cronológico de diligenciamientos completados del
+     * HU-011: historial cronológico de diligenciamientos completados del
      * estudiante autenticado, con su categoría de riesgo.
      */
     public function show(): View

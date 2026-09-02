@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Modules\Auth\Models\Consentimiento;
 use Database\Seeders\RolesPermisosSeeder;
 use Spatie\Permission\Models\Role;
 
@@ -21,11 +22,11 @@ describe('HU-020 — Roles y permisos', function () {
         $user->assignRole('estudiante');
 
         // El consentimiento permite que el middleware role llegue a evaluar
-        \App\Modules\Auth\Models\Consentimiento::create([
-            'user_id'          => $user->id,
+        Consentimiento::create([
+            'user_id' => $user->id,
             'version_politica' => '1.0',
-            'aceptado_at'      => now(),
-            'ip'               => '127.0.0.1',
+            'aceptado_at' => now(),
+            'ip' => '127.0.0.1',
         ]);
 
         $this->actingAs($user)
@@ -37,11 +38,11 @@ describe('HU-020 — Roles y permisos', function () {
         $user = User::factory()->create();
         $user->assignRole('estudiante');
 
-        \App\Modules\Auth\Models\Consentimiento::create([
-            'user_id'          => $user->id,
+        Consentimiento::create([
+            'user_id' => $user->id,
             'version_politica' => '1.0',
-            'aceptado_at'      => now(),
-            'ip'               => '127.0.0.1',
+            'aceptado_at' => now(),
+            'ip' => '127.0.0.1',
         ]);
 
         $this->actingAs($user)
@@ -54,11 +55,11 @@ describe('HU-020 — Roles y permisos', function () {
         $user->assignRole('profesional_salud');
 
         // El middleware consentimiento debe dejarlo pasar — simulamos que ya aceptó
-        \App\Modules\Auth\Models\Consentimiento::create([
-            'user_id'          => $user->id,
+        Consentimiento::create([
+            'user_id' => $user->id,
             'version_politica' => '1.0',
-            'aceptado_at'      => now(),
-            'ip'               => '127.0.0.1',
+            'aceptado_at' => now(),
+            'ip' => '127.0.0.1',
         ]);
 
         $this->actingAs($user)
@@ -70,11 +71,11 @@ describe('HU-020 — Roles y permisos', function () {
         $user = User::factory()->create();
         $user->assignRole('admin');
 
-        \App\Modules\Auth\Models\Consentimiento::create([
-            'user_id'          => $user->id,
+        Consentimiento::create([
+            'user_id' => $user->id,
             'version_politica' => '1.0',
-            'aceptado_at'      => now(),
-            'ip'               => '127.0.0.1',
+            'aceptado_at' => now(),
+            'ip' => '127.0.0.1',
         ]);
 
         $this->actingAs($user)
