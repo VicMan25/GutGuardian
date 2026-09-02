@@ -113,4 +113,12 @@
         @endif
     </x-tarjeta>
 
+    {{-- Resolución 3100 de 2019 — obligatorio junto a todo resultado de riesgo,
+         también en la vista del profesional. --}}
+    @if($riesgo || $diligenciamientos->contains(fn ($d) => $d->evaluaciones->isNotEmpty()))
+        <div class="mt-6">
+            <x-aviso-no-diagnostico />
+        </div>
+    @endif
+
 </x-layouts.profesional>

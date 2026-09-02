@@ -274,6 +274,12 @@ histórica** de los registros del estudiante y ajustar la redacción en la monog
       en `RolesPermisosSeeder` (`consultar_estudiantes`, `crear_usuarios`, etc.) que no se
       habían usado hasta ahora. HU-019 agregó el primer bloqueo real de login por cuenta
       desactivada (`LoginRequest::authenticate`, `activo => true` en las credenciales).
+      Cierre de huecos de cumplimiento (ver `docs/AVANCE_PROYECTO.md` §11.6):
+      `AuditoriaClinicaService` deja rastro en `activity_log` de todo acceso de
+      terceros a datos clínicos —ficha individual, resultado ajeno, consulta y
+      exportación de reportes— (Ley 1581); `aviso-no-diagnostico` agregado a las
+      vistas de ficha y de reportes del panel (Resolución 3100); HU-016 con test
+      propio. Suite: 180 tests.
 - [ ] Sprint 6
 - [ ] **BLOQUEANTE (sigue abierto):** regla operativa real de la variable dependiente Y
       (requiere a Enfermería). `ml/comun.py::derivar_categoria_riesgo` implementa una regla

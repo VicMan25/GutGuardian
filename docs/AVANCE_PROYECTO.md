@@ -869,8 +869,10 @@ Todas las rutas nuevas viven bajo `/panel`, protegidas por
 | `HU017_CrearUsuarioTest.php` | Creación exitosa con perfil asociado; rechazo de correo/código duplicado; 403 sin permiso. |
 | `HU018_EditarUsuarioTest.php` | Edición exitosa; 404 sobre una cuenta que no es estudiante; 403 sin permiso. |
 | `HU019_DesactivarUsuarioTest.php` | Desactivar sin borrar historial; login bloqueado tras desactivar; login restaurado tras reactivar; 403 sin permiso. |
+| `HU016_NivelRiesgoTest.php` | "Sin evaluar" en el listado sin evaluaciones; el listado muestra el riesgo más reciente y no uno antiguo; la ficha grafica la evolución con ≥2 evaluaciones y no con 1; la ficha muestra el `aviso-no-diagnostico` junto al riesgo y lo omite cuando el estudiante no tiene evaluaciones. |
 | `HU022_HU023_ReporteGeneralTest.php` | Distribución correcta; filtro por fecha; filtro por categoría; estado vacío con filtros sin resultados; 403 sin permiso. |
 | `HU024_ExportarReportesTest.php` | Descarga de PDF (`Content-Type: application/pdf`); descarga de Excel (`spreadsheetml`); 403 sin permiso. |
+| `AuditoriaAccesoClinicoTest.php` | Registra causante/sujeto al consultar la ficha; registra la consulta de un resultado por un tercero; **no** audita el acceso del propio estudiante a su resultado; registra la consulta y las dos exportaciones del reporte; conserva causante y fecha. |
 
 Suite completa verificada tras el sprint: 168 tests, 404 assertions.
 Verificado también manualmente contra el servidor de desarrollo con el
@@ -881,3 +883,41 @@ generar + descargar el reporte en PDF (3 páginas válidas) y Excel (.xlsx
 válido).
 
 Suite completa verificada tras la corrección: 143 tests, 347 assertions.
+
+### 11.6 Cierre de huecos de cumplimiento legal del Sprint 5
+
+Sprint 5 es el primer sprint que da acceso de terceros (profesional de salud /
+admin) a datos clínicos del estudiante. Al revisarlo contra `CLAUDE.md` §9
+—que marca esos requisitos como "afectan el código, no son solo papeleo"—
+quedaban tres huecos:
+
+1. **Log de auditoría de acceso a datos clínicos (Ley 1581 de 2012).**
+   `spatie/laravel-activitylog` estaba instalado y la tabla `activity_log`
+   migrada desde Sprint 0, pero nada registraba quién consultaba un registro
+   clínico. Nuevo
+   `App\Modules\Panel\Services\AuditoriaClinicaService` (log dedicado
+   `acceso_clinico`), invocado desde:
+   - `EstudianteController::show` → `consulta_ficha` (causante = profesional,
+     sujeto = estudiante).
+   - `ResultadoController::show` → `consulta_resultado`, **solo cuando el
+     visitante no es el dueño del diligenciamiento** — el acceso del propio
+     estudiante a su resultado no se audita.
+   - `ReporteController::index/exportarPdf/exportarExcel` → `consulta_reporte`
+     y `exportacion_reporte`, con los filtros aplicados en `properties`.
+
+   Granularidad elegida: "apertura de un registro individual" + generación de
+   reportes. El listado general (`/panel/estudiantes`) no se audita: es un
+   directorio agregado, no la apertura de una historia puntual.
+
+2. **`aviso-no-diagnostico` en el panel del profesional (Resolución 3100 de
+   2019).** `panel/estudiantes/show` y `panel/reportes/index` mostraban
+   niveles de riesgo sin el aviso obligatorio "junto a todo resultado de
+   riesgo". Se agregó el componente en ambas vistas (en la ficha, solo cuando
+   hay al menos una evaluación). El PDF ya lo traía en el pie.
+
+3. **HU-016 sin test propio.** El alcance inferido (11.2) la resolvía dentro
+   de HU-014/015 sin pantalla propia, pero no había aserciones sobre "Sin
+   evaluar", el riesgo más reciente en el listado ni el aviso en la ficha.
+   Nuevo `HU016_NivelRiesgoTest.php`.
+
+Suite tras el cierre de huecos: 180 tests, 438 assertions.
