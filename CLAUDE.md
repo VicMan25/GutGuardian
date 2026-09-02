@@ -329,9 +329,11 @@ Solo pesos 400 y 500. Formato oración en todos los textos.
 
 | Layout                          | Cuándo usarlo                                     |
 |---------------------------------|---------------------------------------------------|
-| `layouts/publico.blade.php`     | Login, registro, consentimiento                   |
+| `layouts/publico.blade.php`     | Login, registro, consentimiento. Panel de marca `bg-gg-primario` a la izquierda desde `lg`; tarjeta de formulario `max-w-[460px]` a la derecha. En móvil colapsa a una sola columna. |
 | `layouts/estudiante.blade.php`  | Encuesta y resultado (1 col, `max-w-[640px]`)     |
-| `layouts/profesional.blade.php` | Panel institucional (sidebar + contenido denso)   |
+| `layouts/profesional.blade.php` | Panel institucional (sidebar + contenido denso). El contenido se acota a `max-w-[1180px] mx-auto` para no estirar tablas/formularios en monitores anchos. |
+
+Los tres layouts abren con un enlace «Saltar al contenido» (`sr-only` hasta recibir foco) que apunta a `#contenido` en el `<main>`.
 
 ### Inventario de componentes Blade
 

@@ -14,6 +14,14 @@
         @endcan
     </x-slot:acciones>
 
+    <a href="{{ route('panel.estudiantes.index') }}"
+       class="inline-flex items-center gap-1.5 text-xs text-gg-tinta-suave hover:text-gg-tinta mb-4">
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+        </svg>
+        Volver a estudiantes
+    </a>
+
     @if(session('status'))
         <x-alerta tipo="exito" class="mb-6">
             @switch(session('status'))
