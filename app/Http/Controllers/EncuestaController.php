@@ -8,6 +8,8 @@ use App\Modules\Encuestas\Models\Opcion;
 use App\Modules\Encuestas\Models\Pregunta;
 use App\Modules\Encuestas\Models\Respuesta;
 use App\Modules\Encuestas\Models\Seccion;
+use App\Modules\Usuarios\Models\Perfil;
+use App\Modules\Usuarios\Models\Programa;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -72,8 +74,10 @@ class EncuestaController extends Controller
             ->get()
             ->groupBy('pregunta_id');
 
+        $perfil = $diligenciamiento->usuario->perfil;
+
         $campos = $seccion->preguntas->map(
-            fn (Pregunta $p) => $this->construirCampo($p, $respuestasPorPregunta->get($p->id, collect()))
+            fn (Pregunta $p) => $this->construirCampo($p, $respuestasPorPregunta->get($p->id, collect()), $perfil)
         );
 
         return view('estudiante.encuesta.seccion', [
@@ -100,6 +104,8 @@ class EncuestaController extends Controller
         foreach ($seccion->preguntas as $pregunta) {
             $this->guardarRespuesta($diligenciamiento, $pregunta, $datos['respuestas'][$pregunta->id]);
         }
+
+        $this->sincronizarPerfilDesdeSociodemografico($diligenciamiento, $seccion->preguntas, $datos['respuestas']);
 
         if ($diligenciamiento->estado === 'pendiente') {
             $diligenciamiento->update(['estado' => 'en_progreso']);
@@ -178,19 +184,34 @@ class EncuestaController extends Controller
         return null;
     }
 
-    private function construirCampo(Pregunta $pregunta, Collection $respuestas): array
+    /**
+     * Si la sección se recarga tras un fallo de validación (ej. un ítem de
+     * matriz sin responder), Laravel ya deja la entrada anterior en old().
+     * Se prioriza sobre lo guardado en BD para que el estudiante no vea su
+     * respuesta recién marcada "desaparecer" — solo quedó sin persistir
+     * porque otra pregunta de la misma sección falló.
+     */
+    private function construirCampo(Pregunta $pregunta, Collection $respuestas, ?Perfil $perfil = null): array
     {
+        $anterior = old("respuestas.{$pregunta->id}");
+
         return match ($pregunta->tipo) {
             'escala' => [
                 'tipo' => 'escala',
                 'pregunta' => $pregunta,
-                'valor' => $respuestas->first()?->valor_numerico,
+                'valor' => $anterior !== null ? (int) $anterior : $respuestas->first()?->valor_numerico,
             ],
             'single' => [
                 'tipo' => 'single',
                 'pregunta' => $pregunta,
                 'opciones' => $pregunta->opciones->map(fn ($o) => ['id' => $o->id, 'etiqueta' => $o->etiqueta])->all(),
-                'seleccionado' => $respuestas->first()?->opcion_id,
+                // SD1/SD2/SD3/SD4 ya se preguntaron al registrarse (tabla perfiles);
+                // si aún no hay una respuesta guardada en este diligenciamiento, se
+                // preselecciona con lo que el estudiante ya declaró, en vez de
+                // pedírselo de nuevo. Sigue siendo editable.
+                'seleccionado' => $anterior !== null
+                    ? (int) $anterior
+                    : ($respuestas->first()?->opcion_id ?? $this->opcionSociodemograficaDesdePerfil($pregunta, $perfil)),
             ],
             'multiple' => [
                 'tipo' => 'multiple',
@@ -200,16 +221,135 @@ class EncuestaController extends Controller
                     'etiqueta' => $o->etiqueta,
                     'es_ninguna' => $o->etiqueta === 'Ninguna',
                 ])->all(),
-                'seleccionados' => $respuestas->pluck('opcion_id')->all(),
+                'seleccionados' => $anterior !== null ? array_map('intval', (array) $anterior) : $respuestas->pluck('opcion_id')->all(),
             ],
             'matriz' => [
                 'tipo' => 'matriz',
                 'pregunta' => $pregunta,
                 'items' => $pregunta->items->map(fn ($i) => ['id' => $i->id, 'etiqueta' => $i->etiqueta])->all(),
                 'opciones' => $pregunta->opciones->map(fn ($o) => ['valor' => $o->valor_numerico, 'etiqueta' => $o->etiqueta])->all(),
-                'respuestas' => $respuestas->pluck('valor_numerico', 'item_pregunta_id')->all(),
+                'respuestas' => $anterior !== null
+                    ? array_map('intval', array_filter((array) $anterior, fn ($v) => $v !== null && $v !== ''))
+                    : $respuestas->pluck('valor_numerico', 'item_pregunta_id')->all(),
             ],
         };
+    }
+
+    /**
+     * Traduce los datos ya declarados en `perfiles` (registro) al código de
+     * opción del instrumento (SD1 género, SD2 rango de edad, SD3 programa,
+     * SD4 semestre), para preseleccionar esas preguntas y no repetírselas al
+     * estudiante. Solo aplica a preguntas SD*; para cualquier otra devuelve null.
+     */
+    private function opcionSociodemograficaDesdePerfil(Pregunta $pregunta, ?Perfil $perfil): ?int
+    {
+        if (! $perfil) {
+            return null;
+        }
+
+        return match ($pregunta->codigo) {
+            // SD1 solo tiene 3 opciones: "otro" y "prefiero_no_decir" del
+            // registro colapsan ambos en "No binario / Otro".
+            'SD1' => $this->opcionPorValorNumerico($pregunta, match ($perfil->genero) {
+                'masculino' => 1,
+                'femenino' => 2,
+                'otro', 'prefiero_no_decir' => 3,
+                default => null,
+            }),
+            'SD2' => $this->opcionPorValorNumerico($pregunta, $this->rangoEdad($perfil->edad)),
+            // SD3 es una lista fija de 8 programas + "Otro", no la tabla `programas`
+            // (13 filas) del registro: se empata por nombre y si no coincide con
+            // ninguno se deja sin preseleccionar.
+            'SD3' => $perfil->programa ? $pregunta->opciones->firstWhere('etiqueta', $perfil->programa->nombre)?->id : null,
+            'SD4' => $this->opcionPorValorNumerico($pregunta, $perfil->semestre),
+            default => null,
+        };
+    }
+
+    private function opcionPorValorNumerico(Pregunta $pregunta, ?int $valor): ?int
+    {
+        return $valor === null ? null : $pregunta->opciones->firstWhere('valor_numerico', $valor)?->id;
+    }
+
+    /**
+     * SD2 pregunta un rango, no la edad exacta que se guarda en `perfiles`.
+     * Fuera de rango (15-16 años) se ubica en el bucket más cercano.
+     */
+    private function rangoEdad(?int $edad): ?int
+    {
+        return match (true) {
+            $edad === null => null,
+            $edad <= 18 => 1,
+            $edad <= 20 => 2,
+            $edad <= 22 => 3,
+            $edad <= 25 => 4,
+            default => 5,
+        };
+    }
+
+    /**
+     * Si el estudiante corrige género/programa/semestre directamente en la
+     * encuesta (porque cambiaron desde el registro), esa corrección también
+     * se refleja en su perfil — así la próxima encuesta parte del dato
+     * actualizado. La edad se excluye a propósito: SD2 solo captura un rango,
+     * y convertirlo de vuelta a un número exacto pisaría la edad real ya
+     * guardada con un valor inventado.
+     */
+    private function sincronizarPerfilDesdeSociodemografico(Diligenciamiento $diligenciamiento, Collection $preguntas, array $respuestas): void
+    {
+        $preguntasSociodemograficas = $preguntas->whereIn('codigo', ['SD1', 'SD3', 'SD4']);
+
+        if ($preguntasSociodemograficas->isEmpty()) {
+            return;
+        }
+
+        $perfil = $diligenciamiento->usuario->perfil;
+
+        if (! $perfil) {
+            return;
+        }
+
+        $cambios = [];
+
+        foreach ($preguntasSociodemograficas as $pregunta) {
+            $opcion = $pregunta->opciones->firstWhere('id', (int) $respuestas[$pregunta->id]);
+
+            if (! $opcion) {
+                continue;
+            }
+
+            match ($pregunta->codigo) {
+                'SD1' => $cambios['genero'] = match ($opcion->valor_numerico) {
+                    1 => 'masculino',
+                    2 => 'femenino',
+                    default => 'otro',
+                },
+                'SD4' => $cambios['semestre'] = $opcion->valor_numerico,
+                'SD3' => $this->agregarCambioPrograma($cambios, $opcion),
+                default => null,
+            };
+        }
+
+        if ($cambios !== []) {
+            $perfil->update($cambios);
+        }
+    }
+
+    /**
+     * "Otro" (valor 8 de SD3) no corresponde a ninguna fila real de
+     * `programas`, así que no se sobrescribe el programa_id ya guardado.
+     */
+    private function agregarCambioPrograma(array &$cambios, Opcion $opcion): void
+    {
+        if ($opcion->valor_numerico === 8) {
+            return;
+        }
+
+        $programa = Programa::where('nombre', $opcion->etiqueta)->first();
+
+        if ($programa) {
+            $cambios['programa_id'] = $programa->id;
+        }
     }
 
     /**
