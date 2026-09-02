@@ -2,11 +2,14 @@
 
 use App\Http\Controllers\AlertaController;
 use App\Http\Controllers\EncuestaController;
+use App\Http\Controllers\EstudianteController;
 use App\Http\Controllers\EstudianteInicioController;
 use App\Http\Controllers\HistorialController;
 use App\Http\Controllers\PerfilController;
+use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\ResultadoController;
 use App\Http\Controllers\SeguimientoController;
+use App\Http\Controllers\UsuarioController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -65,11 +68,48 @@ Route::middleware(['auth', 'consentimiento'])->group(function () {
 });
 
 // Área del profesional de salud
-Route::middleware(['auth', 'consentimiento', 'role:profesional_salud|admin'])->group(function () {
-    Route::get('/panel', function () {
-        return view('panel.inicio');
-    })->name('panel.inicio');
-});
+Route::middleware(['auth', 'consentimiento', 'role:profesional_salud|admin'])
+    ->prefix('panel')->name('panel.')->group(function () {
+        Route::get('/', function () {
+            return view('panel.inicio');
+        })->name('inicio');
+
+        // HU-014/HU-015/HU-016: consulta individual, listado y nivel de riesgo
+        Route::middleware('permission:consultar_estudiantes')
+            ->get('/estudiantes', [EstudianteController::class, 'index'])->name('estudiantes.index');
+
+        // HU-017: creación de usuarios estudiantes — rutas estáticas /crear
+        // deben registrarse antes de /{estudiante} (dinámica), o el binding
+        // implícito intentaría resolver "crear" como id de estudiante.
+        Route::middleware('permission:crear_usuarios')->group(function () {
+            Route::get('/estudiantes/crear', [UsuarioController::class, 'create'])->name('usuarios.create');
+            Route::post('/estudiantes', [UsuarioController::class, 'store'])->name('usuarios.store');
+        });
+
+        // HU-018: edición de información de usuario
+        Route::middleware('permission:editar_usuarios')->group(function () {
+            Route::get('/estudiantes/{estudiante}/editar', [UsuarioController::class, 'edit'])->name('usuarios.edit');
+            Route::put('/estudiantes/{estudiante}', [UsuarioController::class, 'update'])->name('usuarios.update');
+        });
+
+        // HU-019: desactivación/reactivación de cuenta
+        Route::middleware('permission:desactivar_usuarios')
+            ->post('/estudiantes/{estudiante}/estado', [UsuarioController::class, 'alternarActivo'])
+            ->name('usuarios.alternarActivo');
+
+        Route::middleware('permission:consultar_estudiantes')
+            ->get('/estudiantes/{estudiante}', [EstudianteController::class, 'show'])->name('estudiantes.show');
+
+        // HU-022/HU-023: reporte general del comportamiento de riesgo, filtrable
+        Route::middleware('permission:generar_reportes')
+            ->get('/reportes', [ReporteController::class, 'index'])->name('reportes.index');
+
+        // HU-024: exportación de reportes en PDF y Excel
+        Route::middleware('permission:exportar_reportes')->group(function () {
+            Route::get('/reportes/exportar/pdf', [ReporteController::class, 'exportarPdf'])->name('reportes.exportarPdf');
+            Route::get('/reportes/exportar/excel', [ReporteController::class, 'exportarExcel'])->name('reportes.exportarExcel');
+        });
+    });
 
 // Área de administración
 Route::middleware(['auth', 'consentimiento', 'role:admin'])->group(function () {

@@ -655,4 +655,229 @@ ahora, de forma exacta, las cinco HU reales que el backlog le asigna
 | `SeguimientoSintomasTest.php` | — (complementaria) | Renombrado desde `HU011_HU012_SeguimientoSintomasTest.php`, mismos casos. |
 | `EvolucionDolorTest.php` | — (complementaria) | Renombrado desde `HU013_EvolucionDolorTest.php`, mismos casos. |
 
+---
+
+## 11. Sprint 5 — Panel institucional y reportes (HU-014 a HU-019, HU-022 a HU-024)
+
+**Lo que pide la tesis (§2.4.1.3.5, backlog):** solo la narrativa de una línea
+por HU — a diferencia de HU-001 a HU-025 (salvo estas 9), el documento **no
+desarrolla el capítulo de "Etapa de análisis"** de Sprint 5, así que no existen
+criterios Dado/Cuando/Entonces redactados para ninguna de estas 9 HU. Antes de
+implementar, y para no repetir el desalineamiento de Sprint 3 (sección 10 de
+este documento), se escribieron aquí los criterios inferidos, en el mismo
+formato que el resto del documento, **antes** de que quedaran fijados en el
+código y los tests.
+
+### 11.1 Hallazgo que simplificó el sprint
+
+`database/seeders/RolesPermisosSeeder.php` (sembrado desde Sprint 1) ya
+definía los permisos granulares exactos que este sprint necesita —
+`consultar_estudiantes`, `ver_niveles_riesgo`, `generar_reportes`,
+`exportar_reportes`, `crear_usuarios`, `editar_usuarios`,
+`desactivar_usuarios`, todos asignados a `profesional_salud` — sin que nada
+los usara todavía. El middleware `permission:` ya estaba registrado en
+`bootstrap/app.php`. Cada ruta de este sprint queda protegida por el permiso
+que le corresponde, no solo por el rol.
+
+### 11.2 Decisiones de alcance inferido
+
+- **HU-016** ("visualizar el nivel de riesgo asignado a cada estudiante") no
+  es una pantalla propia: se resuelve mostrando el riesgo más reciente en el
+  listado (HU-015) y en la ficha individual (HU-014), que es donde tiene
+  sentido consultarlo.
+- **HU-017/018/019** se acotan a cuentas con rol `estudiante`. HU-014 y
+  HU-015 —mismo bloque narrativo del backlog— hablan explícitamente de
+  "estudiantes"; en ningún punto el backlog describe gestionar cuentas de
+  otros profesionales o administradores.
+- **HU-017** (crear usuario): el profesional define un password inicial en
+  el mismo formulario, con las mismas reglas que el autorregistro
+  (`RegisteredUserController`). No se construyó un flujo de invitación por
+  correo — no está pedido en el backlog y el proyecto no tiene mail
+  configurado para probarlo honestamente.
+- **HU-019** (desactivar): se implementó como una sola acción que alterna
+  `activo` (desactivar ⇄ reactivar), no una vía sin retorno — un error de
+  clic no debería requerir tocar la base de datos a mano para deshacerse.
+  `activo = false` ahora sí bloquea el login (antes el campo existía en el
+  esquema desde Sprint 1 pero no se usaba en ningún sitio).
+- **HU-022/023** (reporte + filtro) se resolvieron en una sola pantalla:
+  distribución de niveles de riesgo (conteos y porcentajes) sobre todas las
+  evaluaciones realizadas, filtrable por rango de fecha y por categoría.
+
+### 11.3 Criterios de aceptación inferidos
+
+#### HU-014 — Consulta individual de estudiante
+
+> Como profesional de salud quiero buscar y consultar el registro individual
+> de un estudiante para hacer seguimiento a su estado digestivo.
+
+1. Cuando el profesional acceda a la ficha de un estudiante, entonces el
+   sistema debe mostrar sus datos básicos (nombre, código, programa,
+   semestre, estado de la cuenta).
+2. Cuando el estudiante tenga encuestas completadas, entonces el sistema debe
+   mostrar su historial cronológico y la evolución de su nivel de riesgo.
+3. Cuando el estudiante no tenga encuestas completadas, entonces el sistema
+   debe indicarlo sin mostrar una gráfica vacía.
+4. Cuando un usuario sin el permiso `consultar_estudiantes` intente acceder,
+   entonces el sistema debe denegar el acceso (403).
+5. Cuando se solicite la ficha de una cuenta que no tiene rol `estudiante`,
+   entonces el sistema debe responder 404 — este flujo es exclusivo para
+   estudiantes.
+
+#### HU-015 — Listado general de estudiantes
+
+> Como profesional de salud quiero ver el listado general de todos los
+> estudiantes registrados para tener una visión global del grupo monitoreado.
+
+1. Cuando el profesional acceda al listado, entonces el sistema debe mostrar
+   todos los estudiantes registrados con su programa y su nivel de riesgo
+   más reciente.
+2. Cuando el profesional busque por nombre, código o programa, entonces el
+   listado debe filtrarse a las coincidencias.
+3. Cuando no existan estudiantes registrados o ninguno coincida con la
+   búsqueda, entonces el sistema debe mostrar un mensaje informativo.
+4. Cuando un usuario sin el permiso `consultar_estudiantes` intente acceder,
+   entonces el sistema debe denegar el acceso (403).
+
+#### HU-016 — Visualización del nivel de riesgo por estudiante
+
+> Como profesional de salud quiero visualizar el nivel de riesgo asignado a
+> cada estudiante para identificar casos que requieran atención prioritaria.
+
+1. Cuando el profesional consulte el listado general, entonces cada fila debe
+   mostrar el nivel de riesgo más reciente del estudiante correspondiente.
+2. Cuando el profesional consulte la ficha individual de un estudiante,
+   entonces debe poder ver la evolución de su nivel de riesgo a lo largo del
+   tiempo.
+3. Cuando un estudiante no tenga ninguna evaluación todavía, entonces el
+   sistema debe indicarlo explícitamente ("Sin evaluar"), no dejar la celda
+   vacía.
+
+*(Sin pantalla propia — resuelta dentro de HU-014 y HU-015, ver 11.2.)*
+
+#### HU-017 — Creación de usuarios estudiantes
+
+> Como profesional de salud quiero crear nuevos usuarios estudiantes en el
+> sistema para incorporarlos al proceso de monitoreo.
+
+1. Cuando el profesional complete el formulario con datos válidos, entonces
+   el sistema debe crear la cuenta con rol `estudiante` y su perfil
+   sociodemográfico asociado.
+2. Cuando el correo o el código de participante ya existan, entonces el
+   sistema debe rechazar la creación indicando el campo en conflicto.
+3. Cuando falte un campo obligatorio, entonces el sistema debe impedir la
+   creación hasta completarlo.
+4. Cuando la cuenta se cree correctamente, entonces el sistema debe llevar al
+   profesional a la ficha del nuevo estudiante.
+5. Cuando un usuario sin el permiso `crear_usuarios` intente acceder,
+   entonces el sistema debe denegar el acceso (403).
+
+#### HU-018 — Edición de información de usuario
+
+> Como profesional de salud quiero editar la información de un usuario
+> registrado para corregir o actualizar sus datos cuando sea necesario.
+
+1. Cuando el profesional edite los datos de un estudiante con información
+   válida, entonces el sistema debe guardar los cambios (nombre, correo,
+   código, datos sociodemográficos).
+2. Cuando el correo o el código editado ya pertenezcan a otra cuenta,
+   entonces el sistema debe rechazar el cambio.
+3. Cuando se intente editar una cuenta que no tiene rol `estudiante`,
+   entonces el sistema debe responder 404.
+4. Cuando un usuario sin el permiso `editar_usuarios` intente acceder,
+   entonces el sistema debe denegar el acceso (403).
+
+#### HU-019 — Desactivación de cuenta de usuario
+
+> Como profesional de salud quiero desactivar la cuenta de un usuario para
+> suspender su acceso sin eliminar su historial clínico.
+
+1. Cuando el profesional desactive la cuenta de un estudiante, entonces el
+   sistema debe impedirle iniciar sesión sin borrar sus diligenciamientos ni
+   sus respuestas.
+2. Cuando un estudiante desactivado intente iniciar sesión, entonces el
+   sistema debe rechazar el acceso con el mismo mensaje genérico que unas
+   credenciales inválidas — sin revelar que la cuenta fue desactivada.
+3. Cuando el profesional reactive una cuenta previamente desactivada,
+   entonces el estudiante debe poder volver a iniciar sesión.
+4. Cuando un usuario sin el permiso `desactivar_usuarios` intente acceder,
+   entonces el sistema debe denegar el acceso (403).
+
+#### HU-022 — Reporte del comportamiento general de niveles de riesgo
+
+> Como profesional de salud quiero visualizar un reporte del comportamiento
+> general de los niveles de riesgo de los estudiantes para identificar
+> patrones en la población monitoreada.
+
+1. Cuando el profesional acceda al reporte, entonces el sistema debe mostrar
+   la distribución (conteo y porcentaje) de niveles de riesgo bajo, medio y
+   alto sobre todas las evaluaciones realizadas.
+2. Cuando no existan evaluaciones registradas, entonces el sistema debe
+   mostrar un mensaje informativo en vez de un reporte vacío.
+
+#### HU-023 — Filtrado de reportes por fecha o nivel de riesgo
+
+> Como profesional de salud quiero filtrar los reportes por fecha o nivel de
+> riesgo para segmentar el análisis según mis necesidades.
+
+1. Cuando el profesional filtre por un rango de fechas, entonces el reporte
+   debe recalcularse solo sobre las evaluaciones dentro de ese rango.
+2. Cuando el profesional filtre por una categoría de riesgo, entonces el
+   reporte debe mostrar únicamente esa categoría.
+3. Cuando los filtros no arrojen resultados, entonces el sistema debe
+   indicarlo explícitamente.
+4. Cuando un usuario sin el permiso `generar_reportes` intente acceder,
+   entonces el sistema debe denegar el acceso (403).
+
+#### HU-024 — Exportación de reportes (PDF / Excel)
+
+> Como profesional de salud quiero exportar los reportes generados en
+> formato PDF o Excel para compartirlos con otros actores institucionales.
+
+1. Cuando el profesional exporte el reporte a PDF, entonces el sistema debe
+   generar un documento descargable con el mismo resumen y detalle que la
+   pantalla, respetando los filtros aplicados.
+2. Cuando el profesional exporte el reporte a Excel, entonces el sistema debe
+   generar una hoja de cálculo descargable con el detalle filtrado.
+3. Cuando un usuario sin el permiso `exportar_reportes` intente acceder,
+   entonces el sistema debe denegar el acceso (403).
+
+### 11.4 Qué se construyó
+
+| Archivo | Responsabilidad |
+|---|---|
+| `app/Modules/Reportes/Services/ReporteInstitucionalService.php` | `generar(filtros)` — única fuente de verdad (resumen + detalle) para la vista, el PDF y el Excel del reporte. |
+| `app/Exports/DistribucionRiesgoExport.php` | `FromCollection`/`WithHeadings` sobre el detalle del servicio anterior — HU-024 (Excel). |
+| `app/Http/Controllers/EstudianteController.php` | `index()` (HU-015, búsqueda) y `show()` (HU-014, reutiliza `SeguimientoService` de Sprint 3). |
+| `app/Http/Controllers/UsuarioController.php` | `create/store` (HU-017), `edit/update` (HU-018), `alternarActivo` (HU-019). |
+| `app/Http/Controllers/ReporteController.php` | `index` (HU-022/023), `exportarPdf`/`exportarExcel` (HU-024, dompdf + maatwebsite/excel). |
+| `app/Http/Requests/Auth/LoginRequest.php` (modificado) | `Auth::attempt()` exige `activo => true` — HU-019, sin revelar el motivo del rechazo. |
+| `resources/views/panel/estudiantes/{index,show,crear,editar}.blade.php` | Vistas del listado, ficha, creación y edición. |
+| `resources/views/panel/reportes/index.blade.php` | Filtros, resumen, gráfica de barras (Chart.js) y detalle. |
+| `resources/views/reportes/pdf/distribucion-riesgo.blade.php` | Plantilla HTML/CSS plano para dompdf (sin utilidades Tailwind arbitrarias, que dompdf no procesa). |
+| `resources/views/components/layouts/profesional.blade.php` (modificado) | Los ítems "Estudiantes"/"Reportes" del sidebar, antes apuntando a `panel.inicio` como placeholder, ahora enlazan a las rutas reales y se ocultan sin el permiso correspondiente. |
+
+Todas las rutas nuevas viven bajo `/panel`, protegidas por
+`role:profesional_salud|admin` + `permission:<nombre>` por grupo de rutas
+(ver `routes/web.php`).
+
+### 11.5 Tests (`tests/Feature/Sprint5/`)
+
+| Archivo | Casos cubiertos |
+|---|---|
+| `HU014_ConsultaIndividualTest.php` | Consulta de la ficha con historial; 403 sin permiso; 404 sobre una cuenta que no es estudiante. |
+| `HU015_ListadoEstudiantesTest.php` | Listado general; búsqueda por nombre; estado vacío; 403 sin permiso. |
+| `HU017_CrearUsuarioTest.php` | Creación exitosa con perfil asociado; rechazo de correo/código duplicado; 403 sin permiso. |
+| `HU018_EditarUsuarioTest.php` | Edición exitosa; 404 sobre una cuenta que no es estudiante; 403 sin permiso. |
+| `HU019_DesactivarUsuarioTest.php` | Desactivar sin borrar historial; login bloqueado tras desactivar; login restaurado tras reactivar; 403 sin permiso. |
+| `HU022_HU023_ReporteGeneralTest.php` | Distribución correcta; filtro por fecha; filtro por categoría; estado vacío con filtros sin resultados; 403 sin permiso. |
+| `HU024_ExportarReportesTest.php` | Descarga de PDF (`Content-Type: application/pdf`); descarga de Excel (`spreadsheetml`); 403 sin permiso. |
+
+Suite completa verificada tras el sprint: 168 tests, 404 assertions.
+Verificado también manualmente contra el servidor de desarrollo con el
+usuario `profesional@umariana.edu.co` (`UsuariosTestSeeder`): listar y
+buscar estudiantes, crear uno nuevo, ver su ficha, editarlo, desactivarlo
+(login bloqueado confirmado), reactivarlo (login restaurado confirmado), y
+generar + descargar el reporte en PDF (3 páginas válidas) y Excel (.xlsx
+válido).
+
 Suite completa verificada tras la corrección: 143 tests, 347 assertions.

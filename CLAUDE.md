@@ -261,7 +261,20 @@ histórica** de los registros del estudiante y ajustar la redacción en la monog
       `PredictorService`/`ExplicabilidadService` en Laravel implementados y con tests Pest
       (casos conocidos de softmax). Corre de punta a punta sobre datos **sintéticos**; no
       reemplaza el modelo real. Ver bloqueante abajo.
-- [ ] Sprint 5 · [ ] Sprint 6
+- [x] Sprint 5 — panel institucional y reportes (HU-014/015/016/017/018/019/022/023/024,
+      **alcance inferido y documentado** en `docs/AVANCE_PROYECTO.md` — el documento de tesis
+      solo tiene la narrativa de una línea de estas 9 HU en el backlog, sin criterios de
+      aceptación redactados): `EstudianteController` (consulta individual y listado con
+      búsqueda, HU-014/015/016 — reutiliza `SeguimientoService` de Sprint 3),
+      `UsuarioController` (crear/editar/desactivar-reactivar cuentas de estudiantes,
+      HU-017/018/019 — acotado a rol `estudiante`), `ReporteController` +
+      `ReporteInstitucionalService` (distribución de niveles de riesgo filtrable por fecha y
+      categoría, HU-022/023) con exportación a PDF (`barryvdh/laravel-dompdf`) y Excel
+      (`maatwebsite/excel`, HU-024). Reutilizó permisos granulares ya sembrados desde Sprint 1
+      en `RolesPermisosSeeder` (`consultar_estudiantes`, `crear_usuarios`, etc.) que no se
+      habían usado hasta ahora. HU-019 agregó el primer bloqueo real de login por cuenta
+      desactivada (`LoginRequest::authenticate`, `activo => true` en las credenciales).
+- [ ] Sprint 6
 - [ ] **BLOQUEANTE (sigue abierto):** regla operativa real de la variable dependiente Y
       (requiere a Enfermería). `ml/comun.py::derivar_categoria_riesgo` implementa una regla
       PLACEHOLDER documentada solo para poder ejercitar el pipeline de ingeniería — no usar

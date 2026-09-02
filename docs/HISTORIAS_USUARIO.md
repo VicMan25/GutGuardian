@@ -276,7 +276,7 @@ Como estudiante quiero actualizar mis datos de perfil para mantener mi informaci
 
 ## HU-014 — Consulta individual de estudiante
 
-**Estado en el proyecto:** No iniciada (Sprint 5).
+**Estado en el proyecto:** Implementada (Sprint 5) — criterios inferidos y detalle en docs/AVANCE_PROYECTO.md §11.3.
 
 Como profesional de salud quiero buscar y consultar el registro individual de un estudiante para hacer seguimiento a su estado digestivo.
 
@@ -288,7 +288,7 @@ Como profesional de salud quiero buscar y consultar el registro individual de un
 
 ## HU-015 — Listado general de estudiantes
 
-**Estado en el proyecto:** No iniciada (Sprint 5).
+**Estado en el proyecto:** Implementada (Sprint 5) — ver docs/AVANCE_PROYECTO.md §11.3.
 
 Como profesional de salud quiero ver el listado general de todos los estudiantes registrados para tener una visión global del grupo monitoreado.
 
@@ -300,7 +300,7 @@ Como profesional de salud quiero ver el listado general de todos los estudiantes
 
 ## HU-016 — Visualización del nivel de riesgo por estudiante
 
-**Estado en el proyecto:** No iniciada (Sprint 5).
+**Estado en el proyecto:** Implementada (Sprint 5), sin pantalla propia — resuelta dentro de HU-014/015, ver docs/AVANCE_PROYECTO.md §11.2 y §11.3.
 
 Como profesional de salud quiero visualizar el nivel de riesgo asignado a cada estudiante para identificar casos que requieran atención prioritaria.
 
@@ -312,7 +312,7 @@ Como profesional de salud quiero visualizar el nivel de riesgo asignado a cada e
 
 ## HU-017 — Creación de usuarios estudiantes
 
-**Estado en el proyecto:** No iniciada (Sprint 5).
+**Estado en el proyecto:** Implementada (Sprint 5) — ver docs/AVANCE_PROYECTO.md §11.3.
 
 Como profesional de salud quiero crear nuevos usuarios estudiantes en el sistema para incorporarlos al proceso de monitoreo.
 
@@ -324,7 +324,7 @@ Como profesional de salud quiero crear nuevos usuarios estudiantes en el sistema
 
 ## HU-018 — Edición de información de usuario
 
-**Estado en el proyecto:** No iniciada (Sprint 5).
+**Estado en el proyecto:** Implementada (Sprint 5) — ver docs/AVANCE_PROYECTO.md §11.3.
 
 Como profesional de salud quiero editar la información de un usuario registrado para corregir o actualizar sus datos cuando sea necesario.
 
@@ -336,7 +336,7 @@ Como profesional de salud quiero editar la información de un usuario registrado
 
 ## HU-019 — Desactivación de cuenta de usuario
 
-**Estado en el proyecto:** No iniciada (Sprint 5). Relacionada con la regla dura de CLAUDE.md §5: "desactivar cuenta ≠ eliminar historial" (SoftDeletes), ya prevista en el modelo de datos.
+**Estado en el proyecto:** Implementada (Sprint 5), incluye el primer bloqueo real de login por cuenta desactivada — ver docs/AVANCE_PROYECTO.md §11.3. Relacionada con la regla dura de CLAUDE.md §5: "desactivar cuenta ≠ eliminar historial" (SoftDeletes), ya prevista en el modelo de datos.
 
 Como profesional de salud quiero desactivar la cuenta de un usuario para suspender su acceso sin eliminar su historial clínico.
 
@@ -383,7 +383,7 @@ Como profesional de salud quiero restringir el acceso a módulos sensibles para 
 
 ## HU-022 — Reporte del comportamiento general de niveles de riesgo
 
-**Estado en el proyecto:** No iniciada (Sprint 5).
+**Estado en el proyecto:** Implementada (Sprint 5) — ver docs/AVANCE_PROYECTO.md §11.3.
 
 Como profesional de salud quiero visualizar un reporte del comportamiento general de los niveles de riesgo de los estudiantes para identificar patrones en la población monitoreada.
 
@@ -395,7 +395,7 @@ Como profesional de salud quiero visualizar un reporte del comportamiento genera
 
 ## HU-023 — Filtrado de reportes por fecha o nivel de riesgo
 
-**Estado en el proyecto:** No iniciada (Sprint 5).
+**Estado en el proyecto:** Implementada (Sprint 5) — ver docs/AVANCE_PROYECTO.md §11.3.
 
 Como profesional de salud quiero filtrar los reportes por fecha o nivel de riesgo para segmentar el análisis según mis necesidades.
 
@@ -407,7 +407,7 @@ Como profesional de salud quiero filtrar los reportes por fecha o nivel de riesg
 
 ## HU-024 — Exportación de reportes (PDF / Excel)
 
-**Estado en el proyecto:** No iniciada (Sprint 5). CLAUDE.md §2 ya fija las librerías a usar: `barryvdh/laravel-dompdf` + `maatwebsite/excel`.
+**Estado en el proyecto:** Implementada (Sprint 5) — ver docs/AVANCE_PROYECTO.md §11.3. CLAUDE.md §2 ya fija las librerías a usar: `barryvdh/laravel-dompdf` + `maatwebsite/excel`.
 
 Como profesional de salud quiero exportar los reportes generados en formato PDF o Excel para compartirlos con otros actores institucionales.
 
