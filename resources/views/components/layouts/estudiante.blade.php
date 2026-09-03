@@ -50,6 +50,42 @@
             </div>
 
         </div>
+
+        {{--
+            Navbar dinámico: siempre visible (incluso al confirmar/ver el
+            resultado, donde antes no había forma de volver al panel de
+            inicio salvo el logo). Resalta la sección activa con
+            request()->routeIs(), igual que layouts/profesional.
+        --}}
+        @auth
+        @php $alertasNoLeidas = Auth::user()->alertas()->whereNull('leida_at')->count(); @endphp
+        <nav aria-label="Navegación principal" class="max-w-estudiante mx-auto px-4 pb-2 flex items-center gap-1 overflow-x-auto">
+            @foreach([
+                ['ruta' => 'estudiante.inicio', 'etiqueta' => 'Inicio'],
+                ['ruta' => 'historial.show', 'etiqueta' => 'Historial'],
+                ['ruta' => 'seguimiento.show', 'etiqueta' => 'Seguimiento'],
+                ['ruta' => 'alertas.index', 'etiqueta' => 'Alertas'],
+                ['ruta' => 'perfil.edit', 'etiqueta' => 'Perfil'],
+            ] as $item)
+                @php $activo = request()->routeIs($item['ruta']); @endphp
+                <a
+                    href="{{ route($item['ruta']) }}"
+                    @if($activo) aria-current="page" @endif
+                    class="shrink-0 px-3 py-1.5 rounded-control text-sm transition-colors duration-100 inline-flex items-center gap-1.5
+                           {{ $activo
+                               ? 'bg-gg-primario-suave text-gg-primario font-medium'
+                               : 'text-gg-tinta-suave hover:text-gg-tinta hover:bg-gg-papel' }}"
+                >
+                    {{ $item['etiqueta'] }}
+                    @if($item['ruta'] === 'alertas.index' && $alertasNoLeidas > 0)
+                        <span class="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-full text-2xs font-medium bg-gg-primario text-white">
+                            {{ $alertasNoLeidas }}
+                        </span>
+                    @endif
+                </a>
+            @endforeach
+        </nav>
+        @endauth
     </header>
 
     {{-- Contenido principal — columna única, ancho máximo 640 px --}}

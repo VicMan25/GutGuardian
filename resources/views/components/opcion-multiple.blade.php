@@ -31,6 +31,7 @@ $idNinguna = collect($opciones)->firstWhere('es_ninguna', true)['id'] ?? null;
     x-data="opcionMultiple({{ json_encode(array_values((array)$seleccionados)) }}, {{ $idNinguna ?? 'null' }})"
     role="group"
     aria-labelledby="{{ $uid }}-label"
+    aria-required="{{ $requerido ? 'true' : 'false' }}"
 >
     @if($pregunta)
     <p id="{{ $uid }}-label" class="text-sm font-medium text-gg-tinta leading-snug mb-3">
@@ -61,13 +62,19 @@ $idNinguna = collect($opciones)->firstWhere('es_ninguna', true)['id'] ?? null;
                 ? 'border-gg-primario bg-gg-primario-suave'
                 : 'border-gg-borde bg-gg-superficie hover:bg-gg-papel'"
         >
-            {{-- Checkbox real --}}
+            {{--
+                Checkbox real. Sin atributo "required": a diferencia de los radios
+                (donde el navegador exige que UNO del grupo esté marcado), en un
+                grupo de checkboxes "required" exige que TODOS lo estén — con esto
+                puesto en cada opción, el navegador bloqueaba el envío del
+                formulario sin importar cuántas opciones válidas se marcaran. La
+                regla "al menos una" ya la exige el backend (ver reglasSeccion).
+            --}}
             <input
                 type="checkbox"
                 name="{{ $nombre }}[]"
                 value="{{ $opcion['id'] }}"
                 class="sr-only"
-                {{ $requerido ? 'required' : '' }}
                 :checked="marcado({{ $opcion['id'] }})"
                 @change="toggle({{ $opcion['id'] }})"
             />

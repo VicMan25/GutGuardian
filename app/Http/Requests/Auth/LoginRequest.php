@@ -42,7 +42,10 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        // 'activo' => true en las credenciales bloquea el login de cuentas
+        // desactivadas (HU-019) sin revelar el motivo — mismo mensaje
+        // genérico que unas credenciales inválidas.
+        if (! Auth::attempt($this->only('email', 'password') + ['activo' => true], $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([

@@ -11,7 +11,7 @@ use Carbon\Carbon;
 use Database\Seeders\InstrumentoSeeder;
 use Database\Seeders\RolesPermisosSeeder;
 
-function hu013Diligenciamiento(User $user, Instrumento $instrumento, Carbon $fecha, ?int $dolor): Diligenciamiento
+function dolorDiligenciamiento(User $user, Instrumento $instrumento, Carbon $fecha, ?int $dolor): Diligenciamiento
 {
     $d = Diligenciamiento::create([
         'user_id' => $user->id, 'instrumento_id' => $instrumento->id,
@@ -26,7 +26,7 @@ function hu013Diligenciamiento(User $user, Instrumento $instrumento, Carbon $fec
     return $d;
 }
 
-describe('HU-013 — Evolución del dolor abdominal', function () {
+describe('Evolución del dolor abdominal (funcionalidad complementaria, sin HU numerada en el documento fuente)', function () {
 
     beforeEach(function () {
         $this->seed([RolesPermisosSeeder::class, InstrumentoSeeder::class]);
@@ -42,8 +42,8 @@ describe('HU-013 — Evolución del dolor abdominal', function () {
     });
 
     it('SeguimientoService::evolucionDolor produce los valores de P13 en orden cronológico', function () {
-        $d1 = hu013Diligenciamiento($this->estudiante, $this->instrumento, now()->subDays(10), dolor: 2);
-        $d2 = hu013Diligenciamiento($this->estudiante, $this->instrumento, now()->subDays(1), dolor: 5);
+        $d1 = dolorDiligenciamiento($this->estudiante, $this->instrumento, now()->subDays(10), dolor: 2);
+        $d2 = dolorDiligenciamiento($this->estudiante, $this->instrumento, now()->subDays(1), dolor: 5);
 
         $servicio = new SeguimientoService;
         $diligenciamientos = $servicio->diligenciamientosCompletados($this->estudiante);
@@ -58,8 +58,8 @@ describe('HU-013 — Evolución del dolor abdominal', function () {
     });
 
     it('omite diligenciamientos sin respuesta de P13 en vez de fallar', function () {
-        hu013Diligenciamiento($this->estudiante, $this->instrumento, now()->subDays(10), dolor: 3);
-        hu013Diligenciamiento($this->estudiante, $this->instrumento, now()->subDays(1), dolor: null);
+        dolorDiligenciamiento($this->estudiante, $this->instrumento, now()->subDays(10), dolor: 3);
+        dolorDiligenciamiento($this->estudiante, $this->instrumento, now()->subDays(1), dolor: null);
 
         $servicio = new SeguimientoService;
         $diligenciamientos = $servicio->diligenciamientosCompletados($this->estudiante);
@@ -70,8 +70,8 @@ describe('HU-013 — Evolución del dolor abdominal', function () {
     });
 
     it('la gráfica de dolor aparece en la vista de seguimiento', function () {
-        hu013Diligenciamiento($this->estudiante, $this->instrumento, now()->subDays(10), dolor: 2);
-        hu013Diligenciamiento($this->estudiante, $this->instrumento, now()->subDays(1), dolor: 4);
+        dolorDiligenciamiento($this->estudiante, $this->instrumento, now()->subDays(10), dolor: 2);
+        dolorDiligenciamiento($this->estudiante, $this->instrumento, now()->subDays(1), dolor: 4);
 
         $this->actingAs($this->estudiante)
             ->get(route('seguimiento.show'))

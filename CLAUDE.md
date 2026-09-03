@@ -244,17 +244,37 @@ histórica** de los registros del estudiante y ajustar la redacción en la monog
       (`DiligenciamientoPolicy`), componente `selector-unico` nuevo para preguntas tipo
       `single`. Corrigió además un bug preexistente en `matriz-sintomas` que impedía
       prellenar respuestas al reanudar.
-- [x] Sprint 3 — seguimiento y visualización individual (HU-007/008/011/012/013, alcance
-      inferido a falta de texto de aceptación — ver módulo `Reportes`): `/historial` (HU-007),
-      `/seguimiento` con Chart.js — evolución del riesgo con los colores de estado ya
-      existentes (HU-008), evolución del dolor abdominal (HU-013) y grid de 6 síntomas con
-      frecuencia/temporalidad (HU-011/012). Paleta de las gráficas de síntomas validada con
-      la skill dataviz (`scripts/validate_palette.js`) para no chocar con la escala de riesgo.
+- [x] Sprint 3 — seguimiento y visualización individual, **HU-007/008/011/012/013 reales**
+      (corregidas tras extraer `docs/HISTORIAS_USUARIO.md` del documento de tesis — la primera
+      entrega de este sprint tenía las etiquetas cruzadas, ver esa nota de extracción #3):
+      `/inicio` resume el resultado más reciente del estudiante (HU-007), `/historial` lista
+      cronológicamente los diligenciamientos completados (HU-011), `/seguimiento` con Chart.js
+      grafica la evolución del riesgo con los colores de estado ya existentes (HU-008),
+      `/alertas` genera y muestra un aviso interno cuando el nivel de riesgo cambia entre
+      evaluaciones (HU-012, `AlertaService`) y `/perfil` permite actualizar género/edad/programa/
+      semestre sin alterar registros históricos (HU-013, `PerfilController`). La evolución del
+      dolor abdominal y el grid de 6 síntomas con frecuencia/temporalidad, ambos en
+      `/seguimiento`, son funcionalidad complementaria del módulo `Reportes` sin HU numerada en
+      el documento fuente. Paleta de las gráficas de síntomas validada con la skill dataviz
+      (`scripts/validate_palette.js`) para no chocar con la escala de riesgo.
 - [~] Sprint 4 — pipeline `ml/` (preparación, entrenamiento MNLogit, VIF, exportación) y
       `PredictorService`/`ExplicabilidadService` en Laravel implementados y con tests Pest
       (casos conocidos de softmax). Corre de punta a punta sobre datos **sintéticos**; no
       reemplaza el modelo real. Ver bloqueante abajo.
-- [ ] Sprint 5 · [ ] Sprint 6
+- [x] Sprint 5 — panel institucional y reportes (HU-014/015/016/017/018/019/022/023/024,
+      **alcance inferido y documentado** en `docs/AVANCE_PROYECTO.md` — el documento de tesis
+      solo tiene la narrativa de una línea de estas 9 HU en el backlog, sin criterios de
+      aceptación redactados): `EstudianteController` (consulta individual y listado con
+      búsqueda, HU-014/015/016 — reutiliza `SeguimientoService` de Sprint 3),
+      `UsuarioController` (crear/editar/desactivar-reactivar cuentas de estudiantes,
+      HU-017/018/019 — acotado a rol `estudiante`), `ReporteController` +
+      `ReporteInstitucionalService` (distribución de niveles de riesgo filtrable por fecha y
+      categoría, HU-022/023) con exportación a PDF (`barryvdh/laravel-dompdf`) y Excel
+      (`maatwebsite/excel`, HU-024). Reutilizó permisos granulares ya sembrados desde Sprint 1
+      en `RolesPermisosSeeder` (`consultar_estudiantes`, `crear_usuarios`, etc.) que no se
+      habían usado hasta ahora. HU-019 agregó el primer bloqueo real de login por cuenta
+      desactivada (`LoginRequest::authenticate`, `activo => true` en las credenciales).
+- [ ] Sprint 6
 - [ ] **BLOQUEANTE (sigue abierto):** regla operativa real de la variable dependiente Y
       (requiere a Enfermería). `ml/comun.py::derivar_categoria_riesgo` implementa una regla
       PLACEHOLDER documentada solo para poder ejercitar el pipeline de ingeniería — no usar

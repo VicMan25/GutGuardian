@@ -6,6 +6,7 @@ use App\Modules\Analitica\Models\EvaluacionRiesgo;
 use App\Modules\Analitica\Services\ExplicabilidadService;
 use App\Modules\Analitica\Services\PredictorService;
 use App\Modules\Encuestas\Models\Diligenciamiento;
+use App\Modules\Panel\Services\AlertaService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -14,6 +15,7 @@ class ResultadoController extends Controller
     public function __construct(
         private readonly PredictorService $predictor,
         private readonly ExplicabilidadService $explicabilidad,
+        private readonly AlertaService $alertas,
     ) {}
 
     public function show(Diligenciamiento $diligenciamiento): View|RedirectResponse
@@ -43,7 +45,7 @@ class ResultadoController extends Controller
         $prediccion = $this->predictor->predecir($diligenciamiento);
         $contribuciones = $this->explicabilidad->explicar($prediccion, $version);
 
-        return EvaluacionRiesgo::create([
+        $evaluacion = EvaluacionRiesgo::create([
             'diligenciamiento_id' => $diligenciamiento->id,
             'version_modelo_id' => $version->id,
             'categoria' => $prediccion['categoria'],
@@ -53,5 +55,9 @@ class ResultadoController extends Controller
             'contribuciones' => $contribuciones,
             'evaluado_at' => now(),
         ]);
+
+        $this->alertas->generarSiCambioDeRiesgo($evaluacion);
+
+        return $evaluacion;
     }
 }

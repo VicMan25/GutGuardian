@@ -21,4 +21,10 @@
         />
     </x-tarjeta>
 
+    <div class="mt-6 flex justify-center">
+        <x-boton variante="secundario" href="{{ route('estudiante.inicio') }}">
+            Volver al inicio
+        </x-boton>
+    </div>
+
 </x-layouts.estudiante>

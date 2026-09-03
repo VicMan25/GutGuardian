@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Modules\Analitica\Models\EvaluacionRiesgo;
 use App\Modules\Encuestas\Models\Diligenciamiento;
+use App\Modules\Panel\Models\Alerta;
+use App\Policies\AlertaPolicy;
 use App\Policies\DiligenciamientoPolicy;
 use App\Policies\EvaluacionRiesgoPolicy;
 use Illuminate\Support\Facades\Gate;
@@ -17,5 +19,6 @@ class AppServiceProvider extends ServiceProvider
     {
         Gate::policy(Diligenciamiento::class, DiligenciamientoPolicy::class);
         Gate::policy(EvaluacionRiesgo::class, EvaluacionRiesgoPolicy::class);
+        Gate::policy(Alerta::class, AlertaPolicy::class);
     }
 }

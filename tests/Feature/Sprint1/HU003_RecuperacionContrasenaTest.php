@@ -28,7 +28,7 @@ describe('HU-003 — Recuperación de contraseña', function () {
 
         $token = app('auth.password.broker')->createToken($user);
 
-        $this->get(route('password.reset', ['token' => $token]) . '?email=' . urlencode($user->email))
+        $this->get(route('password.reset', ['token' => $token]).'?email='.urlencode($user->email))
             ->assertOk();
     });
 

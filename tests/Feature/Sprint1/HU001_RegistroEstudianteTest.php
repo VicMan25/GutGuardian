@@ -15,17 +15,17 @@ describe('HU-001 — Registro de estudiante', function () {
         $programa = Programa::first();
 
         $this->post(route('register'), [
-            'name'                  => 'Ana Torres',
-            'email'                 => 'ana@umariana.edu.co',
-            'codigo_participante'   => 'EST-001',
-            'password'              => 'Password123!',
+            'name' => 'Ana Torres',
+            'email' => 'ana@umariana.edu.co',
+            'codigo_participante' => 'EST-001',
+            'password' => 'Password123!',
             'password_confirmation' => 'Password123!',
-            'genero'                => 'femenino',
-            'edad'                  => 21,
-            'programa_id'           => $programa->id,
-            'semestre'              => 4,
+            'genero' => 'femenino',
+            'edad' => 21,
+            'programa_id' => $programa->id,
+            'semestre' => 4,
         ])
-        ->assertRedirect(route('estudiante.inicio'));
+            ->assertRedirect(route('estudiante.inicio'));
 
         $user = User::where('email', 'ana@umariana.edu.co')->first();
 
@@ -38,15 +38,15 @@ describe('HU-001 — Registro de estudiante', function () {
         $programa = Programa::first();
 
         $this->post(route('register'), [
-            'name'                  => 'Luis Pérez',
-            'email'                 => 'luis@umariana.edu.co',
-            'codigo_participante'   => 'EST-002',
-            'password'              => 'Password123!',
+            'name' => 'Luis Pérez',
+            'email' => 'luis@umariana.edu.co',
+            'codigo_participante' => 'EST-002',
+            'password' => 'Password123!',
             'password_confirmation' => 'Password123!',
-            'genero'                => 'masculino',
-            'edad'                  => 23,
-            'programa_id'           => $programa->id,
-            'semestre'              => 6,
+            'genero' => 'masculino',
+            'edad' => 23,
+            'programa_id' => $programa->id,
+            'semestre' => 6,
         ]);
 
         $user = User::where('email', 'luis@umariana.edu.co')->first();
@@ -64,15 +64,15 @@ describe('HU-001 — Registro de estudiante', function () {
         User::factory()->create(['codigo_participante' => 'EST-DUP']);
 
         $this->post(route('register'), [
-            'name'                  => 'Estudiante Dos',
-            'email'                 => 'dos@umariana.edu.co',
-            'codigo_participante'   => 'EST-DUP',
-            'password'              => 'Password123!',
+            'name' => 'Estudiante Dos',
+            'email' => 'dos@umariana.edu.co',
+            'codigo_participante' => 'EST-DUP',
+            'password' => 'Password123!',
             'password_confirmation' => 'Password123!',
-            'genero'                => 'femenino',
-            'edad'                  => 20,
-            'programa_id'           => $programa->id,
-            'semestre'              => 2,
+            'genero' => 'femenino',
+            'edad' => 20,
+            'programa_id' => $programa->id,
+            'semestre' => 2,
         ])->assertSessionHasErrors('codigo_participante');
     });
 
@@ -80,14 +80,14 @@ describe('HU-001 — Registro de estudiante', function () {
         $programa = Programa::first();
 
         $this->post(route('register'), [
-            'name'                  => 'Sin Código',
-            'email'                 => 'sn@umariana.edu.co',
-            'password'              => 'Password123!',
+            'name' => 'Sin Código',
+            'email' => 'sn@umariana.edu.co',
+            'password' => 'Password123!',
             'password_confirmation' => 'Password123!',
-            'genero'                => 'otro',
-            'edad'                  => 19,
-            'programa_id'           => $programa->id,
-            'semestre'              => 1,
+            'genero' => 'otro',
+            'edad' => 19,
+            'programa_id' => $programa->id,
+            'semestre' => 1,
         ])->assertSessionHasErrors('codigo_participante');
     });
 

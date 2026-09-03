@@ -8,9 +8,11 @@ use App\Modules\Encuestas\Models\Respuesta;
 use Illuminate\Support\Collection;
 
 /**
- * Arma los datasets de seguimiento individual del estudiante (HU-007, 008,
- * 011, 012, 013): evolución del riesgo, del dolor abdominal y de los 6
- * síntomas rastreados por el instrumento (temporalidad y frecuencia).
+ * Arma los datasets de seguimiento individual del estudiante: evolución del
+ * riesgo (HU-008, real) y, como funcionalidad complementaria sin HU numerada
+ * en el documento fuente (ver docs/HISTORIAS_USUARIO.md, nota 3), la
+ * evolución del dolor abdominal y de los 6 síntomas rastreados por el
+ * instrumento (temporalidad y frecuencia).
  */
 class SeguimientoService
 {
@@ -56,7 +58,8 @@ class SeguimientoService
     }
 
     /**
-     * HU-013: evolución de la escala de dolor abdominal (P13, 1-5).
+     * Funcionalidad complementaria, sin HU numerada en el documento fuente:
+     * evolución de la escala de dolor abdominal (P13, 1-5).
      *
      * @return array{etiquetas: array<int, string>, valores: array<int, int>}
      */
@@ -82,8 +85,9 @@ class SeguimientoService
     }
 
     /**
-     * HU-011/HU-012: por cada uno de los 6 síntomas, su temporalidad (P11) y
-     * frecuencia en el último mes (P12) a lo largo de los diligenciamientos.
+     * Funcionalidad complementaria, sin HU numerada en el documento fuente:
+     * por cada uno de los 6 síntomas, su temporalidad (P11) y frecuencia en
+     * el último mes (P12) a lo largo de los diligenciamientos.
      *
      * @return array<int, array{sintoma: string, etiquetas: array<int, string>, frecuencia: array<int, int|null>, temporalidad: array<int, int|null>}>
      */

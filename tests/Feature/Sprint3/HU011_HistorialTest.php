@@ -10,7 +10,7 @@ use Carbon\Carbon;
 use Database\Seeders\InstrumentoSeeder;
 use Database\Seeders\RolesPermisosSeeder;
 
-function hu007VersionMinima(): VersionModelo
+function hu011VersionMinima(): VersionModelo
 {
     return VersionModelo::create([
         'nombre' => 'Prueba', 'version' => 'test-'.uniqid(), 'activo' => false,
@@ -18,7 +18,7 @@ function hu007VersionMinima(): VersionModelo
     ]);
 }
 
-function hu007DiligenciamientoCompletado(User $user, Instrumento $instrumento, Carbon $fecha, int $categoria = 0): Diligenciamiento
+function hu011DiligenciamientoCompletado(User $user, Instrumento $instrumento, Carbon $fecha, int $categoria = 0): Diligenciamiento
 {
     $d = Diligenciamiento::create([
         'user_id' => $user->id, 'instrumento_id' => $instrumento->id,
@@ -26,7 +26,7 @@ function hu007DiligenciamientoCompletado(User $user, Instrumento $instrumento, C
     ]);
 
     EvaluacionRiesgo::create([
-        'diligenciamiento_id' => $d->id, 'version_modelo_id' => hu007VersionMinima()->id,
+        'diligenciamiento_id' => $d->id, 'version_modelo_id' => hu011VersionMinima()->id,
         'categoria' => $categoria, 'prob_0' => 0.5, 'prob_1' => 0.3, 'prob_2' => 0.2,
         'contribuciones' => [], 'evaluado_at' => $fecha,
     ]);
@@ -34,7 +34,7 @@ function hu007DiligenciamientoCompletado(User $user, Instrumento $instrumento, C
     return $d;
 }
 
-describe('HU-007 — Historial de diligenciamientos', function () {
+describe('HU-011 — Consulta del historial de registros', function () {
 
     beforeEach(function () {
         $this->seed([RolesPermisosSeeder::class, InstrumentoSeeder::class]);
@@ -57,8 +57,8 @@ describe('HU-007 — Historial de diligenciamientos', function () {
     });
 
     it('lista los diligenciamientos completados de más reciente a más antiguo', function () {
-        $d1 = hu007DiligenciamientoCompletado($this->estudiante, $this->instrumento, now()->subDays(20), categoria: 0);
-        $d2 = hu007DiligenciamientoCompletado($this->estudiante, $this->instrumento, now()->subDays(5), categoria: 2);
+        $d1 = hu011DiligenciamientoCompletado($this->estudiante, $this->instrumento, now()->subDays(20), categoria: 0);
+        $d2 = hu011DiligenciamientoCompletado($this->estudiante, $this->instrumento, now()->subDays(5), categoria: 2);
 
         $respuesta = $this->actingAs($this->estudiante)->get(route('historial.show'));
 
@@ -85,7 +85,7 @@ describe('HU-007 — Historial de diligenciamientos', function () {
     it('un estudiante nunca ve diligenciamientos de otro en su historial', function () {
         $otro = User::factory()->create();
         $otro->assignRole('estudiante');
-        hu007DiligenciamientoCompletado($otro, $this->instrumento, now());
+        hu011DiligenciamientoCompletado($otro, $this->instrumento, now());
 
         $respuesta = $this->actingAs($this->estudiante)->get(route('historial.show'));
 
@@ -93,7 +93,7 @@ describe('HU-007 — Historial de diligenciamientos', function () {
     });
 
     it('cada fila enlaza al resultado correspondiente', function () {
-        $d = hu007DiligenciamientoCompletado($this->estudiante, $this->instrumento, now());
+        $d = hu011DiligenciamientoCompletado($this->estudiante, $this->instrumento, now());
 
         $this->actingAs($this->estudiante)
             ->get(route('historial.show'))

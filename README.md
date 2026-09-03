@@ -134,4 +134,4 @@ Los patrones de archivos de datos reales están explícitamente excluidos en `.g
 
 ## Licencia
 
-Uso académico — trabajo de grado, Universidad Mariana, 2025–2026.
+Uso académico — trabajo de grado, Universidad Mariana, 2026.

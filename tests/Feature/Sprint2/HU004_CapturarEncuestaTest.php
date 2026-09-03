@@ -146,6 +146,32 @@ describe('HU-004 — Captura de la encuesta por secciones', function () {
         expect(Respuesta::where('diligenciamiento_id', $diligenciamiento->id)->count())->toBe(0);
     });
 
+    it('si falta un ítem de una pregunta matriz, el error queda visible al recargar la sección y no avanza', function () {
+        $diligenciamiento = Diligenciamiento::create([
+            'user_id' => $this->estudiante->id, 'instrumento_id' => $this->instrumento->id, 'estado' => 'pendiente',
+        ]);
+        $seccionClinica = Seccion::where('instrumento_id', $this->instrumento->id)->where('orden', 3)->first();
+        $p11 = Pregunta::where('codigo', 'P11')->first();
+
+        $payload = hu004PayloadSeccion($seccionClinica);
+        $itemFaltante = $p11->items->first();
+        unset($payload['respuestas'][$p11->id][$itemFaltante->id]);
+
+        $this->actingAs($this->estudiante)
+            ->from(route('encuesta.seccion', [$diligenciamiento, 3]))
+            ->post(route('encuesta.guardar', [$diligenciamiento, 3]), $payload)
+            ->assertSessionHasErrors("respuestas.{$p11->id}.{$itemFaltante->id}")
+            ->assertRedirect(route('encuesta.seccion', [$diligenciamiento, 3]));
+
+        expect(Respuesta::where('diligenciamiento_id', $diligenciamiento->id)->count())->toBe(0);
+
+        $this->actingAs($this->estudiante)
+            ->from(route('encuesta.guardar', [$diligenciamiento, 3]))
+            ->followingRedirects()
+            ->post(route('encuesta.guardar', [$diligenciamiento, 3]), $payload)
+            ->assertSee('Falta responder uno o más ítems de esta pregunta.');
+    });
+
     it('un estudiante no puede diligenciar el instrumento de otro estudiante — 403', function () {
         $otro = User::factory()->create();
         $otro->assignRole('estudiante');
