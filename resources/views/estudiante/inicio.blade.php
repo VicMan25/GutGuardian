@@ -43,25 +43,36 @@
         @endphp
 
         {{-- Resultado más reciente --}}
-        <x-tarjeta class="mb-4">
-            <p class="text-xs text-gg-tinta-suave mb-1">Tu resultado más reciente</p>
-            @if($evaluacion)
-                <p class="font-display text-xl font-medium mb-4" style="color: {{ $bgHex[$evaluacion->categoria] }}">
-                    {{ $etiquetasCategoria[$evaluacion->categoria] }}
-                </p>
-            @else
-                <p class="text-sm text-gg-tinta-suave mb-4">Aún no se ha calculado.</p>
-            @endif
-            <div class="flex flex-wrap gap-2">
-                <x-boton variante="primario" href="{{ route('resultado.show', $ultimoDiligenciamiento) }}" tamano="sm">
-                    Ver resultado
-                </x-boton>
-                <x-boton variante="secundario" href="{{ route('historial.show') }}" tamano="sm">
-                    Historial
-                </x-boton>
-                <x-boton variante="secundario" href="{{ route('seguimiento.show') }}" tamano="sm">
-                    Seguimiento
-                </x-boton>
+        <x-tarjeta padding="p-0" class="mb-4 overflow-hidden">
+            <div class="flex">
+                <div class="w-1.5 shrink-0"
+                     style="background-color: {{ $evaluacion ? $bgHex[$evaluacion->categoria] : '#E0E3DC' }};"
+                     aria-hidden="true"></div>
+                <div class="flex-1 p-5">
+                    <p class="text-xs text-gg-tinta-suave mb-1">Tu resultado más reciente</p>
+                    @if($evaluacion)
+                        <p class="font-display text-2xl font-medium" style="color: {{ $bgHex[$evaluacion->categoria] }}">
+                            {{ $etiquetasCategoria[$evaluacion->categoria] }}
+                        </p>
+                        <p class="text-2xs text-gg-tinta-suave mt-1 mb-4">
+                            Evaluado el {{ $evaluacion->evaluado_at->format('d/m/Y') }}
+                            · {{ $totalCompletados }} {{ $totalCompletados === 1 ? 'encuesta completada' : 'encuestas completadas' }}
+                        </p>
+                    @else
+                        <p class="text-sm text-gg-tinta-suave mt-1 mb-4">Aún no se ha calculado.</p>
+                    @endif
+                    <div class="flex flex-wrap gap-2">
+                        <x-boton variante="primario" href="{{ route('resultado.show', $ultimoDiligenciamiento) }}" tamano="sm">
+                            Ver resultado
+                        </x-boton>
+                        <x-boton variante="secundario" href="{{ route('historial.show') }}" tamano="sm">
+                            Historial
+                        </x-boton>
+                        <x-boton variante="secundario" href="{{ route('seguimiento.show') }}" tamano="sm">
+                            Seguimiento
+                        </x-boton>
+                    </div>
+                </div>
             </div>
         </x-tarjeta>
 

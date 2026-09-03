@@ -3,13 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Modules\Panel\Services\AuditoriaClinicaService;
 use App\Modules\Reportes\Services\SeguimientoService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class EstudianteController extends Controller
 {
-    public function __construct(private readonly SeguimientoService $seguimiento) {}
+    public function __construct(
+        private readonly SeguimientoService $seguimiento,
+        private readonly AuditoriaClinicaService $auditoria,
+    ) {}
 
     /**
      * HU-015/HU-016: listado general de estudiantes con su nivel de riesgo
@@ -46,9 +50,12 @@ class EstudianteController extends Controller
      * HU-014/HU-016: consulta individual — historial y evolución del riesgo
      * de un estudiante puntual.
      */
-    public function show(User $estudiante): View
+    public function show(Request $request, User $estudiante): View
     {
         abort_unless($estudiante->hasRole('estudiante'), 404);
+
+        // Ley 1581 de 2012 — deja rastro de quién consultó este registro clínico.
+        $this->auditoria->registrarConsultaFicha($request->user(), $estudiante);
 
         $diligenciamientos = $this->seguimiento->diligenciamientosCompletados($estudiante);
 

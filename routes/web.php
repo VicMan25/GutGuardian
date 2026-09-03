@@ -5,6 +5,7 @@ use App\Http\Controllers\EncuestaController;
 use App\Http\Controllers\EstudianteController;
 use App\Http\Controllers\EstudianteInicioController;
 use App\Http\Controllers\HistorialController;
+use App\Http\Controllers\PanelController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\ResultadoController;
@@ -70,9 +71,7 @@ Route::middleware(['auth', 'consentimiento'])->group(function () {
 // Área del profesional de salud
 Route::middleware(['auth', 'consentimiento', 'role:profesional_salud|admin'])
     ->prefix('panel')->name('panel.')->group(function () {
-        Route::get('/', function () {
-            return view('panel.inicio');
-        })->name('inicio');
+        Route::get('/', [PanelController::class, 'inicio'])->name('inicio');
 
         // HU-014/HU-015/HU-016: consulta individual, listado y nivel de riesgo
         Route::middleware('permission:consultar_estudiantes')

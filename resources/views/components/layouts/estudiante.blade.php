@@ -17,6 +17,13 @@
 </head>
 <body class="min-h-full font-sans antialiased bg-gg-papel text-gg-tinta">
 
+    <a href="#contenido"
+       class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-3 focus:left-3
+              focus:bg-gg-superficie focus:border focus:border-gg-primario focus:rounded-control
+              focus:px-3 focus:py-2 focus:text-sm focus:text-gg-primario">
+        Saltar al contenido
+    </a>
+
     {{-- Barra de navegación mínima --}}
     <header class="sticky top-0 z-20 bg-gg-superficie border-b border-gg-borde">
         <div class="max-w-estudiante mx-auto px-4 h-14 flex items-center justify-between gap-4">
@@ -89,7 +96,7 @@
     </header>
 
     {{-- Contenido principal — columna única, ancho máximo 640 px --}}
-    <main class="max-w-estudiante mx-auto px-4 py-8">
+    <main id="contenido" class="max-w-estudiante mx-auto px-4 py-8">
         {{ $slot }}
     </main>
 

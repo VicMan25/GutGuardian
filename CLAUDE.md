@@ -274,6 +274,12 @@ histórica** de los registros del estudiante y ajustar la redacción en la monog
       en `RolesPermisosSeeder` (`consultar_estudiantes`, `crear_usuarios`, etc.) que no se
       habían usado hasta ahora. HU-019 agregó el primer bloqueo real de login por cuenta
       desactivada (`LoginRequest::authenticate`, `activo => true` en las credenciales).
+      Cierre de huecos de cumplimiento (ver `docs/AVANCE_PROYECTO.md` §11.6):
+      `AuditoriaClinicaService` deja rastro en `activity_log` de todo acceso de
+      terceros a datos clínicos —ficha individual, resultado ajeno, consulta y
+      exportación de reportes— (Ley 1581); `aviso-no-diagnostico` agregado a las
+      vistas de ficha y de reportes del panel (Resolución 3100); HU-016 con test
+      propio. Suite: 180 tests.
 - [ ] Sprint 6
 - [ ] **BLOQUEANTE (sigue abierto):** regla operativa real de la variable dependiente Y
       (requiere a Enfermería). `ml/comun.py::derivar_categoria_riesgo` implementa una regla
@@ -323,9 +329,11 @@ Solo pesos 400 y 500. Formato oración en todos los textos.
 
 | Layout                          | Cuándo usarlo                                     |
 |---------------------------------|---------------------------------------------------|
-| `layouts/publico.blade.php`     | Login, registro, consentimiento                   |
+| `layouts/publico.blade.php`     | Login, registro, consentimiento. Panel de marca `bg-gg-primario` a la izquierda desde `lg`; tarjeta de formulario `max-w-[460px]` a la derecha. En móvil colapsa a una sola columna. |
 | `layouts/estudiante.blade.php`  | Encuesta y resultado (1 col, `max-w-[640px]`)     |
-| `layouts/profesional.blade.php` | Panel institucional (sidebar + contenido denso)   |
+| `layouts/profesional.blade.php` | Panel institucional (sidebar + contenido denso). El contenido se acota a `max-w-[1180px] mx-auto` para no estirar tablas/formularios en monitores anchos. |
+
+Los tres layouts abren con un enlace «Saltar al contenido» (`sr-only` hasta recibir foco) que apunta a `#contenido` en el `<main>`.
 
 ### Inventario de componentes Blade
 

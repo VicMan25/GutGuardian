@@ -17,6 +17,13 @@
 </head>
 <body class="h-full font-sans antialiased bg-gg-papel text-gg-tinta" x-data="{ navAbierta: false }">
 
+    <a href="#contenido"
+       class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-3 focus:left-3
+              focus:bg-gg-superficie focus:border focus:border-gg-primario focus:rounded-control
+              focus:px-3 focus:py-2 focus:text-sm focus:text-gg-primario">
+        Saltar al contenido
+    </a>
+
     <div class="flex h-full">
 
         {{-- Sidebar fijo en desktop, drawer en móvil --}}
@@ -148,9 +155,11 @@
 
             </header>
 
-            {{-- Contenido de la página --}}
-            <main class="flex-1 px-4 lg:px-6 py-6">
-                {{ $slot }}
+            {{-- Contenido de la página — ancho acotado para longitud de línea legible --}}
+            <main id="contenido" class="flex-1 px-4 lg:px-6 py-6">
+                <div class="mx-auto w-full max-w-[1180px]">
+                    {{ $slot }}
+                </div>
             </main>
 
         </div>

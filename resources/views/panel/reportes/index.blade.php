@@ -108,6 +108,11 @@
             </table>
             </div>
         </x-tarjeta>
+
+        {{-- Resolución 3100 de 2019 — aviso obligatorio junto a todo resultado de riesgo. --}}
+        <div class="mt-6">
+            <x-aviso-no-diagnostico />
+        </div>
     @endif
 
 </x-layouts.profesional>
