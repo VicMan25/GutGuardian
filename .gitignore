@@ -34,6 +34,8 @@ ml/datos/
 *.participantes.json
 dataset_real.*
 encuestas_reales.*
+/docs/ENCUESTAS ANALISIS TABLAS .xlsx
+docs/*.xlsx
 
 # ------------------------------------------------------------
 # Artefactos de Python (ml/)
