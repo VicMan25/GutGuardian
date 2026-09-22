@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\DistribucionRiesgoExport;
+use App\Modules\Panel\Services\AuditoriaClinicaService;
 use App\Modules\Reportes\Services\ReporteInstitucionalService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -13,7 +14,10 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ReporteController extends Controller
 {
-    public function __construct(private readonly ReporteInstitucionalService $reportes) {}
+    public function __construct(
+        private readonly ReporteInstitucionalService $reportes,
+        private readonly AuditoriaClinicaService $auditoria,
+    ) {}
 
     /**
      * HU-022/HU-023: reporte general del comportamiento de los niveles de
@@ -21,6 +25,8 @@ class ReporteController extends Controller
      */
     public function index(Request $request): View
     {
+        $this->auditoria->registrarReporte($request->user(), 'consulta', $this->filtros($request));
+
         $datos = $this->reportes->generar($this->filtros($request));
 
         return view('panel.reportes.index', [
@@ -31,6 +37,8 @@ class ReporteController extends Controller
 
     public function exportarPdf(Request $request): Response
     {
+        $this->auditoria->registrarReporte($request->user(), 'exportacion_pdf', $this->filtros($request));
+
         $datos = $this->reportes->generar($this->filtros($request));
 
         return Pdf::loadView('reportes.pdf.distribucion-riesgo', $datos)
@@ -39,6 +47,8 @@ class ReporteController extends Controller
 
     public function exportarExcel(Request $request): BinaryFileResponse
     {
+        $this->auditoria->registrarReporte($request->user(), 'exportacion_excel', $this->filtros($request));
+
         $datos = $this->reportes->generar($this->filtros($request));
 
         return Excel::download(new DistribucionRiesgoExport($datos['detalle']), 'reporte-riesgo-institucional.xlsx');
