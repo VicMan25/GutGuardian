@@ -51,6 +51,7 @@ export default {
 
             maxWidth: {
                 estudiante: '640px',
+                'estudiante-ancho': '960px',
             },
 
             spacing: {

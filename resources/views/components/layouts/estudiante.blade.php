@@ -17,9 +17,24 @@
 </head>
 <body class="min-h-full font-sans antialiased bg-gg-papel text-gg-tinta">
 
+    {{--
+        Encuesta y resultado se quedan en 640px (lectura de un formulario, como
+        indica CLAUDE.md §12). Páginas con gráficas o datos (seguimiento) piden
+        ancho="ancho" para aprovechar mejor un monitor sin perder la columna
+        angosta en móvil.
+    --}}
+    @php $anchoContenedor = ($ancho ?? 'compacto') === 'ancho' ? 'max-w-estudiante-ancho' : 'max-w-estudiante'; @endphp
+
+    <a href="#contenido"
+       class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-3 focus:left-3
+              focus:bg-gg-superficie focus:border focus:border-gg-primario focus:rounded-control
+              focus:px-3 focus:py-2 focus:text-sm focus:text-gg-primario">
+        Saltar al contenido
+    </a>
+
     {{-- Barra de navegación mínima --}}
     <header class="sticky top-0 z-20 bg-gg-superficie border-b border-gg-borde">
-        <div class="max-w-estudiante mx-auto px-4 h-14 flex items-center justify-between gap-4">
+        <div class="{{ $anchoContenedor }} mx-auto px-4 h-14 flex items-center justify-between gap-4">
 
             <a href="{{ route('estudiante.inicio') }}"
                class="font-display text-md font-medium text-gg-primario tracking-tight shrink-0"
@@ -59,7 +74,7 @@
         --}}
         @auth
         @php $alertasNoLeidas = Auth::user()->alertas()->whereNull('leida_at')->count(); @endphp
-        <nav aria-label="Navegación principal" class="max-w-estudiante mx-auto px-4 pb-2 flex items-center gap-1 overflow-x-auto">
+        <nav aria-label="Navegación principal" class="{{ $anchoContenedor }} mx-auto px-4 pb-2 flex items-center gap-1 overflow-x-auto">
             @foreach([
                 ['ruta' => 'estudiante.inicio', 'etiqueta' => 'Inicio'],
                 ['ruta' => 'historial.show', 'etiqueta' => 'Historial'],
@@ -88,13 +103,13 @@
         @endauth
     </header>
 
-    {{-- Contenido principal — columna única, ancho máximo 640 px --}}
-    <main class="max-w-estudiante mx-auto px-4 py-8">
+    {{-- Contenido principal — 640px por defecto, o más ancho si la página lo pide --}}
+    <main id="contenido" class="{{ $anchoContenedor }} mx-auto px-4 py-8">
         {{ $slot }}
     </main>
 
     {{-- Pie: aviso legal siempre visible --}}
-    <footer class="max-w-estudiante mx-auto px-4 pb-10">
+    <footer class="{{ $anchoContenedor }} mx-auto px-4 pb-10">
         <p class="text-2xs text-gg-tinta-suave text-center">
             GutGuardián no emite diagnóstico clínico.
             Res. 3100 de 2019 · Universidad Mariana, Pasto.

@@ -1,4 +1,4 @@
-<x-layouts.estudiante titulo="Seguimiento">
+<x-layouts.estudiante titulo="Seguimiento" ancho="ancho">
 
     <div class="mb-6 flex items-center justify-between gap-4">
         <div>
@@ -21,59 +21,61 @@
         </x-tarjeta>
     @else
 
-        {{-- Evolución del nivel de riesgo (HU-008) --}}
-        <x-tarjeta class="mb-6">
-            <h2 class="text-sm font-medium text-gg-tinta mb-4">Evolución del nivel de riesgo</h2>
-            <div class="h-64">
-                <canvas
-                    x-data
-                    x-init="new Chart($el, {
-                        type: 'line',
-                        data: {
-                            labels: @json($riesgo['etiquetas']),
-                            datasets: [
-                                { label: 'Riesgo bajo', data: @json($riesgo['bajo']), borderColor: '#3E7D64', backgroundColor: '#3E7D64', tension: 0.25 },
-                                { label: 'Riesgo medio', data: @json($riesgo['medio']), borderColor: '#C08A2E', backgroundColor: '#C08A2E', tension: 0.25 },
-                                { label: 'Riesgo alto', data: @json($riesgo['alto']), borderColor: '#9C4A32', backgroundColor: '#9C4A32', tension: 0.25 },
-                            ],
-                        },
-                        options: {
-                            maintainAspectRatio: false,
-                            scales: { y: { min: 0, max: 100, ticks: { callback: (v) => v + '%' } } },
-                            plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } } },
-                        },
-                    })"
-                    role="img"
-                    aria-label="Gráfica de evolución de las probabilidades de riesgo bajo, medio y alto"
-                ></canvas>
-            </div>
-        </x-tarjeta>
+        <div class="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-4 mb-6">
+            {{-- Evolución del nivel de riesgo (HU-008) --}}
+            <x-tarjeta>
+                <h2 class="text-sm font-medium text-gg-tinta mb-4">Evolución del nivel de riesgo</h2>
+                <div class="h-64">
+                    <canvas
+                        x-data
+                        x-init="new Chart($el, {
+                            type: 'line',
+                            data: {
+                                labels: @json($riesgo['etiquetas']),
+                                datasets: [
+                                    { label: 'Riesgo bajo', data: @json($riesgo['bajo']), borderColor: '#3E7D64', backgroundColor: '#3E7D64', tension: 0.25 },
+                                    { label: 'Riesgo medio', data: @json($riesgo['medio']), borderColor: '#C08A2E', backgroundColor: '#C08A2E', tension: 0.25 },
+                                    { label: 'Riesgo alto', data: @json($riesgo['alto']), borderColor: '#9C4A32', backgroundColor: '#9C4A32', tension: 0.25 },
+                                ],
+                            },
+                            options: {
+                                maintainAspectRatio: false,
+                                scales: { y: { min: 0, max: 100, ticks: { callback: (v) => v + '%' } } },
+                                plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } } },
+                            },
+                        })"
+                        role="img"
+                        aria-label="Gráfica de evolución de las probabilidades de riesgo bajo, medio y alto"
+                    ></canvas>
+                </div>
+            </x-tarjeta>
 
-        {{-- Evolución del dolor abdominal (complementaria, sin HU numerada) --}}
-        <x-tarjeta class="mb-6">
-            <h2 class="text-sm font-medium text-gg-tinta mb-4">Evolución del dolor abdominal</h2>
-            <div class="h-56">
-                <canvas
-                    x-data
-                    x-init="new Chart($el, {
-                        type: 'line',
-                        data: {
-                            labels: @json($dolor['etiquetas']),
-                            datasets: [
-                                { label: 'Dolor (1-5)', data: @json($dolor['valores']), borderColor: '#1F5C4A', backgroundColor: '#1F5C4A', tension: 0.25 },
-                            ],
-                        },
-                        options: {
-                            maintainAspectRatio: false,
-                            scales: { y: { min: 1, max: 5, ticks: { stepSize: 1 } } },
-                            plugins: { legend: { display: false } },
-                        },
-                    })"
-                    role="img"
-                    aria-label="Gráfica de evolución de la intensidad del dolor abdominal"
-                ></canvas>
-            </div>
-        </x-tarjeta>
+            {{-- Evolución del dolor abdominal (complementaria, sin HU numerada) --}}
+            <x-tarjeta>
+                <h2 class="text-sm font-medium text-gg-tinta mb-4">Evolución del dolor abdominal</h2>
+                <div class="h-64">
+                    <canvas
+                        x-data
+                        x-init="new Chart($el, {
+                            type: 'line',
+                            data: {
+                                labels: @json($dolor['etiquetas']),
+                                datasets: [
+                                    { label: 'Dolor (1-5)', data: @json($dolor['valores']), borderColor: '#1F5C4A', backgroundColor: '#1F5C4A', tension: 0.25 },
+                                ],
+                            },
+                            options: {
+                                maintainAspectRatio: false,
+                                scales: { y: { min: 1, max: 5, ticks: { stepSize: 1 } } },
+                                plugins: { legend: { display: false } },
+                            },
+                        })"
+                        role="img"
+                        aria-label="Gráfica de evolución de la intensidad del dolor abdominal"
+                    ></canvas>
+                </div>
+            </x-tarjeta>
+        </div>
 
         {{-- Seguimiento de síntomas (complementaria, sin HU numerada) --}}
         <div class="mb-3">
@@ -82,7 +84,7 @@
                 Frecuencia en el último mes y temporalidad reportada, por síntoma.
             </p>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
             @foreach($sintomas as $panel)
             <x-tarjeta>
                 <h3 class="text-xs font-medium text-gg-tinta mb-3">{{ $panel['sintoma'] }}</h3>
