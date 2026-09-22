@@ -39,14 +39,14 @@ export default {
 
             // Escala tipográfica del sistema de diseño (solo estos tamaños permitidos)
             fontSize: {
-                '2xs': ['12px', { lineHeight: '16px' }],
-                xs:    ['13px', { lineHeight: '18px' }],
-                sm:    ['14px', { lineHeight: '20px' }],
-                base:  ['16px', { lineHeight: '24px' }],
-                md:    ['17px', { lineHeight: '26px' }],
-                xl:    ['22px', { lineHeight: '30px' }],
-                '2xl': ['28px', { lineHeight: '36px' }],
-                '3xl': ['36px', { lineHeight: '44px' }],
+                '2xs': ['13px', { lineHeight: '18px' }],
+                xs:    ['14px', { lineHeight: '20px' }],
+                sm:    ['15px', { lineHeight: '22px' }],
+                base:  ['17px', { lineHeight: '26px' }],
+                md:    ['19px', { lineHeight: '28px' }],
+                xl:    ['24px', { lineHeight: '32px' }],
+                '2xl': ['30px', { lineHeight: '38px' }],
+                '3xl': ['40px', { lineHeight: '48px' }],
             },
 
             maxWidth: {

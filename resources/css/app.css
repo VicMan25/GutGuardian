@@ -90,7 +90,7 @@
     .gg-tabla th {
         background-color: var(--gg-papel);
         color: var(--gg-tinta-suave);
-        font-size: 12px;
+        font-size: 13px;
         font-weight: 500;
         text-transform: none;
         letter-spacing: 0;
@@ -99,6 +99,6 @@
 
     .gg-tabla td {
         border-bottom: 1px solid var(--gg-borde);
-        font-size: 14px;
+        font-size: 15px;
     }
 }

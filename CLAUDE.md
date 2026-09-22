@@ -315,7 +315,7 @@ histórica** de los registros del estudiante y ajustar la redacción en la monog
 | Source Sans 3          | 400/500 | `font-sans`       | Todo el cuerpo de texto                          |
 | IBM Plex Mono          | 400     | `font-mono`       | Códigos de participante, probabilidades, OR      |
 
-**Escala tipográfica:** `12 / 13 / 14 / 16 / 17 / 22 / 28 / 36 px` (Tailwind: `2xs xs sm base md xl 2xl 3xl`).
+**Escala tipográfica:** `13 / 14 / 15 / 17 / 19 / 24 / 30 / 40 px` (Tailwind: `2xs xs sm base md xl 2xl 3xl`).
 Solo pesos 400 y 500. Formato oración en todos los textos.
 
 ### Radios y bordes
