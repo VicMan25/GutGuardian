@@ -63,10 +63,10 @@
                     x-init="new Chart($el, {
                         type: 'bar',
                         data: {
-                            labels: @json(collect($resumen)->pluck('etiqueta')),
+                            labels: {{ Js::from(collect($resumen)->pluck('etiqueta')) }},
                             datasets: [{
-                                data: @json(collect($resumen)->pluck('total')),
-                                backgroundColor: @json($bgHex),
+                                data: {{ Js::from(collect($resumen)->pluck('total')) }},
+                                backgroundColor: {{ Js::from($bgHex) }},
                             }],
                         },
                         options: {

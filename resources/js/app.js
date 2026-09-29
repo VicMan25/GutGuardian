@@ -1,8 +1,9 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
-import { Chart, LineController, LineElement, PointElement, LinearScale, CategoryScale, Legend, Tooltip } from 'chart.js';
+import { Chart, LineController, LineElement, PointElement, BarController, BarElement, LinearScale, CategoryScale, Legend, Tooltip } from 'chart.js';
 
-Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Legend, Tooltip);
+// Barras: reporte institucional (HU-022). Líneas: seguimiento y ficha (HU-008/HU-010).
+Chart.register(LineController, LineElement, PointElement, BarController, BarElement, LinearScale, CategoryScale, Legend, Tooltip);
 Chart.defaults.font.family = "'Source Sans 3', system-ui, sans-serif";
 
 window.Alpine = Alpine;

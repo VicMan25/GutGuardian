@@ -30,11 +30,11 @@
                     x-init="new Chart($el, {
                         type: 'line',
                         data: {
-                            labels: @json($riesgo['etiquetas']),
+                            labels: {{ Js::from($riesgo['etiquetas']) }},
                             datasets: [
-                                { label: 'Riesgo bajo', data: @json($riesgo['bajo']), borderColor: '#3E7D64', backgroundColor: '#3E7D64', tension: 0.25 },
-                                { label: 'Riesgo medio', data: @json($riesgo['medio']), borderColor: '#C08A2E', backgroundColor: '#C08A2E', tension: 0.25 },
-                                { label: 'Riesgo alto', data: @json($riesgo['alto']), borderColor: '#9C4A32', backgroundColor: '#9C4A32', tension: 0.25 },
+                                { label: 'Riesgo bajo', data: {{ Js::from($riesgo['bajo']) }}, borderColor: '#3E7D64', backgroundColor: '#3E7D64', tension: 0.25 },
+                                { label: 'Riesgo medio', data: {{ Js::from($riesgo['medio']) }}, borderColor: '#C08A2E', backgroundColor: '#C08A2E', tension: 0.25 },
+                                { label: 'Riesgo alto', data: {{ Js::from($riesgo['alto']) }}, borderColor: '#9C4A32', backgroundColor: '#9C4A32', tension: 0.25 },
                             ],
                         },
                         options: {
@@ -58,9 +58,9 @@
                     x-init="new Chart($el, {
                         type: 'line',
                         data: {
-                            labels: @json($dolor['etiquetas']),
+                            labels: {{ Js::from($dolor['etiquetas']) }},
                             datasets: [
-                                { label: 'Dolor (1-5)', data: @json($dolor['valores']), borderColor: '#1F5C4A', backgroundColor: '#1F5C4A', tension: 0.25 },
+                                { label: 'Dolor (1-5)', data: {{ Js::from($dolor['valores']) }}, borderColor: '#1F5C4A', backgroundColor: '#1F5C4A', tension: 0.25 },
                             ],
                         },
                         options: {
@@ -92,10 +92,10 @@
                         x-init="new Chart($el, {
                             type: 'line',
                             data: {
-                                labels: @json($panel['etiquetas']),
+                                labels: {{ Js::from($panel['etiquetas']) }},
                                 datasets: [
-                                    { label: 'Frecuencia', data: @json($panel['frecuencia']), borderColor: '#2a78d6', backgroundColor: '#2a78d6', tension: 0.25 },
-                                    { label: 'Temporalidad', data: @json($panel['temporalidad']), borderColor: '#4a3aa7', backgroundColor: '#4a3aa7', tension: 0.25 },
+                                    { label: 'Frecuencia', data: {{ Js::from($panel['frecuencia']) }}, borderColor: '#2a78d6', backgroundColor: '#2a78d6', tension: 0.25 },
+                                    { label: 'Temporalidad', data: {{ Js::from($panel['temporalidad']) }}, borderColor: '#4a3aa7', backgroundColor: '#4a3aa7', tension: 0.25 },
                                 ],
                             },
                             options: {

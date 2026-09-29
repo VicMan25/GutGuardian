@@ -68,11 +68,11 @@
                     x-init="new Chart($el, {
                         type: 'line',
                         data: {
-                            labels: @json($riesgo['etiquetas']),
+                            labels: {{ Js::from($riesgo['etiquetas']) }},
                             datasets: [
-                                { label: 'Riesgo bajo', data: @json($riesgo['bajo']), borderColor: '#3E7D64', backgroundColor: '#3E7D64', tension: 0.25 },
-                                { label: 'Riesgo medio', data: @json($riesgo['medio']), borderColor: '#C08A2E', backgroundColor: '#C08A2E', tension: 0.25 },
-                                { label: 'Riesgo alto', data: @json($riesgo['alto']), borderColor: '#9C4A32', backgroundColor: '#9C4A32', tension: 0.25 },
+                                { label: 'Riesgo bajo', data: {{ Js::from($riesgo['bajo']) }}, borderColor: '#3E7D64', backgroundColor: '#3E7D64', tension: 0.25 },
+                                { label: 'Riesgo medio', data: {{ Js::from($riesgo['medio']) }}, borderColor: '#C08A2E', backgroundColor: '#C08A2E', tension: 0.25 },
+                                { label: 'Riesgo alto', data: {{ Js::from($riesgo['alto']) }}, borderColor: '#9C4A32', backgroundColor: '#9C4A32', tension: 0.25 },
                             ],
                         },
                         options: {

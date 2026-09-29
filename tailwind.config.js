@@ -12,7 +12,10 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans:    ['Source Sans 3', ...defaultTheme.fontFamily.sans],
+                // Comillas internas obligatorias: sin ellas el minificador emite
+                // `font-family:Source Sans 3,…`, que es CSS inválido (el "3" no es
+                // un identificador) y el navegador descarta toda la declaración.
+                sans:    ['"Source Sans 3"', ...defaultTheme.fontFamily.sans],
                 display: ['Bricolage Grotesque', ...defaultTheme.fontFamily.sans],
                 mono:    ['IBM Plex Mono', ...defaultTheme.fontFamily.mono],
             },
