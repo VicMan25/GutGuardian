@@ -4,18 +4,19 @@
     <p class="text-sm text-gg-tinta-suave">Bienvenido, {{ Auth::user()->name }}.</p>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-        <a href="{{ route('panel.inicio') }}" class="block">
-            <x-tarjeta class="hover:bg-gg-papel transition-colors duration-100">
-                <p class="font-display text-md font-medium text-gg-tinta">Panel institucional</p>
-                <p class="text-2xs text-gg-tinta-suave mt-1">Indicadores, estudiantes y reportes.</p>
+        @foreach([
+            ['ruta' => 'panel.inicio', 'titulo' => 'Panel institucional', 'texto' => 'Indicadores, estudiantes y reportes.'],
+            ['ruta' => 'admin.modelos.index', 'titulo' => 'Modelo predictivo', 'texto' => 'Registrar, revisar y activar versiones del modelo.'],
+            ['ruta' => 'admin.validacion.index', 'titulo' => 'Validación', 'texto' => 'Usabilidad (SUS), tiempos y errores de la prueba piloto.'],
+            ['ruta' => 'admin.auditoria.index', 'titulo' => 'Auditoría', 'texto' => 'Accesos a datos clínicos y cambios del modelo.'],
+        ] as $tarjeta)
+        <a href="{{ route($tarjeta['ruta']) }}" class="block">
+            <x-tarjeta class="h-full hover:bg-gg-papel transition-colors duration-100">
+                <p class="font-display text-md font-medium text-gg-tinta">{{ $tarjeta['titulo'] }}</p>
+                <p class="text-2xs text-gg-tinta-suave mt-1">{{ $tarjeta['texto'] }}</p>
             </x-tarjeta>
         </a>
-        <x-tarjeta class="flex flex-col justify-center">
-            <p class="text-sm font-medium text-gg-tinta">Gestión del modelo predictivo</p>
-            <p class="text-2xs text-gg-tinta-suave mt-1">
-                Versionado de <code class="font-mono">versiones_modelo</code> — pendiente de sprint posterior.
-            </p>
-        </x-tarjeta>
+        @endforeach
     </div>
 
 </x-layouts.profesional>

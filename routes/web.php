@@ -1,16 +1,21 @@
 <?php
 
 use App\Http\Controllers\AlertaController;
+use App\Http\Controllers\AuditoriaController;
 use App\Http\Controllers\EncuestaController;
 use App\Http\Controllers\EstudianteController;
 use App\Http\Controllers\EstudianteInicioController;
 use App\Http\Controllers\HistorialController;
+use App\Http\Controllers\MisDatosController;
+use App\Http\Controllers\ModeloController;
 use App\Http\Controllers\PanelController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\ResultadoController;
 use App\Http\Controllers\SeguimientoController;
+use App\Http\Controllers\UsabilidadController;
 use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\ValidacionController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -50,6 +55,14 @@ Route::middleware(['auth', 'consentimiento', 'role:estudiante'])->group(function
     // HU-013: actualización del perfil sociodemográfico del estudiante
     Route::get('/perfil', [PerfilController::class, 'edit'])->name('perfil.edit');
     Route::put('/perfil', [PerfilController::class, 'update'])->name('perfil.update');
+
+    // Ley 1581 de 2012: derechos del titular (conocer, saber el uso dado, copia)
+    Route::get('/mis-datos', [MisDatosController::class, 'show'])->name('mis-datos.show');
+    Route::get('/mis-datos/descargar', [MisDatosController::class, 'descargar'])->name('mis-datos.descargar');
+
+    // Sprint 6: cuestionario SUS de la prueba piloto (objetivo 1.3.2.4)
+    Route::get('/usabilidad', [UsabilidadController::class, 'show'])->name('usabilidad.show');
+    Route::post('/usabilidad', [UsabilidadController::class, 'store'])->name('usabilidad.store');
 
     // Captura y persistencia de encuestas (HU-004, HU-005, HU-006)
     Route::get('/encuesta', [EncuestaController::class, 'iniciar'])->name('encuesta.iniciar');
@@ -111,11 +124,25 @@ Route::middleware(['auth', 'consentimiento', 'role:profesional_salud|admin'])
     });
 
 // Área de administración
-Route::middleware(['auth', 'consentimiento', 'role:admin'])->group(function () {
-    Route::get('/admin', function () {
-        return view('admin.inicio');
-    })->name('admin.inicio');
-});
+Route::middleware(['auth', 'consentimiento', 'role:admin'])
+    ->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/', fn () => view('admin.inicio'))->name('inicio');
+
+        // HU-026: gestión de versiones del modelo predictivo
+        Route::middleware('permission:gestionar_versiones_modelo')->group(function () {
+            Route::get('/modelos', [ModeloController::class, 'index'])->name('modelos.index');
+            Route::post('/modelos', [ModeloController::class, 'store'])->name('modelos.store');
+            Route::get('/modelos/{version}', [ModeloController::class, 'show'])->name('modelos.show');
+            Route::post('/modelos/{version}/activar', [ModeloController::class, 'activar'])->name('modelos.activar');
+        });
+
+        // Ley 1581: consulta del registro de auditoría
+        Route::get('/auditoria', [AuditoriaController::class, 'index'])->name('auditoria.index');
+
+        // Sprint 6: indicadores de validación del piloto (objetivo 1.3.2.4)
+        Route::get('/validacion', [ValidacionController::class, 'index'])->name('validacion.index');
+        Route::get('/validacion/sus.csv', [ValidacionController::class, 'exportarSus'])->name('validacion.exportarSus');
+    });
 
 // Galería de componentes — solo entorno local, evidencia de Sprint 0
 if (app()->environment('local')) {

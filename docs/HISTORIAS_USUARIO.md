@@ -3,7 +3,22 @@
 > Extraído textualmente del documento de tesis (Google Doc) el 2026-09-01.
 > Fuente: https://docs.google.com/document/d/1mGfRjs47zWLOUASyGuUv1gS22fBELAmgnA7maNaZ80k
 >
-> El documento solo desarrolla la "Especificación de historia de usuario" (con
+> Recotejado contra el documento fuente el 2026-09-15: el plan de sprints
+> (§2.4.1.3.6, Tabla 32) y el Product Backlog (Tabla 31) no cambiaron —
+> siguen siendo la fuente correcta y coinciden con CLAUDE.md §8. Se
+> actualizaron los estados de HU-007, HU-012 y HU-013 (ver nota 3): estaban
+> marcados como pendientes porque este archivo documentó el diagnóstico del
+> empalme *antes* de que, en ese mismo commit, se construyeran las HU reales.
+>
+> Recotejado el 2026-09-29: el documento **ya incluye el Sprint 5 completo**
+> (§2.4.1.4.5, Tablas 62–75) con especificación y criterios de aceptación de
+> HU-014 a HU-019 y HU-022 a HU-024. Esos criterios coinciden con los que se
+> infirieron en `docs/AVANCE_PROYECTO.md` §11.3 (el equipo los redactó a partir
+> del repositorio), así que la nota 5 queda resuelta. El Sprint 6 y la HU-026
+> siguen sin capítulo en el documento: su redacción propuesta está en el
+> complemento de la monografía (`docs/monografia/`).
+>
+> *Texto histórico (2026-09-15):* el documento solo desarrollaba la "Especificación de historia de usuario" (con
 > criterios de aceptación Dado/Cuando/Entonces) hasta el **Sprint 4** inclusive.
 > Las HU del backlog completo (tabla única, §"Product Backlog") sí existen para
 > las 25 historias, pero HU-014 a HU-019 y HU-022 a HU-024 (Sprint 5) **no
@@ -33,7 +48,7 @@ Como estudiante quiero registrarme en el aplicativo web ingresando los datos bá
 
 ## HU-002 — Inicio de sesión
 
-**Estado en el proyecto:** Completada (Sprint 1).
+**Estado en el proyecto:** Completada (Sprint 1). ⚠️ El criterio 3 («mostrar un mensaje informativo» a una cuenta deshabilitada) contradice el criterio 2 de HU-019 del mismo documento («el mismo mensaje genérico, sin revelar que la cuenta fue desactivada»). El código sigue a HU-019 (`LoginRequest::authenticate`, mensaje `auth.failed`), que es la opción segura; se propone corregir el texto de HU-002 en la tesis.
 
 Como estudiante quiero iniciar sesión con mis credenciales para acceder al sistema de forma segura.
 
@@ -129,7 +144,7 @@ Como estudiante quiero que mis respuestas queden almacenadas en el sistema para 
 
 ## HU-007 — Resumen de respuestas registradas
 
-**Estado en el proyecto:** ⚠️ Ver nota de empalme — lo implementado en Sprint 3 bajo la etiqueta "HU-007" (`/historial`, `HistorialController`) corresponde en realidad al texto de **HU-011** del documento fuente ("Consulta del historial de registros"), no a este.
+**Estado en el proyecto:** ✅ Completada (Sprint 3, corregida en el mismo commit que detectó el empalme — `EstudianteInicioController`/`/inicio`, CLAUDE.md §11). Lo que originalmente estaba etiquetado como "HU-007" (`/historial`, `HistorialController`) correspondía en realidad al texto de **HU-011** ("Consulta del historial de registros"); ya se separaron ambas rutas.
 
 Como estudiante quiero ver un resumen de mis últimas respuestas registradas para tener una visión general de mi estado digestivo.
 
@@ -169,7 +184,7 @@ Como estudiante quiero visualizar una gráfica sencilla de mis registros a lo la
 
 ## HU-009 — Clasificación del nivel de riesgo gastrointestinal
 
-**Estado en el proyecto:** Sprint 4 (`~`) — pipeline y `PredictorService`/`ExplicabilidadService` funcionan de punta a punta, pero sobre datos sintéticos; bloqueante de la regla clínica de Y sigue abierto.
+**Estado en el proyecto:** Completada (Sprint 4) con modelo **provisional**: el flujo funciona de punta a punta, pero la versión activa se entrenó sobre datos sintéticos con la regla Y provisional. El reentrenamiento con los 347 registros reales depende de la regla clínica de Enfermería (bloqueante abierto).
 
 Como estudiante quiero recibir una clasificación de nivel de riesgo gastrointestinal generada por el modelo predictivo para orientar mi autocuidado.
 
@@ -191,7 +206,7 @@ Como estudiante quiero recibir una clasificación de nivel de riesgo gastrointes
 
 ## HU-010 — Proyección de salud gastrointestinal
 
-**Estado en el proyecto:** ⚠️ Ver nota de empalme — CLAUDE.md §8 registra una corrección de alcance deliberada: se implementó como **evolución histórica**, no como proyección hacia el futuro, porque el modelo es transversal y no puede proyectar. El texto original de la HU sí pide explícitamente una proyección con "datos históricos vs. datos proyectados" diferenciados visualmente.
+**Estado en el proyecto:** Completada con alcance ajustado (Sprint 4): evolución histórica de las probabilidades de riesgo, no proyección futura. El ajuste está justificado en la propia tesis (§2.4.1.4.4.1, «Ajuste de alcance de la HU-010»).
 
 Como estudiante quiero visualizar una proyección de mi salud gastrointestinal a lo largo del tiempo para anticipar posibles cambios en mi condición digestiva.
 
@@ -214,7 +229,7 @@ Como estudiante quiero visualizar una proyección de mi salud gastrointestinal a
 
 ## HU-011 — Consulta del historial de registros
 
-**Estado en el proyecto:** ⚠️ Ver nota de empalme — lo que hoy corre bajo la etiqueta "HU-011" en Sprint 3 (grid de 6 síntomas con frecuencia/temporalidad) no es esto. Esta HU (historial completo cronológico con detalle por registro) es lo que realmente se construyó en `/historial` y se etiquetó como HU-007.
+**Estado en el proyecto:** ✅ Completada (Sprint 3, `/historial`, `HistorialController`) — ver nota 3.
 
 Como estudiante quiero consultar el historial de mis registros anteriores para revisar mi evolución y los datos que he ingresado previamente.
 
@@ -233,7 +248,7 @@ Como estudiante quiero consultar el historial de mis registros anteriores para r
 
 ## HU-012 — Alertas internas de riesgo
 
-**Estado en el proyecto:** ❌ No implementada. Lo etiquetado como "HU-011/HU-012" en Sprint 3 es el grid de síntomas (`seguimientoSintomas()`), que no corresponde a este texto. La tabla `alertas` ya existe en el modelo de datos (CLAUDE.md §5: `id, user_id, evaluacion_id, tipo, mensaje, leida_at`) pero no hay controlador, vista ni lógica de generación/lectura de alertas todavía.
+**Estado en el proyecto:** ✅ Completada (Sprint 3, corregida en el mismo commit que detectó el empalme — `AlertaController`/`AlertaService`, rutas `/alertas` y `/alertas/{alerta}/leer`, CLAUDE.md §11). Lo que originalmente estaba etiquetado como "HU-011/HU-012" en Sprint 3 era el grid de síntomas (`seguimientoSintomas()`), que no correspondía a este texto; ya se construyó la funcionalidad real de alertas enganchada al resultado de `ResultadoController`.
 
 Como estudiante quiero recibir una alerta dentro del aplicativo cuando mi nivel de riesgo cambie para tomar decisiones oportunas sobre mi salud.
 
@@ -254,7 +269,7 @@ Como estudiante quiero recibir una alerta dentro del aplicativo cuando mi nivel 
 
 ## HU-013 — Actualización del perfil del estudiante
 
-**Estado en el proyecto:** ❌ No implementada. Lo etiquetado como "HU-013" en Sprint 3 (`evolucionDolor()`, gráfica de dolor abdominal P13) **no corresponde a ninguna HU del documento fuente** — es una funcionalidad inventada que no está en el backlog. La actualización real de perfil (género/edad/programa/semestre, con separación explícita frente a los registros históricos) sigue sin construirse.
+**Estado en el proyecto:** ✅ Completada (Sprint 3, corregida en el mismo commit que detectó el empalme — `PerfilController`, rutas `/perfil` GET/PUT, CLAUDE.md §11). Lo que originalmente estaba etiquetado como "HU-013" en Sprint 3 (`evolucionDolor()`, gráfica de dolor abdominal P13) **no correspondía a ninguna HU del documento fuente** — era funcionalidad complementaria sin numerar, no la actualización de perfil; ambas cosas coexisten ahora por separado.
 
 Como estudiante quiero actualizar mis datos de perfil para mantener mi información personal y clínica vigente.
 
@@ -276,7 +291,7 @@ Como estudiante quiero actualizar mis datos de perfil para mantener mi informaci
 
 ## HU-014 — Consulta individual de estudiante
 
-**Estado en el proyecto:** Implementada (Sprint 5) — criterios inferidos y detalle en docs/AVANCE_PROYECTO.md §11.3.
+**Estado en el proyecto:** ✅ Completada (Sprint 5). Criterios oficiales en la tesis, §2.4.1.4.5.1 (Tablas 63–71); coinciden con lo implementado.
 
 Como profesional de salud quiero buscar y consultar el registro individual de un estudiante para hacer seguimiento a su estado digestivo.
 
@@ -288,7 +303,7 @@ Como profesional de salud quiero buscar y consultar el registro individual de un
 
 ## HU-015 — Listado general de estudiantes
 
-**Estado en el proyecto:** Implementada (Sprint 5) — ver docs/AVANCE_PROYECTO.md §11.3.
+**Estado en el proyecto:** ✅ Completada (Sprint 5). Criterios oficiales en la tesis, §2.4.1.4.5.1 (Tablas 63–71); coinciden con lo implementado.
 
 Como profesional de salud quiero ver el listado general de todos los estudiantes registrados para tener una visión global del grupo monitoreado.
 
@@ -300,7 +315,7 @@ Como profesional de salud quiero ver el listado general de todos los estudiantes
 
 ## HU-016 — Visualización del nivel de riesgo por estudiante
 
-**Estado en el proyecto:** Implementada (Sprint 5), sin pantalla propia — resuelta dentro de HU-014/015, ver docs/AVANCE_PROYECTO.md §11.2 y §11.3.
+**Estado en el proyecto:** ✅ Completada (Sprint 5). Criterios oficiales en la tesis, §2.4.1.4.5.1 (Tablas 63–71); coinciden con lo implementado.
 
 Como profesional de salud quiero visualizar el nivel de riesgo asignado a cada estudiante para identificar casos que requieran atención prioritaria.
 
@@ -312,7 +327,7 @@ Como profesional de salud quiero visualizar el nivel de riesgo asignado a cada e
 
 ## HU-017 — Creación de usuarios estudiantes
 
-**Estado en el proyecto:** Implementada (Sprint 5) — ver docs/AVANCE_PROYECTO.md §11.3.
+**Estado en el proyecto:** ✅ Completada (Sprint 5). Criterios oficiales en la tesis, §2.4.1.4.5.1 (Tablas 63–71); coinciden con lo implementado.
 
 Como profesional de salud quiero crear nuevos usuarios estudiantes en el sistema para incorporarlos al proceso de monitoreo.
 
@@ -324,7 +339,7 @@ Como profesional de salud quiero crear nuevos usuarios estudiantes en el sistema
 
 ## HU-018 — Edición de información de usuario
 
-**Estado en el proyecto:** Implementada (Sprint 5) — ver docs/AVANCE_PROYECTO.md §11.3.
+**Estado en el proyecto:** ✅ Completada (Sprint 5). Criterios oficiales en la tesis, §2.4.1.4.5.1 (Tablas 63–71); coinciden con lo implementado.
 
 Como profesional de salud quiero editar la información de un usuario registrado para corregir o actualizar sus datos cuando sea necesario.
 
@@ -336,7 +351,7 @@ Como profesional de salud quiero editar la información de un usuario registrado
 
 ## HU-019 — Desactivación de cuenta de usuario
 
-**Estado en el proyecto:** Implementada (Sprint 5), incluye el primer bloqueo real de login por cuenta desactivada — ver docs/AVANCE_PROYECTO.md §11.3. Relacionada con la regla dura de CLAUDE.md §5: "desactivar cuenta ≠ eliminar historial" (SoftDeletes), ya prevista en el modelo de datos.
+**Estado en el proyecto:** ✅ Completada (Sprint 5). Criterios oficiales en la tesis, §2.4.1.4.5.1 (Tablas 63–71); coinciden con lo implementado.
 
 Como profesional de salud quiero desactivar la cuenta de un usuario para suspender su acceso sin eliminar su historial clínico.
 
@@ -383,7 +398,7 @@ Como profesional de salud quiero restringir el acceso a módulos sensibles para 
 
 ## HU-022 — Reporte del comportamiento general de niveles de riesgo
 
-**Estado en el proyecto:** Implementada (Sprint 5) — ver docs/AVANCE_PROYECTO.md §11.3.
+**Estado en el proyecto:** ✅ Completada (Sprint 5). Criterios oficiales en la tesis, §2.4.1.4.5.1 (Tablas 63–71); coinciden con lo implementado.
 
 Como profesional de salud quiero visualizar un reporte del comportamiento general de los niveles de riesgo de los estudiantes para identificar patrones en la población monitoreada.
 
@@ -395,7 +410,7 @@ Como profesional de salud quiero visualizar un reporte del comportamiento genera
 
 ## HU-023 — Filtrado de reportes por fecha o nivel de riesgo
 
-**Estado en el proyecto:** Implementada (Sprint 5) — ver docs/AVANCE_PROYECTO.md §11.3.
+**Estado en el proyecto:** ✅ Completada (Sprint 5). Criterios oficiales en la tesis, §2.4.1.4.5.1 (Tablas 63–71); coinciden con lo implementado.
 
 Como profesional de salud quiero filtrar los reportes por fecha o nivel de riesgo para segmentar el análisis según mis necesidades.
 
@@ -407,7 +422,7 @@ Como profesional de salud quiero filtrar los reportes por fecha o nivel de riesg
 
 ## HU-024 — Exportación de reportes (PDF / Excel)
 
-**Estado en el proyecto:** Implementada (Sprint 5) — ver docs/AVANCE_PROYECTO.md §11.3. CLAUDE.md §2 ya fija las librerías a usar: `barryvdh/laravel-dompdf` + `maatwebsite/excel`.
+**Estado en el proyecto:** ✅ Completada (Sprint 5). Criterios oficiales en la tesis, §2.4.1.4.5.1 (Tablas 63–71); coinciden con lo implementado.
 
 Como profesional de salud quiero exportar los reportes generados en formato PDF o Excel para compartirlos con otros actores institucionales.
 
@@ -433,20 +448,43 @@ Como usuario quiero cerrar sesión para proteger mis datos personales y clínico
 
 ---
 
+## HU-026 — Gestión de versiones del modelo predictivo
+
+> ⚠️ **No proviene del documento de tesis.** El rol `admin` (CLAUDE.md §4: "todo lo anterior + gestión de versiones del modelo predictivo") no tiene ninguna HU que lo respalde en las 25 del backlog original — se buscó "administrador" en todo el documento y no aparece ni una vez. Esta HU se redacta para darle trazabilidad a una capacidad que el equipo de Ingeniería ya decidió incluir en el diseño de roles y en el modelo de datos (`versiones_modelo`), pero que aún no está construida ni fue puntuada por el comité en Aporte/Urgencia/Complejidad. Antes de implementarla, el equipo debe decidir si se presenta así (adenda al backlog) o si se prefiere documentarla directamente como alcance añadido en la monografía sin pasar por HU.
+
+**Estado en el proyecto:** ✅ Implementada (Sprint 6, 2026-09-29) — `ModeloController` + `ImportadorModeloService`, rutas `/admin/modelos` (listado, carga del JSON, detalle con métricas/coeficientes/matriz de confusión, activación). Los 8 criterios tienen prueba en `tests/Feature/Sprint6/HU026_GestionVersionesModeloTest.php`. `VersionModeloSeeder` pasa por el mismo importador. Sigue pendiente que el comité la incorpore al backlog oficial (redacción propuesta en el complemento de la monografía).
+
+Como administrador quiero gestionar las versiones del modelo predictivo — registrar una nueva versión entrenada, consultar sus métricas y decidir cuál queda activa — para poder actualizar el modelo de clasificación de riesgo sin interrumpir el servicio y mantener trazabilidad de qué versión produjo cada evaluación.
+
+**Actor:** Administrador · **Prioridad:** Media (estimada, sin puntuación del comité) · **Complejidad:** Media
+
+**Criterios de aceptación:**
+1. Cuando el administrador acceda al módulo de gestión de modelos, entonces el sistema debe mostrar el listado de versiones registradas con su fecha de entrenamiento, sus métricas de desempeño y su estado (activa/inactiva).
+2. Cuando el administrador registre una nueva versión a partir del artefacto exportado por el pipeline de entrenamiento (`ml/exportar_modelo.py`), entonces el sistema debe almacenar sus coeficientes, métricas y mapa de variables sin afectar la versión actualmente activa.
+3. Cuando el administrador active una versión del modelo, entonces el sistema debe marcarla como activa y desactivar automáticamente cualquier otra versión previamente activa, garantizando que exista como máximo una versión activa a la vez.
+4. Cuando exista una versión activa, entonces el componente predictivo (`PredictorService`) debe usar exclusivamente esa versión para las evaluaciones nuevas, sin requerir un nuevo despliegue de la aplicación.
+5. Cuando se genere una evaluación de riesgo, entonces debe quedar asociada al identificador de la versión del modelo que la produjo, conforme a la regla de trazabilidad de CLAUDE.md §5 y al dominio "análisis estadístico" de PROBAST+AI.
+6. Cuando el administrador intente activar una versión con metadatos incompletos o corruptos, entonces el sistema debe rechazar la activación e informar el motivo, sin dejar la aplicación sin una versión activa válida.
+7. Cuando un usuario sin rol de administrador intente acceder al módulo de gestión de versiones, entonces el sistema debe denegar el acceso.
+8. Cuando el administrador consulte el detalle de una versión, entonces el sistema debe mostrar sus coeficientes y métricas de forma legible, sin exponer información de participantes individuales.
+
+---
+
 ## Notas de extracción
 
-1. **El documento fuente solo tiene 25 HU (HU-001 a HU-025)**, agrupadas en 6 sprints según la tabla real del backlog (línea ~2499 del documento): Sprint 1 = HU-001,002,003,020,021,025; Sprint 2 = HU-004,005,006; Sprint 3 = HU-007,008,011,012,013; Sprint 4 = HU-009,010; Sprint 5 = HU-014,015,016,017,018,019,022,023,024. No hay HU-026 en adelante.
+1. **El documento fuente solo tiene 25 HU (HU-001 a HU-025)**, agrupadas en 6 sprints según la tabla real del backlog (línea ~2499 del documento): Sprint 1 = HU-001,002,003,020,021,025; Sprint 2 = HU-004,005,006; Sprint 3 = HU-007,008,011,012,013; Sprint 4 = HU-009,010; Sprint 5 = HU-014,015,016,017,018,019,022,023,024. **HU-026 (gestión de versiones del modelo) se añadió el 2026-09-15 y no proviene del documento** — ver la nota de origen en esa sección.
 
 2. **Sección obsoleta detectada dentro del propio documento (§1.5.5.4):** una narrativa temprana de planeación describe "cinco sprints" con nombres genéricos (Sprint 5 ahí se llama "Pruebas integrales y despliegue"), que **no coincide** con la tabla real de backlog usada en la ejecución (§2.4.1.3, 6 sprints, Sprint 5 = "Panel institucional y reportes", Sprint 6 = pruebas y despliegue). Es contenido temprano/descartado del documento; la tabla de backlog y CLAUDE.md §8 son la fuente correcta y ya coinciden entre sí.
 
-3. **Discrepancia importante para el empalme — Sprint 3 quedó mal mapeado contra el documento real:**
-   - Lo implementado como **"HU-007"** (`/historial`, lista completa cronológica) es en realidad el texto de **HU-011** ("Consulta del historial de registros").
-   - Lo implementado como **"HU-011/HU-012"** (grid de 6 síntomas con frecuencia/temporalidad) no corresponde al texto de ninguna de las dos — ni HU-011 (que es el historial completo) ni HU-012 (que son alertas internas por cambio de nivel de riesgo, tabla `alertas` ya en el modelo de datos).
-   - Lo implementado como **"HU-013"** (evolución del dolor abdominal, gráfica P13) **no existe como HU en el documento** — es contenido inventado. La HU-013 real es "Actualización del perfil del estudiante" y no está construida.
-   - HU-007 real ("Resumen de respuestas registradas" — vista simplificada de los últimos registros, distinta de un historial completo) tampoco está construida.
-   - HU-012 real (alertas internas de riesgo) tampoco está construida, pese a que la tabla `alertas` ya existe en el esquema.
-   - Esto no invalida el trabajo de Sprint 3 (la gráfica de evolución de riesgo, HU-008, sí coincide, y el grid de síntomas / evolución de dolor son funcionalidad útil), pero si el jurado revisa el documento de tesis contra el código, encontrará que las etiquetas HU no calzan. Se recomienda decidir explícitamente antes de sustentar: (a) renombrar/documentar la correspondencia real en la monografía, o (b) construir las HU-007, 011, 012, 013 reales como trabajo adicional y mantener lo ya hecho como funcionalidad extra sin numerar. Esta decisión no se tomó en esta extracción — es una decisión de producto que le corresponde al equipo.
+3. **Discrepancia detectada y corregida — Sprint 3 estaba mal mapeado contra el documento real (resuelto en el mismo commit que la detectó, `dd75b4a`):**
+   - Lo que originalmente estaba etiquetado como **"HU-007"** (`/historial`, lista completa cronológica) era en realidad el texto de **HU-011** ("Consulta del historial de registros") — se corrigió el rótulo y el docblock, sin tocar la lógica.
+   - Lo que originalmente estaba etiquetado como **"HU-011/HU-012"** (grid de 6 síntomas con frecuencia/temporalidad) no correspondía al texto de ninguna de las dos — se dejó como funcionalidad complementaria sin numerar (`SeguimientoSintomasTest`).
+   - Lo que originalmente estaba etiquetado como **"HU-013"** (evolución del dolor abdominal, gráfica P13) tampoco correspondía a HU alguna del documento — se dejó igualmente sin numerar (`EvolucionDolorTest`).
+   - Las HU-007, HU-011, HU-012 y HU-013 **reales** se construyeron aparte: `/inicio` (HU-007), `/historial` (HU-011, ya existía y solo cambió de rótulo), `/alertas` + `AlertaService` (HU-012) y `/perfil` + `PerfilController` (HU-013). Ver el estado "✅ Completada" en cada sección de arriba.
+   - Con esto, las 5 HU reales del Sprint 3 (HU-007/008/011/012/013) y la funcionalidad complementaria sin numerar (grid de síntomas, evolución de dolor) coexisten sin conflicto de rótulos.
 
 4. **HU-010** sí coincide en espíritu con la corrección de alcance que ya documenta CLAUDE.md §8 (de "proyección" a "evolución histórica"): el propio texto de la HU pide que el resultado se presente como "estimación", no como certeza, lo cual respalda (no contradice) la decisión ya tomada.
 
-5. **HU-014 a HU-019 y HU-022 a HU-024 (todo el Sprint 5) no tienen criterios de aceptación redactados en el documento fuente** — solo la descripción de una línea en la tabla de backlog (Aporte/Urgencia/Prioridad). Antes de implementar Sprint 5 con el mismo rigor que los sprints anteriores, hace falta que alguien (Product Owner / asesora) redacte los criterios Dado/Cuando/Entonces para estas 9 HU, igual que se hizo para las 16 ya desarrolladas — de lo contrario el alcance de Sprint 5 tendría que inferirse de cero, con el mismo riesgo de desalineación que ya ocurrió en Sprint 3.
+5. **[Resuelta el 2026-09-29 — el documento ya tiene los criterios, Tablas 63–71.]** *Nota original:* **HU-014 a HU-019 y HU-022 a HU-024 (todo el Sprint 5) no tenían criterios de aceptación redactados en el documento fuente** — solo la descripción de una línea en la tabla de backlog (Aporte/Urgencia/Prioridad). Antes de implementar Sprint 5 con el mismo rigor que los sprints anteriores, hace falta que alguien (Product Owner / asesora) redacte los criterios Dado/Cuando/Entonces para estas 9 HU, igual que se hizo para las 16 ya desarrolladas — de lo contrario el alcance de Sprint 5 tendría que inferirse de cero, con el mismo riesgo de desalineación que ya ocurrió en Sprint 3.
+
+6. **Funcionalidades del Sprint 6 sin HU numerada** (2026-09-29). Responden a exigencias de la tesis que no están escritas como HU: el objetivo 1.3.2.4 (validar la estrategia computacional), las pruebas de usabilidad prometidas en §1.5.5.5 y el marco legal §1.4.5. Son: cuestionario SUS e indicadores de validación (`/usabilidad`, `/admin/validacion`), derechos del titular (`/mis-datos`), visor de auditoría (`/admin/auditoria`), cabeceras de seguridad y HTTPS forzado, y los comandos `gutguardian:crear-usuario` y `gutguardian:verificar-despliegue`. Se documentan en el capítulo del Sprint 6 propuesto para la monografía, no como HU nuevas.

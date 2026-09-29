@@ -39,6 +39,18 @@ class PredictorService
     }
 
     /**
+     * Nombres de las variables que este servicio sabe construir. Lo usa
+     * ImportadorModeloService (HU-026) para rechazar, antes de activarla, una
+     * versión del modelo que exija una variable que la aplicación no calcula.
+     *
+     * @return list<string>
+     */
+    public function variablesSoportadas(): array
+    {
+        return array_keys($this->calcularVariablesDisponibles(collect()));
+    }
+
+    /**
      * @return array<string, float> vector de predictores en el orden declarado por el modelo.
      */
     public function armarVector(Diligenciamiento $diligenciamiento, VersionModelo $version): array

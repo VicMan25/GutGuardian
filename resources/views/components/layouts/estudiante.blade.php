@@ -73,6 +73,7 @@
                 ['ruta' => 'seguimiento.show', 'etiqueta' => 'Seguimiento'],
                 ['ruta' => 'alertas.index', 'etiqueta' => 'Alertas'],
                 ['ruta' => 'perfil.edit', 'etiqueta' => 'Perfil'],
+                ['ruta' => 'mis-datos.show', 'etiqueta' => 'Mis datos'],
             ] as $item)
                 @php $activo = request()->routeIs($item['ruta']); @endphp
                 <a

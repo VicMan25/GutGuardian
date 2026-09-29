@@ -3,13 +3,14 @@
 namespace Database\Seeders;
 
 use App\Modules\Analitica\Models\VersionModelo;
+use App\Modules\Analitica\Services\ImportadorModeloService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\File;
 use RuntimeException;
 
 class VersionModeloSeeder extends Seeder
 {
-    public function run(): void
+    public function run(ImportadorModeloService $importador): void
     {
         $ruta = storage_path('app/models/modelo_v1.json');
 
@@ -28,25 +29,7 @@ class VersionModeloSeeder extends Seeder
             return;
         }
 
-        VersionModelo::where('activo', true)->update(['activo' => false]);
-
-        VersionModelo::create([
-            'nombre' => $datos['nombre'],
-            'version' => $datos['version'],
-            'entrenado_at' => $datos['entrenado_at'],
-            'activo' => true,
-            'coeficientes' => $datos['coeficientes'],
-            'metricas' => $datos['metricas'],
-            // mapa_variables agrupa todo lo que PredictorService/ExplicabilidadService
-            // necesitan además de los coeficientes: orden fijo de variables, categoría
-            // base del MNLogit, etiquetas en lenguaje llano y limitaciones a mostrar.
-            'mapa_variables' => [
-                'orden_variables' => $datos['orden_variables'],
-                'categoria_base' => $datos['categoria_base'],
-                'categorias' => $datos['categorias'],
-                'variables' => $datos['mapa_variables'],
-                'limitaciones' => $datos['limitaciones'],
-            ],
-        ]);
+        // Misma validación que la carga desde /admin/modelos (HU-026).
+        $importador->importar($datos, activar: true);
     }
 }

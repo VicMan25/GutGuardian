@@ -261,10 +261,9 @@ histórica** de los registros del estudiante y ajustar la redacción en la monog
       `PredictorService`/`ExplicabilidadService` en Laravel implementados y con tests Pest
       (casos conocidos de softmax). Corre de punta a punta sobre datos **sintéticos**; no
       reemplaza el modelo real. Ver bloqueante abajo.
-- [x] Sprint 5 — panel institucional y reportes (HU-014/015/016/017/018/019/022/023/024,
-      **alcance inferido y documentado** en `docs/AVANCE_PROYECTO.md` — el documento de tesis
-      solo tiene la narrativa de una línea de estas 9 HU en el backlog, sin criterios de
-      aceptación redactados): `EstudianteController` (consulta individual y listado con
+- [x] Sprint 5 — panel institucional y reportes (HU-014/015/016/017/018/019/022/023/024;
+      el alcance se infirió en `docs/AVANCE_PROYECTO.md` y la tesis ya lo formalizó en
+      §2.4.1.4.5, Tablas 62–75, con los mismos criterios): `EstudianteController` (consulta individual y listado con
       búsqueda, HU-014/015/016 — reutiliza `SeguimientoService` de Sprint 3),
       `UsuarioController` (crear/editar/desactivar-reactivar cuentas de estudiantes,
       HU-017/018/019 — acotado a rol `estudiante`), `ReporteController` +
@@ -280,13 +279,29 @@ histórica** de los registros del estudiante y ajustar la redacción en la monog
       exportación de reportes— (Ley 1581); `aviso-no-diagnostico` agregado a las
       vistas de ficha y de reportes del panel (Resolución 3100); HU-016 con test
       propio. Suite: 180 tests.
-- [ ] Sprint 6
+- [x] Sprint 6 (software) — HU-026 gestión de versiones del modelo (`/admin/modelos`,
+      `ImportadorModeloService`, también usado por `VersionModeloSeeder`); validación del
+      objetivo 1.3.2.4: cuestionario SUS (`/usabilidad`), tasa de errores por envío de sección
+      y tiempo de diligenciamiento, resumidos en `/admin/validacion` con exportación CSV
+      anonimizada; Ley 1581: `/mis-datos` (datos, consentimiento, quién consultó, copia PDF) y
+      visor `/admin/auditoria`; seguridad: `CabecerasSeguridad` y HTTPS forzado en producción;
+      comandos `gutguardian:crear-usuario` y `gutguardian:verificar-despliegue`; tutorial
+      `docs/DESPLIEGUE.md`. Corrigió además dos defectos que impedían dibujar **todas** las
+      gráficas (seguimiento, ficha del panel y reporte): `@json` dentro de `x-init="…"` emitía
+      comillas dobles crudas que cortaban el atributo (ahora `Js::from`), y `BarController` no
+      estaba registrado en `app.js`. Comando solo-desarrollo `gutguardian:simular-seguimiento`
+      (usa `EvaluacionService`, extraído de `ResultadoController`). Suite: 230 tests. **Pendiente de campo:** ejecutar la prueba piloto
+      con estudiantes y desplegar en el servidor institucional.
 - [ ] **BLOQUEANTE (sigue abierto):** regla operativa real de la variable dependiente Y
       (requiere a Enfermería). `ml/comun.py::derivar_categoria_riesgo` implementa una regla
       PLACEHOLDER documentada solo para poder ejercitar el pipeline de ingeniería — no usar
       para tamizaje real.
-- [ ] Dataset de 347 registros exportado y limpio para entrenamiento (el pipeline actual
-      corre sobre `ml/generar_dataset_sintetico.py`, no sobre datos reales)
+- [~] Dataset de 347 registros: ETL listo (`ml/etl_datos_reales.py` → `ml/datos/dataset_real.csv`,
+      ignorado por git). La versión activa del modelo (v1.0) sigue siendo la entrenada con datos
+      sintéticos; reentrenar con los datos reales depende de la regla Y.
+- [ ] Monografía: el complemento con los cambios resaltados está en `docs/monografia/`
+      (Sprint 6, HU-026, objetivo 1.3.2.4, conclusiones y recomendaciones de Ingeniería,
+      marcadores pendientes del documento).
 
 ---
 

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Modules\Auth\Models\Consentimiento;
 use App\Modules\Encuestas\Models\Diligenciamiento;
+use App\Modules\Encuestas\Models\EvaluacionUsabilidad;
 use App\Modules\Panel\Models\Alerta;
 use App\Modules\Usuarios\Models\Perfil;
 use Database\Factories\UserFactory;
@@ -72,5 +73,10 @@ class User extends Authenticatable
     public function consentimientos(): HasMany
     {
         return $this->hasMany(Consentimiento::class);
+    }
+
+    public function evaluacionUsabilidad(): HasOne
+    {
+        return $this->hasOne(EvaluacionUsabilidad::class);
     }
 }

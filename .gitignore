@@ -42,3 +42,8 @@ docs/*.xlsx
 # ------------------------------------------------------------
 ml/__pycache__/
 *.pyc
+
+# Monografía: .docx/.pdf de la tesis pesan decenas de MB; se versionan solo las capturas.
+docs/monografia/*.docx
+docs/monografia/*.pdf
+docs/monografia/~$*

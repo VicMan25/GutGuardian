@@ -1,4 +1,4 @@
-# Avance de GutGuardián — Sprints 2, 3 y 4
+# Avance de GutGuardián — Sprints 2 a 6
 
 > Documento de trabajo para el sustento del trabajo de grado. Explica **qué** se
 > construyó, **en qué archivos**, **por qué** se tomó cada decisión y **cómo**
@@ -562,7 +562,23 @@ tests/Feature/
 
 ---
 
-## 9. Pendientes abiertos (a la fecha de este documento)
+## 9. Pendientes abiertos
+
+> Actualizado el 2026-09-29. El texto original de esta sección (Sprint 4) decía
+> que el dataset real y los Sprints 5 y 6 estaban pendientes; ya no es así.
+
+1. **Bloqueante — regla clínica de derivación de Y**, pendiente del equipo de
+   Enfermería (sección 5 de este documento). Sigue abierto.
+2. ~~Dataset real de 347 registros~~ — ETL construido (`ml/etl_datos_reales.py`,
+   commit `c6abfe9`); produce `ml/datos/dataset_real.csv` (ignorado por git).
+   Falta entrenar con él, lo que depende del punto 1.
+3. ~~Sprint 5~~ — completado (§11). ~~Sprint 6~~ — componente de software
+   completado (§12); faltan las actividades de campo: prueba piloto con
+   estudiantes y despliegue en el servidor institucional.
+4. Reentrenar con (1) y (2), registrar la versión desde `/admin/modelos`
+   (HU-026) y reemplazar en la monografía las métricas sintéticas de la Tabla 60.
+
+*Lista original (Sprint 4):*
 
 1. **Bloqueante — regla clínica de derivación de Y**, pendiente del equipo de
    Enfermería (sección 5 de este documento).
@@ -921,3 +937,91 @@ quedaban tres huecos:
    Nuevo `HU016_NivelRiesgoTest.php`.
 
 Suite tras el cierre de huecos: 180 tests, 438 assertions.
+
+---
+
+## 12. Sprint 6 — Pruebas integrales, validación y preparación del despliegue piloto
+
+**Lo que pide la tesis:** Tabla 32 («pruebas funcionales, pruebas integrales,
+revisión de criterios de aceptación, corrección de errores y preparación del
+entorno de despliegue piloto»), el objetivo 1.3.2.4 («validar la estrategia
+computacional») y §1.5.5.5 («pruebas de usabilidad con un grupo de
+estudiantes… tiempo de interacción promedio y tasa de errores al ingresar
+datos»; «pruebas específicas de seguridad»). El documento todavía no tiene el
+capítulo del Sprint 6; la redacción propuesta está en el complemento de la
+monografía.
+
+### 12.1 Qué se construyó
+
+| Componente | Responsabilidad | Respaldo en la tesis |
+|---|---|---|
+| `ImportadorModeloService` + `ModeloController` (`/admin/modelos`) | HU-026: registrar, validar, revisar y activar versiones del modelo sin redesplegar | Rol admin (§4 de CLAUDE.md), trazabilidad TRIPOD+AI |
+| `UsabilidadService` + `UsabilidadController` (`/usabilidad`) | Cuestionario SUS (Brooke, 1996) voluntario, una vez por estudiante, tras completar su primera encuesta | §1.5.5.5, objetivo 1.3.2.4 |
+| Registro de envíos de sección en `EncuestaController::guardar` | Tasa de errores al ingresar datos (log `usabilidad`) | §1.5.5.5 |
+| `ValidacionController` (`/admin/validacion`) | SUS (media, mediana, DE, aceptabilidad según Bangor et al., 2008, media por ítem), tiempo de diligenciamiento (mediana e IQR), tasa de errores, modelo activo; exportación CSV **anonimizada** | Objetivo 1.3.2.4 |
+| `MisDatosController` (`/mis-datos`) | Derechos del titular: ver sus datos y su consentimiento, quién consultó su información clínica, copia en PDF | Ley 1581 de 2012, art. 8 |
+| `AuditoriaController` (`/admin/auditoria`) | Consulta filtrable del log de accesos clínicos y de cambios del modelo | Ley 1581 de 2012 |
+| `CabecerasSeguridad` + `URL::forceScheme('https')` en producción | X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy, HSTS sobre HTTPS | Ley 1273 de 2009, CLAUDE.md §9 |
+| `gutguardian:crear-usuario` | Crea cuentas admin/profesional sin insertar a mano en la BD; contraseña sin eco | Despliegue piloto |
+| `gutguardian:verificar-despliegue` | Lista de chequeo previa al piloto (HTTPS, depuración, sesión, BD, instrumento, roles, modelo) | Tabla 32, Sprint 6 |
+| `docs/DESPLIEGUE.md` | Tutorial de ingreso, configuración y despliegue | Producto esperado §1.5.6 |
+
+### 12.2 Decisiones
+
+- **SUS y no un cuestionario propio:** es un instrumento estandarizado, corto
+  (10 ítems) y con puntos de corte publicados, lo que permite defender el
+  resultado ante el jurado. La redacción en español de la aplicación debe
+  cotejarse con una versión validada (p. ej. Sevilla-Gonzalez et al., 2020)
+  antes del piloto.
+- **Una respuesta SUS por estudiante:** mide la experiencia global, no la de
+  cada encuesta; además evita que un mismo usuario pese más en la media.
+- **Tiempo con mediana e IQR, no media:** la encuesta se puede pausar y
+  reanudar, así que hay valores extremos esperables.
+- **La tasa de errores no guarda respuestas:** solo sección, si fue válida y
+  cuántos campos fallaron (minimización de datos).
+- **Registrar una versión del modelo no la activa:** activar es una decisión
+  explícita del administrador, revalidada antes de cambiar la versión vigente.
+- **Sin Content-Security-Policy completa:** Alpine.js necesita evaluar
+  expresiones en línea; se deja `frame-ancestors 'none'` y se documenta como
+  mejora futura.
+
+### 12.3 Tests (`tests/Feature/Sprint6/`)
+
+| Archivo | Casos |
+|---|---|
+| `HU026_GestionVersionesModeloTest.php` | 13 |
+| `ValidacionUsabilidadTest.php` | 14 |
+| `Ley1581_MisDatosAuditoriaTest.php` | 9 |
+| `SeguridadDespliegueTest.php` | 8 |
+
+Suite completa: 224 tests.
+
+### 12.3.1 Defecto de las gráficas (corregido el 2026-09-29)
+
+Ninguna gráfica de Chart.js se dibujaba en el navegador, aunque el estudiante
+tuviera encuestas suficientes. Causa: las vistas usaban `@json($x)` dentro de
+`x-init="new Chart(...)"`; para listas de texto (las fechas del eje X) Blade
+emite `["19\/08\/2026"]` con comillas dobles crudas, que cierran el atributo
+HTML, y Alpine recibe una expresión truncada («Unexpected token '}'»). Afectaba
+a `/seguimiento`, a la ficha del panel y al reporte institucional. Se reemplazó
+por `{{ Js::from($x) }}`, seguro dentro de atributos. El reporte tenía un
+segundo defecto: usa `type: 'bar'` y `app.js` solo registraba los componentes
+de líneas; se registraron `BarController` y `BarElement`. Los tests no lo
+detectaban porque solo comprobaban el HTML del servidor; se añadió
+`GraficasYSimulacionTest`, que verifica que cada `x-init` quede completo.
+
+Para ver el seguimiento sin diligenciar el instrumento varias veces se creó
+`gutguardian:simular-seguimiento` (solo desarrollo; se niega en producción),
+que genera encuestas completas con una trayectoria de riesgo y las evalúa con
+`EvaluacionService` —la misma lógica que `ResultadoController`, ahora extraída
+a un servicio—, por lo que también genera las alertas de cambio de riesgo.
+Suite: 230 tests.
+
+### 12.4 Lo que el software no puede cerrar solo
+
+- **Prueba piloto con estudiantes** (SUS, tiempos, errores): la aplicación ya
+  recolecta y resume la evidencia; falta ejecutarla con el grupo piloto.
+- **Despliegue en el servidor institucional:** requiere dominio, certificado
+  TLS y el visto bueno de la universidad.
+- **Modelo final:** depende de la regla Y de Enfermería (bloqueante §5).
+

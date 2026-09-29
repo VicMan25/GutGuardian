@@ -88,6 +88,21 @@
                 Comenzar
             </x-boton>
         </x-tarjeta>
+
+        {{-- Invitación al SUS de la prueba piloto (Sprint 6) --}}
+        @unless(Auth::user()->evaluacionUsabilidad()->exists())
+        <x-tarjeta class="flex items-center justify-between gap-4 mb-4">
+            <div>
+                <p class="text-sm font-medium text-gg-tinta">¿Cómo te pareció usar GutGuardián?</p>
+                <p class="text-2xs text-gg-tinta-suave mt-0.5">
+                    Diez afirmaciones, unos dos minutos. Nos ayuda a validar el aplicativo.
+                </p>
+            </div>
+            <x-boton variante="secundario" href="{{ route('usabilidad.show') }}" tamano="sm">
+                Evaluar
+            </x-boton>
+        </x-tarjeta>
+        @endunless
     @endif
 
     {{-- Aviso obligatorio Res. 3100 de 2019 --}}
