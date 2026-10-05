@@ -11,14 +11,14 @@
     </x-slot:acciones>
 
     <div class="mb-6">
-        <h1 class="font-display text-2xl font-medium text-gg-tinta">Indicadores de validación</h1>
+        <h1 class="font-display text-3xl font-medium text-gg-tinta">Indicadores de validación</h1>
         <p class="text-sm text-gg-tinta-suave mt-1">
             Evidencia para la prueba piloto: usabilidad percibida, tiempo de diligenciamiento, errores de ingreso y modelo activo.
         </p>
     </div>
 
     {{-- SUS --}}
-    <h2 class="text-sm font-medium text-gg-tinta mb-3">Usabilidad percibida (System Usability Scale)</h2>
+    <h2 class="font-display text-xl font-medium text-gg-tinta mb-3">Usabilidad percibida (System Usability Scale)</h2>
     @if($sus['n'] === 0)
         <x-tarjeta class="mb-6">
             <p class="text-sm text-gg-tinta-suave">
@@ -34,8 +34,8 @@
                 ['Desviación estándar', $sus['desviacion'], 1],
             ] as [$etiqueta, $valor, $dec])
             <x-tarjeta padding="p-4">
-                <p class="font-display text-2xl font-medium text-gg-tinta">{{ $fmt($valor, $dec) }}</p>
-                <p class="text-2xs text-gg-tinta-suave mt-1">{{ $etiqueta }}</p>
+                <p class="font-display text-3xl font-medium text-gg-tinta">{{ $fmt($valor, $dec) }}</p>
+                <p class="text-xs text-gg-tinta-suave mt-1">{{ $etiqueta }}</p>
             </x-tarjeta>
             @endforeach
         </div>
@@ -51,7 +51,7 @@
                     </div>
                     @endforeach
                 </dl>
-                <p class="text-2xs text-gg-tinta-suave mt-3">≥ 70 aceptable · 50–69,9 marginal · &lt; 50 no aceptable.</p>
+                <p class="text-xs text-gg-tinta-suave mt-3">≥ 70 aceptable · 50–69,9 marginal · &lt; 50 no aceptable.</p>
             </x-tarjeta>
 
             <x-tarjeta padding="p-0" class="lg:col-span-2 overflow-x-auto">
@@ -68,7 +68,7 @@
                         @endforeach
                     </tbody>
                 </table>
-                <p class="px-5 py-3 text-2xs text-gg-tinta-suave border-t border-gg-borde">
+                <p class="px-5 py-3 text-xs text-gg-tinta-suave border-t border-gg-borde">
                     Afirmaciones impares: más alto es mejor. Pares: más bajo es mejor.
                 </p>
             </x-tarjeta>
@@ -76,38 +76,38 @@
     @endif
 
     {{-- Interacción --}}
-    <h2 class="text-sm font-medium text-gg-tinta mb-3">Interacción con la encuesta</h2>
+    <h2 class="font-display text-xl font-medium text-gg-tinta mb-3">Interacción con la encuesta</h2>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         <x-tarjeta>
-            <p class="text-2xs text-gg-tinta-suave">Tiempo de diligenciamiento (mediana)</p>
-            <p class="font-display text-2xl font-medium text-gg-tinta mt-1">
+            <p class="text-xs text-gg-tinta-suave">Tiempo de diligenciamiento (mediana)</p>
+            <p class="font-display text-3xl font-medium text-gg-tinta mt-1">
                 {{ $fmt($interaccion['tiempo']['mediana']) }} <span class="text-sm font-sans text-gg-tinta-suave">min</span>
             </p>
-            <p class="text-2xs text-gg-tinta-suave mt-2">
+            <p class="text-xs text-gg-tinta-suave mt-2">
                 Rango intercuartílico {{ $fmt($interaccion['tiempo']['p25']) }}–{{ $fmt($interaccion['tiempo']['p75']) }} min
                 · {{ $interaccion['tiempo']['n'] }} encuestas completadas.
                 Incluye pausas: la encuesta se puede reanudar.
             </p>
         </x-tarjeta>
         <x-tarjeta>
-            <p class="text-2xs text-gg-tinta-suave">Tasa de errores al ingresar datos</p>
-            <p class="font-display text-2xl font-medium text-gg-tinta mt-1">
+            <p class="text-xs text-gg-tinta-suave">Tasa de errores al ingresar datos</p>
+            <p class="font-display text-3xl font-medium text-gg-tinta mt-1">
                 {{ $fmt($interaccion['errores']['tasa']) }} <span class="text-sm font-sans text-gg-tinta-suave">%</span>
             </p>
-            <p class="text-2xs text-gg-tinta-suave mt-2">
+            <p class="text-xs text-gg-tinta-suave mt-2">
                 {{ $interaccion['errores']['con_error'] }} de {{ $interaccion['errores']['envios'] }} envíos de sección rechazados por validación.
             </p>
         </x-tarjeta>
     </div>
 
     {{-- Modelo --}}
-    <h2 class="text-sm font-medium text-gg-tinta mb-3">Modelo predictivo activo</h2>
+    <h2 class="font-display text-xl font-medium text-gg-tinta mb-3">Modelo predictivo activo</h2>
     <x-tarjeta>
         @if($modelo)
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <div>
                     <p class="text-sm text-gg-tinta"><span class="font-mono">v{{ $modelo->version }}</span> — {{ $modelo->nombre }}</p>
-                    <p class="text-2xs text-gg-tinta-suave mt-1">
+                    <p class="text-xs text-gg-tinta-suave mt-1">
                         Exactitud {{ $fmt($modelo->metricas['exactitud_test'] ?? null, 2) }}
                         · AUC {{ $fmt($modelo->metricas['auc_macro_ovr_test'] ?? null, 2) }}
                     </p>

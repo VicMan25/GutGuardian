@@ -10,16 +10,17 @@
         />
     </x-slot:progreso>
 
-    <form method="POST" action="{{ route('encuesta.guardar', [$diligenciamiento, $seccionActual]) }}" class="space-y-8">
+    <form method="POST" action="{{ route('encuesta.guardar', [$diligenciamiento, $seccionActual]) }}" class="space-y-5">
         @csrf
 
         @php
             $esSociodemografica = $seccion->preguntas->contains(fn ($p) => str_starts_with($p->codigo, 'SD'));
         @endphp
 
-        <div>
-            <h1 class="font-display text-2xl font-medium text-gg-tinta">{{ $seccion->nombre }}</h1>
-            <p class="text-sm text-gg-tinta-suave mt-1">
+        <div class="animate-gg-entrada">
+            <p class="gg-rotulo">Sección {{ $seccionActual }} de {{ $totalSecciones }} · {{ $seccion->preguntas->count() }} preguntas</p>
+            <h1 class="mt-1 font-display text-3xl font-medium text-gg-tinta">{{ $seccion->nombre }}</h1>
+            <p class="text-base text-gg-tinta-suave mt-2">
                 Todas las preguntas de esta sección son obligatorias.
                 @if($esSociodemografica)
                     Ya completamos estas respuestas con los datos de tu registro — revísalas y ajústalas si algo cambió.
@@ -27,8 +28,15 @@
             </p>
         </div>
 
+        @if($errors->any())
+            <x-alerta tipo="error" titulo="Revisa las preguntas marcadas">
+                Hay respuestas pendientes o incompletas en esta sección. Te indicamos cuáles debajo de cada pregunta.
+            </x-alerta>
+        @endif
+
         @foreach($campos as $campo)
-        <x-tarjeta>
+        <x-tarjeta class="animate-gg-entrada scroll-mt-40 {{ ($errors->has('respuestas.'.$campo['pregunta']->id) || $errors->has('respuestas.'.$campo['pregunta']->id.'.*')) ? '!border-[#D9A898]' : '' }}"
+                   style="animation-delay: {{ min($loop->index, 6) * 40 }}ms">
             @php
                 $nombreCampo = "respuestas[{$campo['pregunta']->id}]";
                 // Para 'matriz' el error real vive en una clave anidada
@@ -104,18 +112,21 @@
         </x-tarjeta>
         @endforeach
 
-        <div class="flex items-center justify-between gap-4 pb-4">
-            @if($seccionActual > 1)
-                <x-boton variante="secundario" href="{{ route('encuesta.seccion', [$diligenciamiento, $seccionActual - 1]) }}">
-                    Atrás
-                </x-boton>
-            @else
-                <span></span>
-            @endif
+        {{-- Barra de acciones: queda fija sobre la navegación inferior en móvil --}}
+        <div class="sticky bottom-[calc(4rem+env(safe-area-inset-bottom)+0.75rem)] md:bottom-4 z-20 pt-2">
+            <div class="flex items-center justify-between gap-3 p-2 rounded-[18px] bg-gg-superficie/90 backdrop-blur-md border border-gg-borde shadow-elev-3">
+                @if($seccionActual > 1)
+                    <x-boton variante="fantasma" href="{{ route('encuesta.seccion', [$diligenciamiento, $seccionActual - 1]) }}" icono="atras">
+                        Atrás
+                    </x-boton>
+                @else
+                    <span class="pl-3 text-sm text-gg-tinta-suave">Tus respuestas se guardan por sección.</span>
+                @endif
 
-            <x-boton variante="primario" tipo="submit">
-                {{ $esUltima ? 'Continuar a confirmación' : 'Siguiente sección' }}
-            </x-boton>
+                <x-boton variante="primario" tipo="submit" icono-final="flecha" class="flex-1 sm:flex-none">
+                    {{ $esUltima ? 'Continuar a confirmación' : 'Siguiente sección' }}
+                </x-boton>
+            </div>
         </div>
     </form>
 

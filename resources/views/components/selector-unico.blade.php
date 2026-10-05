@@ -34,7 +34,7 @@ $uid = 'su-' . Str::random(8);
     aria-required="{{ $requerido ? 'true' : 'false' }}"
 >
     @if($pregunta)
-    <p id="{{ $uid }}-label" class="text-sm font-medium text-gg-tinta leading-snug mb-3">
+    <p id="{{ $uid }}-label" class="text-base font-medium text-gg-tinta leading-snug mb-3">
         @if($codigo)
             <span class="font-mono text-2xs text-gg-tinta-suave mr-1.5 select-none">{{ $codigo }}</span>
         @endif
@@ -48,11 +48,11 @@ $uid = 'su-' . Str::random(8);
     <div class="space-y-2">
         @foreach($opciones as $opcion)
         <label
-            class="flex items-center gap-3 p-3 rounded-control border cursor-pointer select-none
-                   transition-colors duration-100 group"
+            class="flex items-center gap-3 min-h-[48px] px-3.5 py-3 rounded-control border cursor-pointer select-none
+                   transition-[background-color,border-color,box-shadow] duration-150 group"
             :class="marcado({{ $opcion['id'] }})
-                ? 'border-gg-primario bg-gg-primario-suave'
-                : 'border-gg-borde bg-gg-superficie hover:bg-gg-papel'"
+                ? 'border-gg-primario bg-gg-primario-suave shadow-[inset_0_0_0_1px_var(--gg-primario)]'
+                : 'border-gg-borde bg-gg-superficie hover:border-[#C7D0C9] hover:bg-gg-papel'"
         >
             <input
                 type="radio"
@@ -65,14 +65,14 @@ $uid = 'su-' . Str::random(8);
             />
 
             <span
-                class="w-4 h-4 shrink-0 rounded-full border-2 flex items-center justify-center transition-colors duration-100"
+                class="w-5 h-5 shrink-0 rounded-full border-2 flex items-center justify-center transition-colors duration-100"
                 :class="marcado({{ $opcion['id'] }})
                     ? 'border-gg-primario'
                     : 'border-gg-borde group-hover:border-gg-primario'"
                 aria-hidden="true"
             >
                 <span
-                    class="w-2 h-2 rounded-full bg-gg-primario transition-opacity duration-100"
+                    class="w-2.5 h-2.5 rounded-full bg-gg-primario transition-opacity duration-100"
                     :class="marcado({{ $opcion['id'] }}) ? 'opacity-100' : 'opacity-0'"
                 ></span>
             </span>
@@ -86,6 +86,6 @@ $uid = 'su-' . Str::random(8);
     </div>
 
     @if($error)
-    <p class="mt-2 text-2xs text-gg-riesgo-alto" role="alert">{{ $error }}</p>
+    <p class="mt-2 text-sm text-gg-riesgo-alto" role="alert">{{ $error }}</p>
     @endif
 </div>

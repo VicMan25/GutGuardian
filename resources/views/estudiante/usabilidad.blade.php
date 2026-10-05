@@ -1,7 +1,7 @@
 <x-layouts.estudiante titulo="Evaluar GutGuardián">
 
     <div class="mb-6">
-        <h1 class="font-display text-2xl font-medium text-gg-tinta">Evalúa tu experiencia</h1>
+        <h1 class="font-display text-3xl font-medium text-gg-tinta">Evalúa tu experiencia</h1>
         <p class="text-sm text-gg-tinta-suave mt-1">
             Diez afirmaciones sobre qué tan fácil fue usar GutGuardián. Es voluntario, toma unos dos minutos
             y tus respuestas no afectan tu resultado de riesgo.
@@ -44,15 +44,15 @@
                                          peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-gg-primario">
                                 {{ $valor }}
                             </span>
-                            <span class="text-2xs leading-tight text-gg-tinta-suave hidden sm:block">{{ $etiqueta }}</span>
+                            <span class="text-xs leading-tight text-gg-tinta-suave hidden sm:block">{{ $etiqueta }}</span>
                         </label>
                         @endforeach
                     </div>
-                    <div class="flex justify-between text-2xs text-gg-tinta-suave mt-1.5 sm:hidden" aria-hidden="true">
+                    <div class="flex justify-between text-xs text-gg-tinta-suave mt-1.5 sm:hidden" aria-hidden="true">
                         <span>{{ $escala[1] }}</span><span>{{ $escala[5] }}</span>
                     </div>
                     @error("respuestas.$item")
-                        <p class="text-2xs text-gg-riesgo-alto mt-2" role="alert">{{ $message }}</p>
+                        <p class="text-xs text-gg-riesgo-alto mt-2" role="alert">{{ $message }}</p>
                     @enderror
                 </fieldset>
             </x-tarjeta>
@@ -63,7 +63,7 @@
                 <textarea id="comentario" name="comentario" rows="3" maxlength="1000"
                           class="w-full rounded-control border border-gg-borde text-sm focus:outline-none focus:border-gg-primario"
                           placeholder="¿Algo que te resultó confuso o que mejorarías?">{{ old('comentario') }}</textarea>
-                <p class="text-2xs text-gg-tinta-suave mt-1">No escribas datos de salud ni datos personales aquí.</p>
+                <p class="text-xs text-gg-tinta-suave mt-1">No escribas datos de salud ni datos personales aquí.</p>
             </x-tarjeta>
 
             <x-boton tipo="submit">Enviar evaluación</x-boton>

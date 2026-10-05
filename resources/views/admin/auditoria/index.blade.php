@@ -12,7 +12,7 @@
 <x-layouts.profesional titulo="Auditoría">
 
     <div class="mb-6">
-        <h1 class="font-display text-2xl font-medium text-gg-tinta">Registro de auditoría</h1>
+        <h1 class="font-display text-3xl font-medium text-gg-tinta">Registro de auditoría</h1>
         <p class="text-sm text-gg-tinta-suave mt-1">
             Quién accedió a información clínica y cuándo (Ley 1581 de 2012). Los registros no se pueden modificar desde la aplicación.
         </p>
@@ -55,7 +55,7 @@
             <table class="w-full text-sm">
                 <caption class="sr-only">Registros de auditoría</caption>
                 <thead>
-                    <tr class="border-b border-gg-borde text-left text-2xs text-gg-tinta-suave">
+                    <tr class="border-b border-gg-borde text-left text-sm text-gg-tinta-suave bg-gg-papel">
                         <th scope="col" class="px-4 py-3 font-medium">Fecha</th>
                         <th scope="col" class="px-4 py-3 font-medium">Usuario</th>
                         <th scope="col" class="px-4 py-3 font-medium">Acción</th>
@@ -68,11 +68,11 @@
                         <td class="px-4 py-3 font-mono text-xs text-gg-tinta-suave whitespace-nowrap">{{ $actividad->created_at->format('d/m/Y H:i') }}</td>
                         <td class="px-4 py-3">
                             <p class="text-gg-tinta">{{ $actividad->causer?->name ?? 'Sistema' }}</p>
-                            <p class="text-2xs text-gg-tinta-suave">{{ $actividad->causer?->getRoleNames()->first() }}</p>
+                            <p class="text-xs text-gg-tinta-suave">{{ $actividad->causer?->getRoleNames()->first() }}</p>
                         </td>
                         <td class="px-4 py-3">
                             <p class="text-gg-tinta">{{ $eventos[$actividad->event] ?? $actividad->event }}</p>
-                            <p class="text-2xs text-gg-tinta-suave">{{ $actividad->description }}</p>
+                            <p class="text-xs text-gg-tinta-suave">{{ $actividad->description }}</p>
                         </td>
                         <td class="px-4 py-3 text-xs text-gg-tinta-suave">
                             @php $props = $actividad->properties; @endphp

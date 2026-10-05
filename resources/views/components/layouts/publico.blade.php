@@ -2,8 +2,9 @@
 <html lang="es" class="h-full">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="theme-color" content="#174A3B">
 
     <title>{{ $titulo ?? config('app.name') }} — GutGuardián</title>
 
@@ -16,7 +17,7 @@
 
     {{ $head ?? '' }}
 </head>
-<body class="h-full font-sans antialiased bg-gg-papel text-gg-tinta">
+<body class="min-h-full font-sans antialiased gg-fondo text-gg-tinta">
 
     <a href="#contenido"
        class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-3 focus:left-3
@@ -25,59 +26,91 @@
         Saltar al contenido
     </a>
 
-    <div class="min-h-full lg:grid lg:grid-cols-[minmax(0,42%)_1fr]">
+    <div class="min-h-screen lg:grid lg:grid-cols-[minmax(0,46%)_1fr]">
 
-        {{-- Panel de marca — solo escritorio. Aprovecha el ancho sin degradados ni sombras. --}}
-        <aside class="hidden lg:flex flex-col justify-between bg-gg-primario text-white px-12 py-14">
-            <div>
-                <span class="font-display text-2xl font-medium tracking-tight">GutGuardián</span>
-                <p class="mt-2 text-sm text-white/80 max-w-xs leading-relaxed">
-                    Monitoreo de hábitos alimentarios y salud digestiva · Universidad Mariana
+        {{-- ============================================================
+             Panel de marca — escritorio. Verde profundo con el patrón de
+             flujo, propuesta de valor y un adelanto de la pista de riesgo
+             (la pieza central del producto) como elemento visual.
+        ============================================================ --}}
+        <aside class="gg-marca hidden lg:flex flex-col justify-between overflow-hidden px-12 xl:px-16 py-12 lg:sticky lg:top-0 lg:h-screen">
+
+            <x-marca tono="claro" tamano="lg" subtitulo="Universidad Mariana · Pasto" :href="url('/')" />
+
+            <div class="max-w-md">
+                <p class="gg-rotulo !text-gg-acento mb-4">Autocuidado digestivo</p>
+                <p class="font-display text-4xl font-medium text-white">
+                    Tus hábitos cuentan una historia. Aprende a leerla.
                 </p>
+                <p class="mt-5 text-md text-white/80 leading-relaxed">
+                    Registra tu alimentación y tus síntomas, conoce tu nivel de riesgo digestivo
+                    y observa cómo evoluciona con el tiempo.
+                </p>
+
+                {{-- Adelanto ilustrativo de la pista de riesgo (decorativo) --}}
+                <div class="mt-10 rounded-tarjeta bg-white/[0.06] border border-white/10 p-5 backdrop-blur-sm" aria-hidden="true">
+                    <div class="flex items-center justify-between text-xs text-white/70 mb-3">
+                        <span>Así se ve tu resultado</span>
+                        <span class="font-mono">3 niveles</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <div class="h-2 rounded-full bg-[#7FB89D]"></div>
+                        <div class="h-2 rounded-full bg-[#E0B467]/50"></div>
+                        <div class="h-2 rounded-full bg-[#C98A73]/40"></div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-1.5 mt-2 text-xs text-white/75">
+                        <span>Bajo</span><span>Medio</span><span>Alto</span>
+                    </div>
+                </div>
             </div>
 
-            <ul class="space-y-6 max-w-sm">
+            <ul class="grid grid-cols-3 gap-6 max-w-lg text-sm text-white/80">
                 @foreach([
-                    'Registra tus hábitos alimentarios y síntomas digestivos en una encuesta guiada.',
-                    'Consulta tu nivel de riesgo digestivo y cómo evoluciona en el tiempo.',
-                    'Herramienta de autocuidado y tamizaje académico. No emite diagnósticos médicos.',
+                    ['icono' => 'encuesta',    'texto' => 'Encuesta guiada de 20 preguntas'],
+                    ['icono' => 'seguimiento', 'texto' => 'Evolución en el tiempo'],
+                    ['icono' => 'datos',       'texto' => 'Datos protegidos · Ley 1581/2012'],
                 ] as $punto)
-                <li class="flex gap-3 text-sm text-white/90 leading-relaxed">
-                    <svg class="w-4 h-4 shrink-0 mt-0.5 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                    </svg>
-                    <span>{{ $punto }}</span>
+                <li class="flex flex-col gap-2.5">
+                    <span class="w-9 h-9 rounded-control bg-white/10 inline-flex items-center justify-center text-gg-acento">
+                        <x-icono :nombre="$punto['icono']" class="w-[18px] h-[18px]" />
+                    </span>
+                    <span class="leading-snug">{{ $punto['texto'] }}</span>
                 </li>
                 @endforeach
             </ul>
-
-            <p class="text-2xs text-white/60 max-w-xs leading-relaxed">
-                Datos protegidos según la Ley 1581 de 2012. Res. 3100 de 2019 — el aplicativo
-                no sustituye la consulta con un profesional de salud.
-            </p>
         </aside>
 
-        {{-- Panel de contenido --}}
-        <div class="flex flex-col items-center justify-center px-4 py-12 lg:py-16">
+        {{-- ============================================================
+             Panel de contenido
+        ============================================================ --}}
+        <div class="flex flex-col min-h-screen">
 
-            {{-- Marca compacta — visible en móvil y tablet --}}
-            <a href="{{ url('/') }}" class="lg:hidden mb-8 flex flex-col items-center gap-2 no-underline">
-                <span class="font-display text-xl font-medium text-gg-primario tracking-tight">GutGuardián</span>
-                <span class="text-2xs text-gg-tinta-suave text-center leading-tight max-w-[260px]">
-                    Monitoreo de hábitos alimentarios · Universidad Mariana
-                </span>
-            </a>
+            {{-- Cabecera de marca compacta — móvil y tablet: banda verde con
+                 la marca en lugar de un título suelto sobre el papel. --}}
+            <header class="gg-marca lg:hidden px-5 pt-[max(1.5rem,env(safe-area-inset-top))] pb-16 sm:pb-20">
+                <div class="max-w-[460px] mx-auto">
+                    <x-marca tono="claro" subtitulo="Universidad Mariana · Pasto" :href="url('/')" />
+                    <p class="mt-6 font-display text-2xl sm:text-3xl font-medium text-white max-w-sm">
+                        Tus hábitos cuentan una historia.
+                    </p>
+                </div>
+            </header>
 
-            {{-- Tarjeta principal --}}
-            <main id="contenido" class="w-full max-w-[460px] bg-gg-superficie border border-gg-borde rounded-tarjeta p-8">
-                {{ $slot }}
-            </main>
+            <div class="flex-1 flex flex-col items-center justify-start lg:justify-center px-4 sm:px-6 -mt-10 sm:-mt-12 lg:mt-0 pb-10 lg:py-16">
 
-            {{-- Pie institucional --}}
-            <p class="mt-8 text-2xs text-gg-tinta-suave text-center max-w-sm leading-relaxed">
-                Esta herramienta no realiza diagnóstico clínico.&thinsp;
-                <span class="whitespace-nowrap">Res. 3100 de 2019.</span>
-            </p>
+                {{-- Tarjeta principal --}}
+                <main id="contenido"
+                      class="w-full max-w-[460px] bg-gg-superficie border border-gg-borde rounded-bloque shadow-elev-3 lg:shadow-elev-2
+                             p-6 sm:p-9 animate-gg-entrada">
+                    {{ $slot }}
+                </main>
+
+                {{-- Pie institucional --}}
+                <p class="mt-8 text-xs text-gg-tinta-suave text-center max-w-sm leading-relaxed">
+                    Esta herramienta no realiza diagnóstico clínico.&thinsp;
+                    <span class="whitespace-nowrap">Res. 3100 de 2019.</span>
+                </p>
+            </div>
 
         </div>
 

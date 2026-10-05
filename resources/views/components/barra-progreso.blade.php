@@ -29,21 +29,21 @@ $seccionPct = round(($preguntaActual - 1) / max($totalPreguntas, 1) * 100);
 
     {{-- Sección actual --}}
     <div class="flex items-baseline justify-between gap-2 mb-2">
-        <p class="text-xs font-medium text-gg-tinta truncate">
+        <p class="text-sm font-medium text-gg-tinta truncate">
             @if($nombreSeccion)
                 {{ $nombreSeccion }}
             @else
                 Sección {{ $seccionActual }}
             @endif
         </p>
-        <span class="text-2xs text-gg-tinta-suave whitespace-nowrap shrink-0">
+        <span class="font-mono text-xs text-gg-tinta-suave whitespace-nowrap shrink-0">
             <span class="sr-only">Sección</span>
-            {{ $seccionActual }} de {{ $totalSecciones }}
+            {{ $seccionActual }}/{{ $totalSecciones }}
         </span>
     </div>
 
     {{-- Pista de secciones + puntos de preguntas --}}
-    <div class="flex items-center gap-1.5" aria-hidden="true">
+    <div class="flex items-center gap-1" aria-hidden="true">
 
         @for($s = 1; $s <= $totalSecciones; $s++)
 
@@ -53,9 +53,9 @@ $seccionPct = round(($preguntaActual - 1) / max($totalPreguntas, 1) * 100);
             <div class="h-1.5 flex-1 rounded-full bg-gg-primario"></div>
         @elseif($s === $seccionActual)
             {{-- Sección activa: barra de progreso interno --}}
-            <div class="h-1.5 flex-1 rounded-full bg-gg-borde overflow-hidden">
+            <div class="h-1.5 flex-1 rounded-full bg-gg-acento overflow-hidden">
                 <div
-                    class="h-full rounded-full bg-gg-primario transition-all duration-300"
+                    class="h-full rounded-full bg-gg-primario transition-all duration-500"
                     style="width: {{ max(4, $seccionPct) }}%"
                 ></div>
             </div>
@@ -64,12 +64,6 @@ $seccionPct = round(($preguntaActual - 1) / max($totalPreguntas, 1) * 100);
             <div class="h-1.5 flex-1 rounded-full bg-gg-borde"></div>
         @endif
 
-        {{-- Separador entre secciones --}}
-        @if($s < $totalSecciones)
-        <div class="w-1.5 h-1.5 rounded-full shrink-0
-                    {{ $s < $seccionActual ? 'bg-gg-primario' : 'bg-gg-borde' }}">
-        </div>
-        @endif
 
         @endfor
 

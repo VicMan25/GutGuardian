@@ -1,7 +1,7 @@
 <x-layouts.profesional titulo="Modelo predictivo">
 
     <div class="mb-6">
-        <h1 class="font-display text-2xl font-medium text-gg-tinta">Versiones del modelo predictivo</h1>
+        <h1 class="font-display text-3xl font-medium text-gg-tinta">Versiones del modelo predictivo</h1>
         <p class="text-sm text-gg-tinta-suave mt-1">
             Solo una versión puede estar activa. Las evaluaciones ya registradas conservan la versión que las produjo.
         </p>
@@ -22,7 +22,7 @@
                 <table class="w-full text-sm">
                     <caption class="sr-only">Versiones registradas del modelo predictivo</caption>
                     <thead>
-                        <tr class="border-b border-gg-borde text-left text-2xs text-gg-tinta-suave">
+                        <tr class="border-b border-gg-borde text-left text-sm text-gg-tinta-suave bg-gg-papel">
                             <th scope="col" class="px-4 py-3 font-medium">Versión</th>
                             <th scope="col" class="px-4 py-3 font-medium">Entrenado</th>
                             <th scope="col" class="px-4 py-3 font-medium">Exactitud</th>
@@ -38,7 +38,7 @@
                                 <a href="{{ route('admin.modelos.show', $version) }}" class="font-mono text-gg-primario hover:underline">
                                     v{{ $version->version }}
                                 </a>
-                                <p class="text-2xs text-gg-tinta-suave truncate max-w-[260px]">{{ $version->nombre }}</p>
+                                <p class="text-xs text-gg-tinta-suave truncate max-w-[260px]">{{ $version->nombre }}</p>
                             </td>
                             <td class="px-4 py-3 text-gg-tinta-suave">{{ $version->entrenado_at?->format('d/m/Y') ?? '—' }}</td>
                             <td class="px-4 py-3 font-mono">{{ isset($version->metricas['exactitud_test']) ? number_format($version->metricas['exactitud_test'], 2) : '—' }}</td>
@@ -46,9 +46,9 @@
                             <td class="px-4 py-3 font-mono">{{ $version->evaluaciones_count }}</td>
                             <td class="px-4 py-3">
                                 @if($version->activo)
-                                    <span class="inline-flex px-2 py-0.5 rounded-control text-2xs font-medium bg-gg-primario-suave text-gg-primario">Activa</span>
+                                    <span class="inline-flex px-2 py-0.5 rounded-control text-xs font-medium bg-gg-primario-suave text-gg-primario">Activa</span>
                                 @else
-                                    <span class="text-2xs text-gg-tinta-suave">Inactiva</span>
+                                    <span class="text-xs text-gg-tinta-suave">Inactiva</span>
                                 @endif
                             </td>
                         </tr>
@@ -59,8 +59,8 @@
         </x-tarjeta>
 
         <x-tarjeta>
-            <h2 class="text-sm font-medium text-gg-tinta mb-1">Registrar una versión</h2>
-            <p class="text-2xs text-gg-tinta-suave mb-4">
+            <h2 class="font-display text-xl font-medium text-gg-tinta mb-1">Registrar una versión</h2>
+            <p class="text-xs text-gg-tinta-suave mb-4">
                 Archivo JSON generado fuera de la aplicación por el pipeline de entrenamiento (<code class="font-mono">ml/</code>).
                 Se valida antes de guardarse.
             </p>

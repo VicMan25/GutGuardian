@@ -36,6 +36,9 @@
             ['#multiple',        'Opción múltiple'],
             ['#pista-riesgo',    'Pista de riesgo'],
             ['#tarjeta',         'Tarjeta'],
+            ['#marca',           'Marca / logo'],
+            ['#insignia',        'Insignia riesgo'],
+            ['#superficies',     'Superficies'],
             ['#aviso',           'Aviso no-diag.'],
         ] as [$href, $label])
         <a href="{{ $href }}" class="px-2 py-1.5 rounded text-xs text-gg-tinta-suave hover:text-gg-tinta hover:bg-gg-papel transition-colors">
@@ -67,10 +70,14 @@
                     ['--gg-papel',           '#F6F7F4', 'Papel',           'bg-gg-papel'],
                     ['--gg-superficie',      '#FFFFFF',  'Superficie',      'bg-gg-superficie border border-gg-borde'],
                     ['--gg-tinta',           '#16302B', 'Tinta',           'bg-gg-tinta'],
-                    ['--gg-tinta-suave',     '#5A6560', 'Tinta suave',     'bg-gg-tinta-suave'],
+                    ['--gg-tinta-suave',     '#55615B', 'Tinta suave',     'bg-gg-tinta-suave'],
                     ['--gg-borde',           '#E0E3DC', 'Borde',           'bg-gg-borde'],
                     ['--gg-primario',        '#1F5C4A', 'Primario',        'bg-gg-primario'],
                     ['--gg-primario-suave',  '#E6EFEA', 'Primario suave',  'bg-gg-primario-suave'],
+                    ['--gg-primario-hondo',  '#174A3B', 'Primario hondo',  'bg-gg-primario-hondo'],
+                    ['--gg-primario-noche',  '#0F2E25', 'Primario noche',  'bg-gg-primario-noche'],
+                    ['--gg-acento',          '#CFE3B4', 'Acento (solo sobre verde)', 'bg-gg-acento'],
+                    ['--gg-papel-hondo',     '#EDF0EA', 'Papel hondo',     'bg-gg-papel-hondo'],
                     ['--gg-riesgo-bajo',     '#3E7D64', 'Riesgo bajo',     'bg-gg-riesgo-bajo'],
                     ['--gg-riesgo-medio',    '#C08A2E', 'Riesgo medio',    'bg-gg-riesgo-medio'],
                     ['--gg-riesgo-alto',     '#9C4A32', 'Riesgo alto',     'bg-gg-riesgo-alto'],
@@ -500,16 +507,81 @@
 
             <div class="space-y-4">
                 <x-tarjeta>
-                    <p class="text-sm text-gg-tinta">Tarjeta estándar con padding p-5 por defecto.</p>
+                    <p class="text-sm text-gg-tinta">Tarjeta estándar: padding p-5 (p-6 desde sm), elevación elev-1.</p>
                 </x-tarjeta>
 
                 <x-tarjeta padding="p-6">
                     <h3 class="font-display text-xl font-medium text-gg-tinta mb-2">Título dentro de tarjeta</h3>
                     <p class="text-sm text-gg-tinta-suave leading-relaxed">
                         Contenido secundario. Las tarjetas agrupan información relacionada.
-                        Radio de esquina: 12 px. Borde: 1 px gg-borde.
+                        Radio de esquina: 16 px. Borde: 1 px gg-borde. Sombra teñida de verde, nunca negra.
                     </p>
                 </x-tarjeta>
+
+                <x-tarjeta interactiva>
+                    <p class="text-sm text-gg-tinta">Tarjeta <span class="font-mono">interactiva</span>: se eleva 2 px al pasar el cursor. Solo para tarjetas clicables.</p>
+                </x-tarjeta>
+            </div>
+        </section>
+
+        {{-- ============================================================ --}}
+        {{-- MARCA / ESPACIO DEL LOGO                                     --}}
+        {{-- ============================================================ --}}
+        <section id="marca">
+            <x-ui-kit-seccion titulo="Marca y espacio del logo" />
+            <p class="text-sm text-gg-tinta-suave mb-4">
+                El recuadro punteado reserva el lugar del logo oficial. Al copiar el archivo en
+                <span class="font-mono">public/img/logo.svg</span> (o .png) aparece en todas las pantallas sin tocar las vistas.
+            </p>
+            <div class="grid sm:grid-cols-2 gap-4">
+                <x-tarjeta class="flex flex-col gap-5">
+                    <x-marca tamano="sm" />
+                    <x-marca />
+                    <x-marca tamano="lg" subtitulo="Universidad Mariana · Pasto" />
+                </x-tarjeta>
+                <div class="gg-marca rounded-tarjeta p-6 flex flex-col gap-5">
+                    <x-marca tono="claro" tamano="sm" />
+                    <x-marca tono="claro" />
+                    <x-marca tono="claro" tamano="lg" subtitulo="Panel institucional" />
+                </div>
+            </div>
+        </section>
+
+        {{-- ============================================================ --}}
+        {{-- INSIGNIA DE RIESGO                                           --}}
+        {{-- ============================================================ --}}
+        <section id="insignia">
+            <x-ui-kit-seccion titulo="Insignia de nivel de riesgo" />
+            <p class="text-sm text-gg-tinta-suave mb-4">Punto de color + texto: el color nunca es el único portador del significado.</p>
+            <div class="flex flex-wrap gap-3 mb-3">
+                <x-insignia-riesgo :categoria="0" />
+                <x-insignia-riesgo :categoria="1" />
+                <x-insignia-riesgo :categoria="2" />
+                <x-insignia-riesgo :categoria="null" />
+            </div>
+            <div class="flex flex-wrap gap-3">
+                <x-insignia-riesgo :categoria="0" tamano="sm" />
+                <x-insignia-riesgo :categoria="1" tamano="sm" />
+                <x-insignia-riesgo :categoria="2" tamano="sm" />
+            </div>
+        </section>
+
+        {{-- ============================================================ --}}
+        {{-- SUPERFICIES                                                  --}}
+        {{-- ============================================================ --}}
+        <section id="superficies">
+            <x-ui-kit-seccion titulo="Superficies de marca" />
+            <div class="grid sm:grid-cols-2 gap-4">
+                <div class="gg-marca rounded-bloque p-6 min-h-[160px]">
+                    <p class="font-mono text-xs text-white/70">.gg-marca</p>
+                    <p class="mt-2 font-display text-xl font-medium">Verde profundo con patrón de flujo</p>
+                    <p class="text-sm text-white/75 mt-1">Acceso, sidebar del panel y llamadas a la acción principales.</p>
+                </div>
+                <div class="gg-flujo-claro bg-gg-superficie border border-gg-borde rounded-bloque p-6 min-h-[160px] overflow-hidden">
+                    <p class="font-mono text-xs text-gg-tinta-suave">.gg-flujo-claro</p>
+                    <p class="mt-2 font-display text-xl font-medium text-gg-tinta">Patrón sutil sobre superficie</p>
+                    <p class="text-sm text-gg-tinta-suave mt-1">Tarjetas protagonistas y estados vacíos.</p>
+                </div>
             </div>
         </section>
 

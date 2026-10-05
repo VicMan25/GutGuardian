@@ -34,7 +34,7 @@ $idNinguna = collect($opciones)->firstWhere('es_ninguna', true)['id'] ?? null;
     aria-required="{{ $requerido ? 'true' : 'false' }}"
 >
     @if($pregunta)
-    <p id="{{ $uid }}-label" class="text-sm font-medium text-gg-tinta leading-snug mb-3">
+    <p id="{{ $uid }}-label" class="text-base font-medium text-gg-tinta leading-snug mb-3">
         @if($codigo)
             <span class="font-mono text-2xs text-gg-tinta-suave mr-1.5 select-none">{{ $codigo }}</span>
         @endif
@@ -46,7 +46,7 @@ $idNinguna = collect($opciones)->firstWhere('es_ninguna', true)['id'] ?? null;
     @endif
 
     {{-- Hint: selección múltiple --}}
-    <p class="text-2xs text-gg-tinta-suave mb-3" id="{{ $uid }}-hint">
+    <p class="text-sm text-gg-tinta-suave -mt-1 mb-3" id="{{ $uid }}-hint">
         Puede seleccionar varias opciones.
     </p>
 
@@ -56,11 +56,11 @@ $idNinguna = collect($opciones)->firstWhere('es_ninguna', true)['id'] ?? null;
         @php $esNinguna = $opcion['es_ninguna'] ?? false; @endphp
 
         <label
-            class="flex items-start gap-3 p-3 rounded-control border cursor-pointer select-none
-                   transition-colors duration-100 group"
+            class="flex items-start gap-3 min-h-[48px] px-3.5 py-3 rounded-control border cursor-pointer select-none
+                   transition-[background-color,border-color,box-shadow] duration-150 group"
             :class="marcado({{ $opcion['id'] }})
-                ? 'border-gg-primario bg-gg-primario-suave'
-                : 'border-gg-borde bg-gg-superficie hover:bg-gg-papel'"
+                ? 'border-gg-primario bg-gg-primario-suave shadow-[inset_0_0_0_1px_var(--gg-primario)]'
+                : 'border-gg-borde bg-gg-superficie hover:border-[#C7D0C9] hover:bg-gg-papel'"
         >
             {{--
                 Checkbox real. Sin atributo "required": a diferencia de los radios
@@ -81,14 +81,14 @@ $idNinguna = collect($opciones)->firstWhere('es_ninguna', true)['id'] ?? null;
 
             {{-- Casilla visual --}}
             <span
-                class="mt-0.5 w-4 h-4 shrink-0 rounded-[4px] border-2 flex items-center justify-center transition-colors duration-100"
+                class="mt-px w-5 h-5 shrink-0 rounded-[6px] border-2 flex items-center justify-center transition-colors duration-100"
                 :class="marcado({{ $opcion['id'] }})
                     ? 'bg-gg-primario border-gg-primario'
                     : 'border-gg-borde bg-gg-superficie group-hover:border-gg-primario'"
                 aria-hidden="true"
             >
                 <svg
-                    class="w-2.5 h-2.5 text-white transition-opacity duration-100"
+                    class="w-3 h-3 text-white transition-opacity duration-100"
                     :class="marcado({{ $opcion['id'] }}) ? 'opacity-100' : 'opacity-0'"
                     viewBox="0 0 12 12" fill="none"
                 >
@@ -109,7 +109,7 @@ $idNinguna = collect($opciones)->firstWhere('es_ninguna', true)['id'] ?? null;
     </div>
 
     @if($error)
-    <p class="mt-2 text-2xs text-gg-riesgo-alto" role="alert">{{ $error }}</p>
+    <p class="mt-2 text-sm text-gg-riesgo-alto" role="alert">{{ $error }}</p>
     @endif
 
 </div>

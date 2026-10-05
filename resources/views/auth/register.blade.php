@@ -1,6 +1,7 @@
 <x-layouts.publico titulo="Crear cuenta">
 
-    <h1 class="font-display text-xl font-medium text-gg-tinta mb-6">Crear cuenta</h1>
+    <h1 class="font-display text-3xl font-medium text-gg-tinta">Crear cuenta</h1>
+    <p class="text-base text-gg-tinta-suave mt-1.5 mb-7">Toma menos de dos minutos. Usaremos estos datos solo con fines académicos.</p>
 
     <form method="POST" action="{{ route('register') }}" class="space-y-5">
         @csrf
@@ -55,25 +56,24 @@
         />
 
         {{-- Perfil sociodemográfico --}}
-        <div class="pt-2 border-t border-gg-borde">
-            <p class="text-xs font-medium text-gg-tinta-suave uppercase tracking-wide mb-4">
-                Datos sociodemográficos
-            </p>
+        <div class="pt-6 border-t border-gg-borde">
+            <p class="gg-rotulo mb-1">Datos sociodemográficos</p>
+            <p class="text-sm text-gg-tinta-suave mb-5">Los usaremos para prellenar tu primera encuesta.</p>
 
             <div class="space-y-5">
 
                 {{-- Género --}}
                 <div class="w-full space-y-1.5">
-                    <label class="block text-sm font-medium text-gg-tinta">
+                    <label for="genero" class="block text-sm font-medium text-gg-tinta">
                         Género
                         <span class="text-gg-riesgo-medio ml-0.5" aria-hidden="true">*</span>
                     </label>
                     <select
+                        id="genero"
                         name="genero"
                         required
-                        class="w-full rounded-control border border-gg-borde text-sm text-gg-tinta bg-gg-superficie
-                               focus:outline-none focus:border-gg-primario
-                               {{ $errors->first('genero') ? 'border-gg-riesgo-alto bg-[#FDF4F2]' : '' }}"
+                        class="w-full rounded-control border border-gg-borde text-gg-tinta bg-gg-superficie
+                               {{ $errors->first('genero') ? '!border-gg-riesgo-alto bg-[#FDF6F3]' : '' }}"
                     >
                         <option value="">Selecciona una opción</option>
                         <option value="masculino"          {{ old('genero') === 'masculino'          ? 'selected' : '' }}>Masculino</option>
@@ -82,7 +82,7 @@
                         <option value="prefiero_no_decir"  {{ old('genero') === 'prefiero_no_decir'  ? 'selected' : '' }}>Prefiero no decir</option>
                     </select>
                     @error('genero')
-                        <p class="text-2xs text-gg-riesgo-alto" role="alert">{{ $message }}</p>
+                        <p class="text-sm text-gg-riesgo-alto" role="alert">{{ $message }}</p>
                     @enderror
                 </div>
 
@@ -98,16 +98,16 @@
 
                 {{-- Programa --}}
                 <div class="w-full space-y-1.5">
-                    <label class="block text-sm font-medium text-gg-tinta">
+                    <label for="programa_id" class="block text-sm font-medium text-gg-tinta">
                         Programa académico
                         <span class="text-gg-riesgo-medio ml-0.5" aria-hidden="true">*</span>
                     </label>
                     <select
+                        id="programa_id"
                         name="programa_id"
                         required
-                        class="w-full rounded-control border border-gg-borde text-sm text-gg-tinta bg-gg-superficie
-                               focus:outline-none focus:border-gg-primario
-                               {{ $errors->first('programa_id') ? 'border-gg-riesgo-alto bg-[#FDF4F2]' : '' }}"
+                        class="w-full rounded-control border border-gg-borde text-gg-tinta bg-gg-superficie
+                               {{ $errors->first('programa_id') ? '!border-gg-riesgo-alto bg-[#FDF6F3]' : '' }}"
                     >
                         <option value="">Selecciona un programa</option>
                         @foreach($programas as $programa)
@@ -117,22 +117,22 @@
                         @endforeach
                     </select>
                     @error('programa_id')
-                        <p class="text-2xs text-gg-riesgo-alto" role="alert">{{ $message }}</p>
+                        <p class="text-sm text-gg-riesgo-alto" role="alert">{{ $message }}</p>
                     @enderror
                 </div>
 
                 {{-- Semestre --}}
                 <div class="w-full space-y-1.5">
-                    <label class="block text-sm font-medium text-gg-tinta">
+                    <label for="semestre" class="block text-sm font-medium text-gg-tinta">
                         Semestre
                         <span class="text-gg-riesgo-medio ml-0.5" aria-hidden="true">*</span>
                     </label>
                     <select
+                        id="semestre"
                         name="semestre"
                         required
-                        class="w-full rounded-control border border-gg-borde text-sm text-gg-tinta bg-gg-superficie
-                               focus:outline-none focus:border-gg-primario
-                               {{ $errors->first('semestre') ? 'border-gg-riesgo-alto bg-[#FDF4F2]' : '' }}"
+                        class="w-full rounded-control border border-gg-borde text-gg-tinta bg-gg-superficie
+                               {{ $errors->first('semestre') ? '!border-gg-riesgo-alto bg-[#FDF6F3]' : '' }}"
                     >
                         <option value="">Selecciona un semestre</option>
                         @foreach(range(1, 10) as $sem)
@@ -142,19 +142,19 @@
                         @endforeach
                     </select>
                     @error('semestre')
-                        <p class="text-2xs text-gg-riesgo-alto" role="alert">{{ $message }}</p>
+                        <p class="text-sm text-gg-riesgo-alto" role="alert">{{ $message }}</p>
                     @enderror
                 </div>
 
             </div>
         </div>
 
-        <x-boton variante="primario" tipo="submit" class="w-full justify-center">
+        <x-boton variante="primario" tipo="submit" tamano="lg" class="w-full justify-center" icono-final="flecha">
             Crear cuenta
         </x-boton>
     </form>
 
-    <p class="mt-6 text-center text-sm text-gg-tinta-suave">
+    <p class="mt-7 pt-6 border-t border-gg-borde text-center text-sm text-gg-tinta-suave">
         ¿Ya tienes cuenta?
         <a href="{{ route('login') }}" class="text-gg-primario hover:underline font-medium">
             Iniciar sesión

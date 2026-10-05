@@ -1,12 +1,14 @@
 <x-layouts.publico titulo="Consentimiento informado">
 
-    <h1 class="font-display text-xl font-medium text-gg-tinta mb-2">Consentimiento informado</h1>
-    <p class="text-sm text-gg-tinta-suave mb-6">
+    <p class="gg-rotulo mb-1">Antes de empezar</p>
+    <h1 class="font-display text-2xl font-medium text-gg-tinta mb-2">Consentimiento informado</h1>
+    <p class="text-base text-gg-tinta-suave mb-6">
         Antes de continuar, lee detenidamente la siguiente información.
     </p>
 
-    <div class="space-y-4 text-sm text-gg-tinta leading-relaxed max-h-72 overflow-y-auto
-                border border-gg-borde rounded-control p-4 mb-6">
+    <div class="space-y-4 text-sm text-gg-tinta leading-relaxed max-h-80 overflow-y-auto overscroll-contain
+                bg-gg-papel border border-gg-borde rounded-tarjeta p-5 mb-6"
+         tabindex="0" aria-label="Texto del consentimiento informado">
 
         <p class="font-medium">Estudio: Hábitos alimentarios y riesgo digestivo en estudiantes de la Universidad Mariana</p>
 
@@ -48,7 +50,7 @@
             Universidad Mariana, Pasto, Colombia.
         </p>
 
-        <p class="text-2xs text-gg-tinta-suave">Versión 1.0 · Vigente desde agosto 2026</p>
+        <p class="font-mono text-xs text-gg-tinta-suave">Versión 1.0 · Vigente desde agosto 2026</p>
     </div>
 
     @if($errors->has('acepto'))
@@ -58,20 +60,21 @@
     <form method="POST" action="{{ route('consentimiento.store') }}">
         @csrf
 
-        <label class="flex items-start gap-3 cursor-pointer mb-6 group">
+        <label class="flex items-start gap-3 cursor-pointer mb-6 p-4 rounded-tarjeta border border-gg-borde
+                      hover:border-[#B9CBBF] has-[:checked]:border-gg-primario has-[:checked]:bg-gg-primario-suave transition-colors">
             <input
                 type="checkbox"
                 name="acepto"
                 value="1"
-                class="mt-0.5 rounded border-gg-borde text-gg-primario focus:ring-gg-primario shrink-0"
+                class="mt-0.5 w-5 h-5 shrink-0"
             >
-            <span class="text-sm text-gg-tinta">
+            <span class="text-base text-gg-tinta leading-snug">
                 He leído y entendido la información anterior. Acepto participar voluntariamente
                 en el estudio y autorizo el tratamiento de mis datos según lo descrito.
             </span>
         </label>
 
-        <x-boton variante="primario" tipo="submit" class="w-full justify-center">
+        <x-boton variante="primario" tipo="submit" tamano="lg" class="w-full justify-center" icono-final="flecha">
             Acepto y continuar
         </x-boton>
     </form>

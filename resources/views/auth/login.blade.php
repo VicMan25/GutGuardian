@@ -4,7 +4,8 @@
         <x-alerta tipo="exito" class="mb-6">{{ session('status') }}</x-alerta>
     @endif
 
-    <h1 class="font-display text-xl font-medium text-gg-tinta mb-6">Iniciar sesión</h1>
+    <h1 class="font-display text-3xl font-medium text-gg-tinta">Iniciar sesión</h1>
+    <p class="text-base text-gg-tinta-suave mt-1.5 mb-7">Bienvenido de nuevo. Ingresa con tu correo institucional.</p>
 
     <form method="POST" action="{{ route('login') }}" class="space-y-5">
         @csrf
@@ -34,7 +35,7 @@
                 <input
                     type="checkbox"
                     name="remember"
-                    class="rounded border-gg-borde text-gg-primario focus:ring-gg-primario"
+                    class="w-[18px] h-[18px]"
                 >
                 <span class="text-sm text-gg-tinta-suave">Recordarme</span>
             </label>
@@ -47,12 +48,12 @@
             @endif
         </div>
 
-        <x-boton variante="primario" tipo="submit" class="w-full justify-center">
+        <x-boton variante="primario" tipo="submit" tamano="lg" class="w-full justify-center" icono-final="flecha">
             Entrar
         </x-boton>
     </form>
 
-    <p class="mt-6 text-center text-sm text-gg-tinta-suave">
+    <p class="mt-7 pt-6 border-t border-gg-borde text-center text-sm text-gg-tinta-suave">
         ¿No tienes cuenta?
         <a href="{{ route('register') }}" class="text-gg-primario hover:underline font-medium">
             Crear cuenta
