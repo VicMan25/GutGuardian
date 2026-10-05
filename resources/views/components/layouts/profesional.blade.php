@@ -2,8 +2,9 @@
 <html lang="es" class="h-full">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="theme-color" content="#174A3B">
 
     <title>{{ $titulo ?? 'Panel' }} — GutGuardián</title>
 
@@ -15,7 +16,7 @@
 
     {{ $head ?? '' }}
 </head>
-<body class="h-full font-sans antialiased bg-gg-papel text-gg-tinta" x-data="{ navAbierta: false }">
+<body class="h-full font-sans antialiased gg-fondo text-gg-tinta" x-data="{ navAbierta: false }" @keydown.escape.window="navAbierta = false">
 
     <a href="#contenido"
        class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-3 focus:left-3
@@ -24,90 +25,118 @@
         Saltar al contenido
     </a>
 
+    @php
+        $navItems = [
+            ['label' => 'Panel', 'route' => 'panel.inicio', 'icon' => 'panel'],
+        ];
+        if (Auth::check() && Auth::user()->can('consultar_estudiantes')) {
+            $navItems[] = ['label' => 'Estudiantes', 'route' => 'panel.estudiantes.index', 'activo' => 'panel.estudiantes.*', 'icon' => 'estudiantes'];
+        }
+        if (Auth::check() && Auth::user()->can('generar_reportes')) {
+            $navItems[] = ['label' => 'Reportes', 'route' => 'panel.reportes.index', 'activo' => 'panel.reportes.*', 'icon' => 'reportes'];
+        }
+
+        $navAdmin = [
+            ['label' => 'Modelo predictivo', 'route' => 'admin.modelos.index',    'activo' => 'admin.modelos.*',    'icon' => 'modelo'],
+            ['label' => 'Validación',        'route' => 'admin.validacion.index', 'activo' => 'admin.validacion.*', 'icon' => 'validacion'],
+            ['label' => 'Auditoría',         'route' => 'admin.auditoria.index',  'activo' => 'admin.auditoria.*',  'icon' => 'auditoria'],
+        ];
+
+        $claseEnlace = fn (bool $activo) => 'group relative flex items-center gap-3 h-11 px-3 rounded-control text-sm transition-colors duration-150 '
+            .($activo
+                ? 'bg-white/[0.12] text-white font-medium'
+                : 'text-white/70 hover:bg-white/[0.06] hover:text-white');
+
+        $iniciales = Auth::check()
+            ? collect(explode(' ', trim(Auth::user()->name)))->filter()->take(2)->map(fn ($p) => mb_strtoupper(mb_substr($p, 0, 1)))->join('')
+            : '';
+    @endphp
+
     <div class="flex h-full">
 
-        {{-- Sidebar fijo en desktop, drawer en móvil --}}
+        {{-- Sidebar: fijo en desktop, drawer en móvil. Superficie de marca. --}}
         <aside
-            class="fixed inset-y-0 left-0 z-30 w-60 bg-gg-superficie border-r border-gg-borde flex flex-col
-                   transition-transform duration-200
+            class="gg-marca fixed inset-y-0 left-0 z-40 w-[272px] flex flex-col
+                   transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]
                    lg:translate-x-0 lg:static lg:inset-auto lg:h-full"
-            :class="navAbierta ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+            :class="navAbierta ? 'translate-x-0 shadow-elev-3' : '-translate-x-full lg:translate-x-0'"
             aria-label="Navegación principal"
         >
-            {{-- Logo --}}
-            <div class="h-14 flex items-center px-5 border-b border-gg-borde shrink-0">
-                <a href="{{ route('panel.inicio') }}"
-                   class="font-display text-md font-medium text-gg-primario tracking-tight">
-                    GutGuardián
-                </a>
+            {{-- Marca --}}
+            <div class="h-[72px] flex items-center justify-between gap-2 px-5 shrink-0">
+                <x-marca tono="claro" subtitulo="Panel institucional" :href="route('panel.inicio')" />
+                <button class="lg:hidden w-10 h-10 inline-flex items-center justify-center rounded-control text-white/70 hover:text-white hover:bg-white/10"
+                        @click="navAbierta = false" aria-label="Cerrar menú de navegación">
+                    <x-icono nombre="cerrar" />
+                </button>
             </div>
 
             {{-- Nav links --}}
-            <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-0.5" aria-label="Menú de sección">
-
-                @php
-                $navItems = [
-                    ['label' => 'Panel',        'route' => 'panel.inicio', 'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'],
-                ];
-                if (Auth::check() && Auth::user()->can('consultar_estudiantes')) {
-                    $navItems[] = ['label' => 'Estudiantes', 'route' => 'panel.estudiantes.index', 'activo' => 'panel.estudiantes.*', 'icon' => 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'];
-                }
-                if (Auth::check() && Auth::user()->can('generar_reportes')) {
-                    $navItems[] = ['label' => 'Reportes', 'route' => 'panel.reportes.index', 'activo' => 'panel.reportes.*', 'icon' => 'M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'];
-                }
-                @endphp
-
-                @foreach($navItems as $item)
-                <a href="{{ route($item['route']) }}"
-                   class="flex items-center gap-3 px-3 py-2 rounded-control text-sm
-                          transition-colors duration-150
-                          {{ request()->routeIs($item['activo'] ?? $item['route'])
-                             ? 'bg-gg-primario-suave text-gg-primario font-medium'
-                             : 'text-gg-tinta-suave hover:bg-gg-papel hover:text-gg-tinta' }}">
-                    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}"/>
-                    </svg>
-                    {{ $item['label'] }}
-                </a>
-                @endforeach
+            <nav class="flex-1 overflow-y-auto pt-4 pb-4 px-3" aria-label="Menú de sección">
+                <p class="px-3 mb-2 text-xs font-medium text-white/50 tracking-wide">General</p>
+                <div class="space-y-1">
+                    @foreach($navItems as $item)
+                    @php $activo = request()->routeIs($item['activo'] ?? $item['route']); @endphp
+                    <a href="{{ route($item['route']) }}" @if($activo) aria-current="page" @endif class="{{ $claseEnlace($activo) }}">
+                        @if($activo)
+                            <span class="absolute -left-3 top-2 bottom-2 w-[3px] rounded-r-full bg-gg-acento" aria-hidden="true"></span>
+                        @endif
+                        <x-icono :nombre="$item['icon']" class="w-[18px] h-[18px] {{ $activo ? 'text-gg-acento' : '' }}" />
+                        {{ $item['label'] }}
+                    </a>
+                    @endforeach
+                </div>
 
                 {{-- Solo admin --}}
                 @if(Auth::check() && Auth::user()->hasRole('admin'))
-                <div class="pt-4 mt-4 border-t border-gg-borde">
-                    <p class="px-3 mb-1 text-2xs font-medium text-gg-tinta-suave uppercase tracking-wider">Administración</p>
-                    <a href="{{ route('admin.inicio') }}"
-                       class="flex items-center gap-3 px-3 py-2 rounded-control text-sm text-gg-tinta-suave hover:bg-gg-papel hover:text-gg-tinta transition-colors duration-150">
-                        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        </svg>
-                        Modelo predictivo
-                    </a>
+                <div class="pt-5 mt-5 border-t border-white/10">
+                    <p class="px-3 mb-2 text-xs font-medium text-white/50 tracking-wide">Administración</p>
+                    <div class="space-y-1">
+                        @foreach($navAdmin as $item)
+                        @php $activo = request()->routeIs($item['activo']); @endphp
+                        <a href="{{ route($item['route']) }}" @if($activo) aria-current="page" @endif class="{{ $claseEnlace($activo) }}">
+                            @if($activo)
+                                <span class="absolute -left-3 top-2 bottom-2 w-[3px] rounded-r-full bg-gg-acento" aria-hidden="true"></span>
+                            @endif
+                            <x-icono :nombre="$item['icon']" class="w-[18px] h-[18px] {{ $activo ? 'text-gg-acento' : '' }}" />
+                            {{ $item['label'] }}
+                        </a>
+                        @endforeach
+                    </div>
                 </div>
                 @endif
             </nav>
 
             {{-- Usuario / cerrar sesión --}}
-            <div class="border-t border-gg-borde p-4 shrink-0">
-                @auth
-                <p class="text-xs font-medium text-gg-tinta truncate">{{ Auth::user()->name }}</p>
-                <p class="text-2xs text-gg-tinta-suave truncate mb-2">{{ Auth::user()->email }}</p>
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit"
-                            class="text-xs text-gg-tinta-suave hover:text-gg-tinta transition-colors duration-150">
-                        Cerrar sesión
-                    </button>
-                </form>
-                @endauth
+            @auth
+            <div class="p-3 shrink-0">
+                <div class="flex items-center gap-3 p-3 rounded-tarjeta bg-white/[0.06] border border-white/10">
+                    <span class="w-9 h-9 shrink-0 rounded-full bg-gg-acento text-gg-primario-noche text-sm font-medium inline-flex items-center justify-center" aria-hidden="true">
+                        {{ $iniciales }}
+                    </span>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-sm font-medium text-white truncate">{{ Auth::user()->name }}</p>
+                        <p class="text-xs text-white/60 truncate">{{ Auth::user()->email }}</p>
+                    </div>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit"
+                                class="w-9 h-9 inline-flex items-center justify-center rounded-control text-white/70 hover:text-white hover:bg-white/10 transition-colors duration-150"
+                                aria-label="Cerrar sesión" title="Cerrar sesión">
+                            <x-icono nombre="salir" class="w-[18px] h-[18px]" />
+                        </button>
+                    </form>
+                </div>
             </div>
+            @endauth
         </aside>
 
         {{-- Overlay para cerrar drawer en móvil --}}
         <div
-            class="fixed inset-0 z-20 bg-gg-tinta/30 lg:hidden"
+            class="fixed inset-0 z-30 bg-gg-primario-noche/40 backdrop-blur-[2px] lg:hidden"
             x-show="navAbierta"
-            x-transition:enter="transition-opacity duration-150"
+            x-cloak
+            x-transition:enter="transition-opacity duration-200"
             x-transition:enter-start="opacity-0"
             x-transition:enter-end="opacity-100"
             x-transition:leave="transition-opacity duration-150"
@@ -121,43 +150,42 @@
         <div class="flex-1 flex flex-col min-w-0 overflow-auto">
 
             {{-- Topbar --}}
-            <header class="sticky top-0 z-10 h-14 bg-gg-superficie border-b border-gg-borde flex items-center gap-4 px-4 lg:px-6 shrink-0">
+            <header class="sticky top-0 z-20 min-h-16 bg-gg-papel/85 backdrop-blur-md border-b border-gg-borde/80 shrink-0">
+                <div class="mx-auto w-full max-w-[1180px] min-h-16 flex flex-wrap items-center gap-x-4 gap-y-2 px-4 lg:px-8 py-3">
 
-                {{-- Botón hamburguesa (solo móvil) --}}
-                <button
-                    class="lg:hidden p-1.5 -ml-1.5 rounded-control text-gg-tinta-suave hover:text-gg-tinta hover:bg-gg-papel"
-                    @click="navAbierta = !navAbierta"
-                    :aria-expanded="navAbierta"
-                    aria-label="Abrir menú de navegación"
-                >
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
-                    </svg>
-                </button>
+                    {{-- Botón hamburguesa (solo móvil) --}}
+                    <button
+                        class="lg:hidden w-10 h-10 -ml-2 inline-flex items-center justify-center rounded-control text-gg-tinta-suave hover:text-gg-tinta hover:bg-gg-papel-hondo"
+                        @click="navAbierta = !navAbierta"
+                        :aria-expanded="navAbierta"
+                        aria-label="Abrir menú de navegación"
+                    >
+                        <x-icono nombre="menu" />
+                    </button>
 
-                {{-- Breadcrumb / título de pantalla --}}
-                <div class="flex-1 min-w-0">
-                    @isset($encabezado)
-                        {{ $encabezado }}
-                    @else
-                        <h1 class="font-display text-md font-medium text-gg-tinta truncate">
-                            {{ $titulo ?? 'Panel' }}
-                        </h1>
+                    {{-- Breadcrumb / título de pantalla --}}
+                    <div class="flex-1 min-w-0">
+                        @isset($encabezado)
+                            {{ $encabezado }}
+                        @else
+                            <h1 class="font-display text-md font-medium text-gg-tinta truncate">
+                                {{ $titulo ?? 'Panel' }}
+                            </h1>
+                        @endisset
+                    </div>
+
+                    {{-- Acciones de topbar opcionales --}}
+                    @isset($acciones)
+                        <div class="shrink-0 flex flex-wrap items-center gap-2">
+                            {{ $acciones }}
+                        </div>
                     @endisset
                 </div>
-
-                {{-- Acciones de topbar opcionales --}}
-                @isset($acciones)
-                    <div class="shrink-0 flex items-center gap-2">
-                        {{ $acciones }}
-                    </div>
-                @endisset
-
             </header>
 
             {{-- Contenido de la página — ancho acotado para longitud de línea legible --}}
-            <main id="contenido" class="flex-1 px-4 lg:px-6 py-6">
-                <div class="mx-auto w-full max-w-[1180px]">
+            <main id="contenido" class="flex-1 px-4 lg:px-8 py-6 lg:py-8">
+                <div class="mx-auto w-full max-w-[1180px] gg-entrada">
                     {{ $slot }}
                 </div>
             </main>

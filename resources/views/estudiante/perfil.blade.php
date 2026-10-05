@@ -1,7 +1,7 @@
 <x-layouts.estudiante titulo="Perfil">
 
     <div class="mb-6">
-        <h1 class="font-display text-2xl font-medium text-gg-tinta">Perfil</h1>
+        <h1 class="font-display text-3xl font-medium text-gg-tinta">Perfil</h1>
         <p class="text-sm text-gg-tinta-suave mt-1">
             Tus datos sociodemográficos. Actualizarlos no modifica tus encuestas ya completadas.
         </p>
@@ -36,7 +36,7 @@
                     <option value="prefiero_no_decir"  {{ old('genero', $perfil->genero) === 'prefiero_no_decir'  ? 'selected' : '' }}>Prefiero no decir</option>
                 </select>
                 @error('genero')
-                    <p class="text-2xs text-gg-riesgo-alto" role="alert">{{ $message }}</p>
+                    <p class="text-xs text-gg-riesgo-alto" role="alert">{{ $message }}</p>
                 @enderror
             </div>
 
@@ -71,7 +71,7 @@
                     @endforeach
                 </select>
                 @error('programa_id')
-                    <p class="text-2xs text-gg-riesgo-alto" role="alert">{{ $message }}</p>
+                    <p class="text-xs text-gg-riesgo-alto" role="alert">{{ $message }}</p>
                 @enderror
             </div>
 
@@ -96,7 +96,7 @@
                     @endforeach
                 </select>
                 @error('semestre')
-                    <p class="text-2xs text-gg-riesgo-alto" role="alert">{{ $message }}</p>
+                    <p class="text-xs text-gg-riesgo-alto" role="alert">{{ $message }}</p>
                 @enderror
             </div>
 

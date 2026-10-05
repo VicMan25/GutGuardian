@@ -8,16 +8,20 @@ use App\Modules\Encuestas\Models\Opcion;
 use App\Modules\Encuestas\Models\Pregunta;
 use App\Modules\Encuestas\Models\Respuesta;
 use App\Modules\Encuestas\Models\Seccion;
+use App\Modules\Reportes\Services\UsabilidadService;
 use App\Modules\Usuarios\Models\Perfil;
 use App\Modules\Usuarios\Models\Programa;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class EncuestaController extends Controller
 {
+    public function __construct(private readonly UsabilidadService $usabilidad) {}
+
     /**
      * HU-004/HU-005: encuentra el diligenciamiento pendiente/en_progreso del
      * estudiante para el instrumento activo (o crea uno), y lo lleva a la
@@ -99,7 +103,17 @@ class EncuestaController extends Controller
             ->with(['preguntas.opciones', 'preguntas.items'])
             ->firstOrFail();
 
-        $datos = $request->validate($this->reglasSeccion($seccion));
+        // Indicador de validación del piloto (tasa de errores al ingresar datos,
+        // §1.5.5.5): se registra cada envío y si superó las reglas de la sección.
+        try {
+            $datos = $request->validate($this->reglasSeccion($seccion));
+        } catch (ValidationException $e) {
+            $this->usabilidad->registrarEnvioSeccion($request->user(), $diligenciamiento, $orden, count($e->errors()));
+
+            throw $e;
+        }
+
+        $this->usabilidad->registrarEnvioSeccion($request->user(), $diligenciamiento, $orden, 0);
 
         foreach ($seccion->preguntas as $pregunta) {
             $this->guardarRespuesta($diligenciamiento, $pregunta, $datos['respuestas'][$pregunta->id]);

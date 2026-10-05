@@ -22,7 +22,7 @@
                             <option value="otro" {{ old('genero', $perfil?->genero) === 'otro' ? 'selected' : '' }}>Otro</option>
                             <option value="prefiero_no_decir" {{ old('genero', $perfil?->genero) === 'prefiero_no_decir' ? 'selected' : '' }}>Prefiero no decir</option>
                         </select>
-                        @error('genero') <p class="text-2xs text-gg-riesgo-alto" role="alert">{{ $message }}</p> @enderror
+                        @error('genero') <p class="text-xs text-gg-riesgo-alto" role="alert">{{ $message }}</p> @enderror
                     </div>
 
                     <x-campo-texto nombre="edad" etiqueta="Edad" tipo="number" requerido :valor="old('edad', $perfil?->edad)" :error="$errors->first('edad')" />
@@ -35,7 +35,7 @@
                                 <option value="{{ $programa->id }}" {{ (int) old('programa_id', $perfil?->programa_id) === $programa->id ? 'selected' : '' }}>{{ $programa->nombre }}</option>
                             @endforeach
                         </select>
-                        @error('programa_id') <p class="text-2xs text-gg-riesgo-alto" role="alert">{{ $message }}</p> @enderror
+                        @error('programa_id') <p class="text-xs text-gg-riesgo-alto" role="alert">{{ $message }}</p> @enderror
                     </div>
 
                     <div class="w-full space-y-1.5">
@@ -46,7 +46,7 @@
                                 <option value="{{ $sem }}" {{ (int) old('semestre', $perfil?->semestre) === $sem ? 'selected' : '' }}>Semestre {{ $sem }}</option>
                             @endforeach
                         </select>
-                        @error('semestre') <p class="text-2xs text-gg-riesgo-alto" role="alert">{{ $message }}</p> @enderror
+                        @error('semestre') <p class="text-xs text-gg-riesgo-alto" role="alert">{{ $message }}</p> @enderror
                     </div>
                 </div>
             </div>

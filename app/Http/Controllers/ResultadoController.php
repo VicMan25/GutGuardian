@@ -2,11 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Modules\Analitica\Models\EvaluacionRiesgo;
-use App\Modules\Analitica\Services\ExplicabilidadService;
-use App\Modules\Analitica\Services\PredictorService;
+use App\Modules\Analitica\Services\EvaluacionService;
 use App\Modules\Encuestas\Models\Diligenciamiento;
-use App\Modules\Panel\Services\AlertaService;
 use App\Modules\Panel\Services\AuditoriaClinicaService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,9 +12,7 @@ use Illuminate\View\View;
 class ResultadoController extends Controller
 {
     public function __construct(
-        private readonly PredictorService $predictor,
-        private readonly ExplicabilidadService $explicabilidad,
-        private readonly AlertaService $alertas,
+        private readonly EvaluacionService $evaluaciones,
         private readonly AuditoriaClinicaService $auditoria,
     ) {}
 
@@ -34,37 +29,11 @@ class ResultadoController extends Controller
         $this->auditoria->registrarConsultaResultado($request->user(), $diligenciamiento);
 
         $evaluacion = $diligenciamiento->evaluaciones()->latest('evaluado_at')->first()
-            ?? $this->evaluar($diligenciamiento);
+            ?? $this->evaluaciones->evaluar($diligenciamiento);
 
         return view('estudiante.resultado', [
             'evaluacion' => $evaluacion,
             'diligenciamiento' => $diligenciamiento,
         ]);
-    }
-
-    /**
-     * Orquesta predicción + explicabilidad y persiste el resultado.
-     * version_modelo_id queda siempre registrado (CLAUDE.md §5, trazabilidad TRIPOD+AI).
-     */
-    private function evaluar(Diligenciamiento $diligenciamiento): EvaluacionRiesgo
-    {
-        $version = $this->predictor->versionActiva();
-        $prediccion = $this->predictor->predecir($diligenciamiento);
-        $contribuciones = $this->explicabilidad->explicar($prediccion, $version);
-
-        $evaluacion = EvaluacionRiesgo::create([
-            'diligenciamiento_id' => $diligenciamiento->id,
-            'version_modelo_id' => $version->id,
-            'categoria' => $prediccion['categoria'],
-            'prob_0' => $prediccion['probabilidades']['0'],
-            'prob_1' => $prediccion['probabilidades']['1'],
-            'prob_2' => $prediccion['probabilidades']['2'],
-            'contribuciones' => $contribuciones,
-            'evaluado_at' => now(),
-        ]);
-
-        $this->alertas->generarSiCambioDeRiesgo($evaluacion);
-
-        return $evaluacion;
     }
 }

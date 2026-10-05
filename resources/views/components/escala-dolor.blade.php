@@ -42,7 +42,7 @@ $opciones = [
     @keydown.arrow-up.prevent="anterior()"
 >
 
-    <p id="{{ $uid }}-label" class="text-sm font-medium text-gg-tinta leading-snug mb-1">
+    <p id="{{ $uid }}-label" class="text-base font-medium text-gg-tinta leading-snug mb-2">
         @if($codigo)
             <span class="font-mono text-2xs text-gg-tinta-suave mr-1.5 select-none">{{ $codigo }}</span>
         @endif
@@ -54,20 +54,19 @@ $opciones = [
 
     {{-- Leyenda extremos --}}
     <div class="flex justify-between mb-2 px-0.5">
-        <span class="text-2xs text-gg-tinta-suave">Sin dolor</span>
-        <span class="text-2xs text-gg-tinta-suave">Muy intenso</span>
+        <span class="text-xs text-gg-tinta-suave">1 · Sin dolor</span>
+        <span class="text-xs text-gg-tinta-suave">Muy intenso · 5</span>
     </div>
 
-    <div class="grid grid-cols-5 border border-gg-borde rounded-control overflow-hidden"
+    <div class="grid grid-cols-5 gap-1.5 p-1.5 rounded-[14px] bg-gg-papel border border-gg-borde"
          role="presentation">
 
         @foreach($opciones as $i => $opcion)
         <label
-            class="relative cursor-pointer select-none transition-colors duration-100"
-            :class="{
-                'gg-seg-activo': seleccionado === {{ $opcion['valor'] }},
-                'hover:bg-gg-papel': seleccionado !== {{ $opcion['valor'] }},
-            }"
+            class="relative cursor-pointer select-none rounded-control transition-[background-color,box-shadow,transform] duration-150 active:scale-[0.97]"
+            :class="seleccionado === {{ $opcion['valor'] }}
+                ? 'gg-seg-activo'
+                : 'bg-gg-superficie hover:shadow-elev-1'"
         >
             <input
                 type="radio"
@@ -81,24 +80,18 @@ $opciones = [
                 @blur="enfocado = null"
             />
 
-            @if($i < 4)
-            <span class="absolute right-0 top-0 h-full w-px bg-gg-borde" aria-hidden="true"
-                :class="(seleccionado === {{ $opcion['valor'] }} || seleccionado === {{ $opciones[$i+1]['valor'] }}) ? 'opacity-0' : 'opacity-100'">
-            </span>
-            @endif
-
             <span
-                class="pointer-events-none absolute inset-0 transition-opacity duration-100"
-                :class="enfocado === {{ $opcion['valor'] }} ? 'shadow-[inset_0_0_0_2px_var(--gg-primario)]' : 'opacity-0'"
+                class="pointer-events-none absolute inset-0 rounded-control transition-opacity duration-100"
+                :class="enfocado === {{ $opcion['valor'] }} ? 'outline outline-2 outline-offset-2 outline-gg-primario' : 'opacity-0'"
                 aria-hidden="true"
             ></span>
 
-            <div class="flex flex-col items-center justify-center gap-0.5 py-3 px-1 text-center min-h-[3.5rem]">
+            <div class="flex flex-col items-center justify-center gap-1 py-2.5 px-1 text-center min-h-[4rem]">
                 <span
-                    class="text-md font-medium leading-none transition-colors duration-100"
+                    class="font-display text-xl font-medium leading-none transition-colors duration-100"
                     :class="seleccionado === {{ $opcion['valor'] }} ? 'text-gg-primario' : 'text-gg-tinta'"
                 >{{ $opcion['etiqueta'] }}</span>
-                <span class="text-2xs text-gg-tinta-suave leading-tight mt-0.5">
+                <span class="hidden sm:block text-2xs text-gg-tinta-suave leading-tight">
                     {{ $opcion['desc'] }}
                 </span>
             </div>
@@ -108,7 +101,7 @@ $opciones = [
     </div>
 
     @if($error)
-    <p class="mt-1.5 text-2xs text-gg-riesgo-alto" role="alert">{{ $error }}</p>
+    <p class="mt-2 text-sm text-gg-riesgo-alto" role="alert">{{ $error }}</p>
     @endif
 
 </div>

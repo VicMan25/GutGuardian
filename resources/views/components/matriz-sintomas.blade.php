@@ -43,7 +43,7 @@ foreach ($items as $idx => $item) {
 
     {{-- Encabezado de pregunta --}}
     @if($pregunta)
-    <p id="{{ $uid }}-label" class="text-sm font-medium text-gg-tinta leading-snug mb-4">
+    <p id="{{ $uid }}-label" class="text-base font-medium text-gg-tinta leading-snug mb-4">
         @if($codigo)
             <span class="font-mono text-2xs text-gg-tinta-suave mr-1.5 select-none">{{ $codigo }}</span>
         @endif
@@ -56,13 +56,14 @@ foreach ($items as $idx => $item) {
 
     {{-- Progreso: N de M ítems respondidos (accesible) --}}
     <div class="flex items-center justify-between mb-3">
-        <span class="text-2xs text-gg-tinta-suave" aria-live="polite" aria-atomic="true">
+        <span class="text-sm text-gg-tinta-suave" aria-live="polite" aria-atomic="true">
             <span x-text="totalRespondidos()">0</span> de {{ $totalItems }} respondidos
         </span>
         <span
-            class="text-2xs font-medium text-gg-primario transition-opacity duration-200"
+            class="inline-flex items-center gap-1 text-sm font-medium text-gg-primario"
             x-show="todosRespondidos()"
-        >Completado</span>
+            x-transition.opacity
+        ><x-icono nombre="check" class="w-4 h-4" />Completado</span>
     </div>
 
     {{-- ============================================================
@@ -71,12 +72,12 @@ foreach ($items as $idx => $item) {
     <div class="sm:hidden space-y-1.5" role="list" aria-label="{{ $pregunta }}">
 
         @foreach($items as $idx => $item)
-        <div role="listitem" class="border border-gg-borde rounded-control overflow-hidden">
+        <div role="listitem" class="border border-gg-borde rounded-control overflow-hidden transition-shadow duration-200" :class="expandido === {{ $idx }} ? 'shadow-elev-2' : ''">
 
             {{-- Cabecera del ítem --}}
             <button
                 type="button"
-                class="w-full flex items-center justify-between gap-3 px-4 py-3 text-left
+                class="w-full flex items-center justify-between gap-3 px-4 min-h-[52px] py-3 text-left
                        transition-colors duration-100
                        hover:bg-gg-papel focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gg-primario"
                 :class="expandido === {{ $idx }} ? 'bg-gg-primario-suave' : 'bg-gg-superficie'"
@@ -119,16 +120,17 @@ foreach ($items as $idx => $item) {
                 x-transition:leave="transition-all duration-100 ease-in"
                 x-transition:leave-start="opacity-100 translate-y-0"
                 x-transition:leave-end="opacity-0 -translate-y-1"
-                class="border-t border-gg-borde bg-gg-superficie"
+                class="border-t border-gg-borde bg-gg-papel"
                 role="radiogroup"
                 :aria-label="'Frecuencia de: {{ $item['etiqueta'] }}'"
             >
-                <div class="grid grid-cols-{{ count($opciones) <= 4 ? count($opciones) : '3' }} divide-x divide-gg-borde">
+                {{-- Clases literales (no interpoladas) para que Tailwind no las purgue.
+                     Escala de 4 niveles → 2×2; temporalidad de 6 → 2×3. --}}
+                <div class="grid {{ count($opciones) <= 2 ? 'grid-cols-2' : (count($opciones) === 3 ? 'grid-cols-3' : 'grid-cols-2') }} gap-1.5 p-1.5">
                     @foreach($opciones as $j => $opcion)
                     <label
-                        class="relative cursor-pointer select-none transition-colors duration-100
-                               hover:bg-gg-papel"
-                        :class="respuestas[{{ $idx }}] === {{ $opcion['valor'] }} ? 'gg-seg-activo' : ''"
+                        class="relative cursor-pointer select-none rounded-control transition-[background-color,box-shadow,transform] duration-150 active:scale-[0.98]"
+                        :class="respuestas[{{ $idx }}] === {{ $opcion['valor'] }} ? 'gg-seg-activo' : 'bg-gg-superficie hover:shadow-elev-1'"
                     >
                         <input
                             type="radio"
@@ -139,9 +141,9 @@ foreach ($items as $idx => $item) {
                             :checked="respuestas[{{ $idx }}] === {{ $opcion['valor'] }}"
                             @change="responder({{ $idx }}, {{ $opcion['valor'] }})"
                         />
-                        <div class="flex flex-col items-center justify-center gap-0.5 py-3 px-1 text-center min-h-[3rem]">
+                        <div class="flex flex-col items-center justify-center gap-0.5 py-3 px-1 text-center min-h-[3.5rem]">
                             <span
-                                class="text-xs leading-tight transition-colors duration-100"
+                                class="text-sm leading-tight transition-colors duration-100"
                                 :class="respuestas[{{ $idx }}] === {{ $opcion['valor'] }} ? 'text-gg-primario font-medium' : 'text-gg-tinta'"
                             >{{ $opcion['etiqueta'] }}</span>
                             @if(isset($opcion['equiv']))
@@ -186,7 +188,7 @@ foreach ($items as $idx => $item) {
                     role="radiogroup"
                     :aria-label="'{{ $item['etiqueta'] }}'"
                 >
-                    <td class="py-2.5 pr-4 text-sm text-gg-tinta leading-snug">
+                    <td class="py-3 pr-4 text-base text-gg-tinta leading-snug">
                         {{ $item['etiqueta'] }}
                     </td>
                     @foreach($opciones as $opcion)
@@ -203,7 +205,7 @@ foreach ($items as $idx => $item) {
                                 @focus="expandido = {{ $idx }}"
                             />
                             {{-- Círculo visual de radio --}}
-                            <span class="w-5 h-5 rounded-full border-2 border-gg-borde flex items-center justify-center
+                            <span class="w-6 h-6 rounded-full border-2 border-[#C7D0C9] flex items-center justify-center
                                          group-hover:border-gg-primario transition-colors duration-100
                                          peer-checked:border-gg-primario peer-checked:bg-gg-primario
                                          peer-focus-visible:ring-2 peer-focus-visible:ring-gg-primario peer-focus-visible:ring-offset-1"
@@ -221,7 +223,7 @@ foreach ($items as $idx => $item) {
     </div>
 
     @if($error)
-    <p class="mt-2 text-2xs text-gg-riesgo-alto" role="alert">{{ $error }}</p>
+    <p class="mt-2 text-sm text-gg-riesgo-alto" role="alert">{{ $error }}</p>
     @endif
 
 </div>

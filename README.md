@@ -106,7 +106,19 @@ php artisan test
 
 # Análisis estático con Larastan
 ./vendor/bin/phpstan analyse
+
+# Crear una cuenta de administrador o de profesional de salud
+php artisan gutguardian:crear-usuario admin
+
+# SOLO DESARROLLO: simular encuestas de un estudiante para ver seguimiento, historial y alertas
+php artisan gutguardian:simular-seguimiento estudiante@correo --encuestas=6 --dias=14
+
+# Lista de chequeo antes del despliegue piloto
+php artisan gutguardian:verificar-despliegue
 ```
+
+El despliegue en servidor, la gestión de versiones del modelo y la prueba piloto
+de usabilidad están descritos en [`docs/DESPLIEGUE.md`](docs/DESPLIEGUE.md).
 
 ---
 

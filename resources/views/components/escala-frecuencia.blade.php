@@ -43,7 +43,7 @@ $opciones = [
 >
 
     @if($pregunta)
-    <p id="{{ $uid }}-label" class="text-sm font-medium text-gg-tinta leading-snug mb-3">
+    <p id="{{ $uid }}-label" class="text-base font-medium text-gg-tinta leading-snug mb-3">
         @if($codigo)
             <span class="font-mono text-2xs text-gg-tinta-suave mr-1.5 select-none">{{ $codigo }}</span>
         @endif
@@ -54,17 +54,16 @@ $opciones = [
     </p>
     @endif
 
-    {{-- Contenedor segmentado --}}
-    <div class="grid grid-cols-4 border border-gg-borde rounded-control overflow-hidden"
+    {{-- Contenedor segmentado: 2×2 en móvil, 4 columnas desde sm --}}
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1.5 rounded-[14px] bg-gg-papel border border-gg-borde"
          role="presentation">
 
         @foreach($opciones as $i => $opcion)
         <label
-            class="relative cursor-pointer select-none transition-colors duration-100"
-            :class="{
-                'gg-seg-activo': seleccionado === {{ $opcion['valor'] }},
-                'hover:bg-gg-papel': seleccionado !== {{ $opcion['valor'] }},
-            }"
+            class="relative cursor-pointer select-none rounded-control transition-[background-color,box-shadow,transform] duration-150 active:scale-[0.98]"
+            :class="seleccionado === {{ $opcion['valor'] }}
+                ? 'gg-seg-activo'
+                : 'bg-gg-superficie hover:shadow-elev-1'"
         >
             {{-- Input real — accesible a teclado y lector de pantalla --}}
             <input
@@ -79,26 +78,17 @@ $opciones = [
                 @blur="enfocado = null"
             />
 
-            {{-- Separador vertical entre segmentos (excepto el último) --}}
-            @if($i < 3)
-            <span
-                class="absolute right-0 top-0 h-full w-px bg-gg-borde"
-                :class="(seleccionado === {{ $opcion['valor'] }} || seleccionado === {{ $opciones[$i+1]['valor'] }}) ? 'opacity-0' : 'opacity-100'"
-                aria-hidden="true"
-            ></span>
-            @endif
-
             {{-- Indicador de foco de teclado --}}
             <span
-                class="pointer-events-none absolute inset-0 rounded-sm transition-opacity duration-100"
-                :class="enfocado === {{ $opcion['valor'] }} ? 'shadow-[inset_0_0_0_2px_var(--gg-primario)]' : 'opacity-0'"
+                class="pointer-events-none absolute inset-0 rounded-control transition-opacity duration-100"
+                :class="enfocado === {{ $opcion['valor'] }} ? 'outline outline-2 outline-offset-2 outline-gg-primario' : 'opacity-0'"
                 aria-hidden="true"
             ></span>
 
             {{-- Contenido visible del segmento --}}
-            <div class="flex flex-col items-center justify-center gap-0.5 py-3 px-1 text-center min-h-[3.5rem]">
+            <div class="flex flex-col items-center justify-center gap-0.5 py-2.5 px-2 text-center min-h-[3.75rem]">
                 <span
-                    class="text-xs leading-tight transition-colors duration-100"
+                    class="text-sm leading-tight transition-colors duration-100"
                     :class="seleccionado === {{ $opcion['valor'] }} ? 'text-gg-primario font-medium' : 'text-gg-tinta'"
                 >{{ $opcion['etiqueta'] }}</span>
                 <span class="text-2xs text-gg-tinta-suave leading-tight font-mono">
@@ -111,7 +101,7 @@ $opciones = [
     </div>
 
     @if($error)
-    <p class="mt-1.5 text-2xs text-gg-riesgo-alto" role="alert">{{ $error }}</p>
+    <p class="mt-2 text-sm text-gg-riesgo-alto" role="alert">{{ $error }}</p>
     @endif
 
 </div>

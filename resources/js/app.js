@@ -1,9 +1,26 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
-import { Chart, LineController, LineElement, PointElement, LinearScale, CategoryScale, Legend, Tooltip } from 'chart.js';
+import { Chart, LineController, LineElement, PointElement, BarController, BarElement, LinearScale, CategoryScale, Legend, Tooltip } from 'chart.js';
 
-Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Legend, Tooltip);
+// Barras: reporte institucional (HU-022). Líneas: seguimiento y ficha (HU-008/HU-010).
+Chart.register(LineController, LineElement, PointElement, BarController, BarElement, LinearScale, CategoryScale, Legend, Tooltip);
 Chart.defaults.font.family = "'Source Sans 3', system-ui, sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.color = '#55615B';
+Chart.defaults.borderColor = '#E9ECE6';
+Chart.defaults.elements.line.borderWidth = 2.5;
+Chart.defaults.elements.point.radius = 3.5;
+Chart.defaults.elements.point.hoverRadius = 6;
+Chart.defaults.elements.point.borderWidth = 2;
+Chart.defaults.elements.point.backgroundColor = '#FFFFFF';
+Chart.defaults.elements.bar.borderRadius = 8;
+Chart.defaults.plugins.legend.labels.usePointStyle = true;
+Chart.defaults.plugins.legend.labels.pointStyle = 'circle';
+Chart.defaults.plugins.tooltip.backgroundColor = '#0F2E25';
+Chart.defaults.plugins.tooltip.padding = 10;
+Chart.defaults.plugins.tooltip.cornerRadius = 8;
+Chart.defaults.plugins.tooltip.titleFont = { weight: '500' };
+Chart.defaults.plugins.tooltip.boxPadding = 4;
 
 window.Alpine = Alpine;
 window.Chart = Chart;
@@ -160,5 +177,37 @@ Alpine.data('selectorUnico', (seleccionadoInicial = null) => ({
         this.seleccionado = id;
     },
 }));
+
+// ================================================================
+// Estado de carga al enviar formularios POST: el botón que envía
+// muestra un indicador y queda inactivo hasta la respuesta. Evita el
+// doble envío (p. ej. de una sección de la encuesta). No aplica a GET
+// (búsquedas y filtros) ni a formularios marcados con data-sin-carga.
+// ================================================================
+document.addEventListener('submit', (evento) => {
+    const formulario = evento.target;
+    if (evento.defaultPrevented || formulario.method?.toLowerCase() !== 'post' || 'sinCarga' in formulario.dataset) {
+        return;
+    }
+
+    const boton = evento.submitter
+        ?? formulario.querySelector('button[type="submit"], button:not([type])');
+    if (!boton) return;
+
+    // Se marca en el siguiente ciclo para no alterar el valor enviado por el botón.
+    requestAnimationFrame(() => {
+        boton.setAttribute('data-cargando', '');
+        boton.setAttribute('aria-busy', 'true');
+    });
+});
+
+// Al volver con "Atrás" el navegador puede restaurar la página desde caché
+// con el botón todavía en estado de carga.
+window.addEventListener('pageshow', () => {
+    document.querySelectorAll('[data-cargando]').forEach((el) => {
+        el.removeAttribute('data-cargando');
+        el.removeAttribute('aria-busy');
+    });
+});
 
 Alpine.start();

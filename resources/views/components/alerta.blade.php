@@ -58,15 +58,17 @@ $c = $config[$tipo] ?? $config['info'];
     x-transition:leave-start="opacity-100"
     x-transition:leave-end="opacity-0"
     @endif
-    class="flex gap-3 p-4 rounded-control border {{ $c['bg'] }} {{ $c['borde'] }} border-l-4"
+    {{ $attributes->merge(['class' => "flex gap-3 p-4 rounded-tarjeta border border-l-4 animate-gg-entrada {$c['bg']} {$c['borde']}"]) }}
 >
     {{-- Ícono --}}
-    <svg class="w-5 h-5 shrink-0 mt-0.5 {{ $c['tinta'] }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" d="{{ $c['icono'] }}"/>
-    </svg>
+    <span class="shrink-0 w-8 h-8 -my-0.5 rounded-full bg-white/70 inline-flex items-center justify-center {{ $c['tinta'] }}" aria-hidden="true">
+        <svg class="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+            <path stroke-linecap="round" stroke-linejoin="round" d="{{ $c['icono'] }}"/>
+        </svg>
+    </span>
 
     {{-- Contenido --}}
-    <div class="flex-1 min-w-0">
+    <div class="flex-1 min-w-0 pt-1">
         @if($titulo)
         <p class="text-sm font-medium {{ $c['tinta'] }} mb-0.5">{{ $titulo }}</p>
         @endif

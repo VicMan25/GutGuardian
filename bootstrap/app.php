@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CabecerasSeguridad;
 use App\Http\Middleware\VerificarConsentimiento;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -15,6 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->web(append: [CabecerasSeguridad::class]);
+
         $middleware->alias([
             'consentimiento' => VerificarConsentimiento::class,
             'role' => RoleMiddleware::class,

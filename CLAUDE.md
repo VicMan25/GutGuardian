@@ -261,10 +261,9 @@ histórica** de los registros del estudiante y ajustar la redacción en la monog
       `PredictorService`/`ExplicabilidadService` en Laravel implementados y con tests Pest
       (casos conocidos de softmax). Corre de punta a punta sobre datos **sintéticos**; no
       reemplaza el modelo real. Ver bloqueante abajo.
-- [x] Sprint 5 — panel institucional y reportes (HU-014/015/016/017/018/019/022/023/024,
-      **alcance inferido y documentado** en `docs/AVANCE_PROYECTO.md` — el documento de tesis
-      solo tiene la narrativa de una línea de estas 9 HU en el backlog, sin criterios de
-      aceptación redactados): `EstudianteController` (consulta individual y listado con
+- [x] Sprint 5 — panel institucional y reportes (HU-014/015/016/017/018/019/022/023/024;
+      el alcance se infirió en `docs/AVANCE_PROYECTO.md` y la tesis ya lo formalizó en
+      §2.4.1.4.5, Tablas 62–75, con los mismos criterios): `EstudianteController` (consulta individual y listado con
       búsqueda, HU-014/015/016 — reutiliza `SeguimientoService` de Sprint 3),
       `UsuarioController` (crear/editar/desactivar-reactivar cuentas de estudiantes,
       HU-017/018/019 — acotado a rol `estudiante`), `ReporteController` +
@@ -280,13 +279,37 @@ histórica** de los registros del estudiante y ajustar la redacción en la monog
       exportación de reportes— (Ley 1581); `aviso-no-diagnostico` agregado a las
       vistas de ficha y de reportes del panel (Resolución 3100); HU-016 con test
       propio. Suite: 180 tests.
-- [ ] Sprint 6
+- [x] Sprint 6 (software) — HU-026 gestión de versiones del modelo (`/admin/modelos`,
+      `ImportadorModeloService`, también usado por `VersionModeloSeeder`); validación del
+      objetivo 1.3.2.4: cuestionario SUS (`/usabilidad`), tasa de errores por envío de sección
+      y tiempo de diligenciamiento, resumidos en `/admin/validacion` con exportación CSV
+      anonimizada; Ley 1581: `/mis-datos` (datos, consentimiento, quién consultó, copia PDF) y
+      visor `/admin/auditoria`; seguridad: `CabecerasSeguridad` y HTTPS forzado en producción;
+      comandos `gutguardian:crear-usuario` y `gutguardian:verificar-despliegue`; tutorial
+      `docs/DESPLIEGUE.md`. Corrigió además dos defectos que impedían dibujar **todas** las
+      gráficas (seguimiento, ficha del panel y reporte): `@json` dentro de `x-init="…"` emitía
+      comillas dobles crudas que cortaban el atributo (ahora `Js::from`), y `BarController` no
+      estaba registrado en `app.js`. Comando solo-desarrollo `gutguardian:simular-seguimiento`
+      (usa `EvaluacionService`, extraído de `ResultadoController`). Suite: 230 tests. **Pendiente de campo:** ejecutar la prueba piloto
+      con estudiantes y desplegar en el servidor institucional.
 - [ ] **BLOQUEANTE (sigue abierto):** regla operativa real de la variable dependiente Y
       (requiere a Enfermería). `ml/comun.py::derivar_categoria_riesgo` implementa una regla
       PLACEHOLDER documentada solo para poder ejercitar el pipeline de ingeniería — no usar
       para tamizaje real.
-- [ ] Dataset de 347 registros exportado y limpio para entrenamiento (el pipeline actual
-      corre sobre `ml/generar_dataset_sintetico.py`, no sobre datos reales)
+- [~] Dataset de 347 registros: ETL listo (`ml/etl_datos_reales.py` → `ml/datos/dataset_real.csv`,
+      ignorado por git). La versión activa del modelo (v1.0) sigue siendo la entrenada con datos
+      sintéticos; reentrenar con los datos reales depende de la regla Y.
+- [ ] Monografía: el complemento con los cambios resaltados está en `docs/monografia/`
+      (Sprint 6, HU-026, objetivo 1.3.2.4, conclusiones y recomendaciones de Ingeniería,
+      marcadores pendientes del documento).
+- [x] Rediseño UX/UI (post Sprint 6, sin cambios de lógica ni rutas): identidad visual propia
+      (superficie de marca verde con patrón de «flujo», elevación suave, microinteracciones),
+      espacio reservado para el logo oficial (`x-marca`), barra de pestañas inferior en móvil
+      para el estudiante, sidebar de marca en el panel, `x-insignia-riesgo` e `x-icono`
+      unificados, estado de carga en envíos POST (`app.js`), controles de encuesta táctiles
+      (2×2 en móvil). Corrigió además: navegación del layout estudiante que llevaba a
+      profesionales/admin a rutas 403 al abrir `/resultado`, `<select>` del registro sin
+      `<label for>`, y modificadores de opacidad de Tailwind que no funcionaban con los tokens.
 
 ---
 
@@ -294,15 +317,23 @@ histórica** de los registros del estudiante y ajustar la redacción en la monog
 
 ### Tokens de color (CSS variables + utilidades Tailwind `gg-*`)
 
+Cada token tiene además su versión en canales (`--gg-papel-rgb: 246 247 244`) y Tailwind la usa
+con `<alpha-value>`, así que funcionan las opacidades (`bg-gg-papel/85`). Al agregar un token,
+definir ambas variables en `app.css`.
+
 | Token CSS               | Hex       | Tailwind           | Uso                              |
 |-------------------------|-----------|--------------------|----------------------------------|
 | `--gg-papel`            | `#F6F7F4` | `gg-papel`         | Fondo de página                  |
 | `--gg-superficie`       | `#FFFFFF` | `gg-superficie`    | Tarjetas y formularios           |
 | `--gg-tinta`            | `#16302B` | `gg-tinta`         | Texto principal                  |
-| `--gg-tinta-suave`      | `#5A6560` | `gg-tinta-suave`   | Texto secundario, equivalencias  |
+| `--gg-tinta-suave`      | `#55615B` | `gg-tinta-suave`   | Texto secundario, equivalencias  |
 | `--gg-borde`            | `#E0E3DC` | `gg-borde`         | Bordes hairline                  |
 | `--gg-primario`         | `#1F5C4A` | `gg-primario`      | Marca, acciones, anillo de foco  |
 | `--gg-primario-suave`   | `#E6EFEA` | `gg-primario-suave`| Fondo de opción seleccionada     |
+| `--gg-primario-hondo`   | `#174A3B` | `gg-primario-hondo`| Hover del primario, superficie de marca |
+| `--gg-primario-noche`   | `#0F2E25` | `gg-primario-noche`| Fondo más profundo de la marca, tooltips |
+| `--gg-acento`           | `#CFE3B4` | `gg-acento`        | Detalles **sobre verde** (íconos, indicador activo). Nunca texto sobre papel |
+| `--gg-papel-hondo`      | `#EDF0EA` | `gg-papel-hondo`   | Pistas de barras, hover de fantasma |
 | `--gg-riesgo-bajo`      | `#3E7D64` | `gg-riesgo-bajo`   | Segmento 0 de la pista           |
 | `--gg-riesgo-medio`     | `#C08A2E` | `gg-riesgo-medio`  | Segmento 1 de la pista (ámbar)   |
 | `--gg-riesgo-alto`      | `#9C4A32` | `gg-riesgo-alto`   | Segmento 2 (arcilla, NO rojo)    |
@@ -315,23 +346,60 @@ histórica** de los registros del estudiante y ajustar la redacción en la monog
 | Source Sans 3          | 400/500 | `font-sans`       | Todo el cuerpo de texto                          |
 | IBM Plex Mono          | 400     | `font-mono`       | Códigos de participante, probabilidades, OR      |
 
-**Escala tipográfica:** `12 / 13 / 14 / 16 / 17 / 22 / 28 / 36 px` (Tailwind: `2xs xs sm base md xl 2xl 3xl`).
+**Escala tipográfica:** `12 / 13 / 14 / 16 / 17 / 22 / 28 / 36 / 46 px` (Tailwind: `2xs xs sm base md xl 2xl 3xl 4xl`).
 Solo pesos 400 y 500. Formato oración en todos los textos.
 
-### Radios y bordes
+| Rol                         | Clase                                   |
+|-----------------------------|-----------------------------------------|
+| Héroe (acceso, saludo)      | `font-display text-4xl` (`text-3xl` en móvil) |
+| Título de pantalla          | `font-display text-3xl`                 |
+| Título de sección / tarjeta | `font-display text-xl`                  |
+| Enunciado de pregunta, cuerpo | `text-base`                           |
+| Botones                     | `text-base` (md/lg), `text-sm` (sm)     |
+| Texto secundario, ayudas    | `text-sm`                               |
+| Rótulo («eyebrow»)          | `.gg-rotulo` (13 px, tracking)          |
+| Errores de campo            | `text-sm text-gg-riesgo-alto`           |
+| Mínimo (códigos mono, equivalencias) | `text-2xs` — nunca para información que haya que leer |
 
-- Controles interactivos: `rounded-control` (8 px)
-- Tarjetas: `rounded-tarjeta` (12 px)
-- Bordes: 1 px. Sin sombras, salvo el anillo de foco (`outline: 2px solid --gg-primario`).
-- Sin degradados.
+### Radios, bordes, elevación y fondos
+
+- Controles interactivos: `rounded-control` (10 px). Tarjetas: `rounded-tarjeta` (16 px).
+  Bloques protagonistas (héroes, resultado): `rounded-bloque` (24 px).
+- Bordes: 1 px `gg-borde`.
+- Elevación (sombras teñidas de la tinta verde, nunca negras): `shadow-elev-1` (tarjetas),
+  `shadow-elev-2` (tarjeta protagonista), `shadow-elev-3` (menús, barras flotantes, tarjeta de
+  acceso), `shadow-boton` (botón primario).
+- Degradados: **solo** en superficies de marca (`.gg-marca`, verde profundo con patrón de
+  «flujo») y en el fondo de página (`.gg-fondo`, halos casi imperceptibles). Nunca en botones,
+  texto ni en la escala de riesgo.
+- `.gg-flujo-claro`: el mismo patrón, muy tenue, sobre superficies claras (estados vacíos,
+  tarjeta del último resultado).
+- Una utilidad `bg-*` de Tailwind gana sobre `.gg-marca` (capa components): no combinarlas.
+
+### Movimiento
+
+- Curva única `--gg-curva` (`cubic-bezier(0.22, 1, 0.36, 1)`); 150 ms para estados, 200–460 ms
+  para entradas.
+- `.gg-entrada` en un contenedor anima a sus hijos de forma escalonada al cargar.
+- `.gg-interactiva` (o `<x-tarjeta interactiva>`): elevación de 2 px al pasar el cursor; solo
+  en elementos clicables.
+- `app.js` marca con `[data-cargando]` el botón que envía un formulario **POST** (indicador
+  giratorio, evita doble envío). Un formulario puede excluirse con `data-sin-carga`.
+- Todo respeta `prefers-reduced-motion`.
+
+### Logo
+
+El logo oficial **no se inventa**. `x-marca` reserva su espacio (recuadro punteado) en el
+acceso, la cabecera del estudiante y el sidebar del panel. Para incorporarlo basta con copiar
+el archivo en `public/img/logo.svg` (o `logo.png`); ninguna vista necesita cambios.
 
 ### Layouts
 
 | Layout                          | Cuándo usarlo                                     |
 |---------------------------------|---------------------------------------------------|
-| `layouts/publico.blade.php`     | Login, registro, consentimiento. Panel de marca `bg-gg-primario` a la izquierda desde `lg`; tarjeta de formulario `max-w-[460px]` a la derecha. En móvil colapsa a una sola columna. |
-| `layouts/estudiante.blade.php`  | Encuesta y resultado (1 col, `max-w-[640px]`)     |
-| `layouts/profesional.blade.php` | Panel institucional (sidebar + contenido denso). El contenido se acota a `max-w-[1180px] mx-auto` para no estirar tablas/formularios en monitores anchos. |
+| `layouts/publico.blade.php`     | Login, registro, consentimiento. Panel `.gg-marca` fijo a la izquierda desde `lg` (marca, propuesta de valor, adelanto de la pista); tarjeta de formulario `max-w-[460px]` a la derecha. En móvil/tablet: banda de marca arriba y la tarjeta superpuesta. |
+| `layouts/estudiante.blade.php`  | Prop `ancho`: `estrecho` (640 px, por defecto: encuesta, resultado, formularios) o `amplio` (1040 px: inicio, seguimiento). Cabecera translúcida con marca, navegación en píldora (md+) y menú de cuenta (Perfil, Mis datos, Salir). En móvil: **barra de pestañas inferior**. Si quien lo ve no es estudiante (resultado abierto desde el panel), oculta la navegación del estudiante y ofrece «Volver al panel». |
+| `layouts/profesional.blade.php` | Panel institucional: sidebar `.gg-marca` (drawer en móvil) + topbar translúcida. El contenido se acota a `max-w-[1180px] mx-auto` y entra con `.gg-entrada`. |
 
 Los tres layouts abren con un enlace «Saltar al contenido» (`sr-only` hasta recibir foco) que apunta a `#contenido` en el `<main>`.
 
@@ -344,16 +412,20 @@ Los tres layouts abren con un enlace «Saltar al contenido» (`sr-only` hasta re
 | `matriz-sintomas`       | `components/matriz-sintomas`     | Acordeón (móvil) / tabla (desktop) para P11, P12, P16, P17     |
 | `opcion-multiple`       | `components/opcion-multiple`     | Checkboxes con "Ninguna" excluyente. Para P14, P15, P18, P20   |
 | `pista-riesgo`          | `components/pista-riesgo`        | 3 segmentos + marcador + contribuciones + aviso-no-diagnostico  |
-| `tarjeta`               | `components/tarjeta`             | Contenedor superficie, sin sombra                               |
-| `boton`                 | `components/boton`               | Variantes: primario, secundario, fantasma                       |
-| `campo-texto`           | `components/campo-texto`         | Input con label, error y ayuda integrados                       |
+| `tarjeta`               | `components/tarjeta`             | Contenedor superficie, `elev-1`; prop `interactiva` para clicables |
+| `boton`                 | `components/boton`               | Variantes: primario, secundario, fantasma, claro (sobre verde). Tamaños sm/md/lg; props `icono` e `icono-final` |
+| `campo-texto`           | `components/campo-texto`         | Input 46 px con label, error y ayuda; mostrar/ocultar en contraseñas |
+| `marca`                 | `components/marca`               | Espacio del logo + nombre. Tonos claro/oscuro, tamaños sm/md/lg  |
+| `insignia-riesgo`       | `components/insignia-riesgo`     | Píldora de nivel (punto + texto); `null` → «Sin evaluar»         |
+| `icono`                 | `components/icono`               | Juego único de íconos de trazo (24 px, 1.75) para nav y acciones |
 | `alerta`               | `components/alerta`              | Tipos: exito, error, aviso, info. Cierre opcional con Alpine    |
 | `aviso-no-diagnostico`  | `components/aviso-no-diagnostico`| **Obligatorio** junto a todo resultado. Res. 3100/2019          |
 | `barra-progreso`        | `components/barra-progreso`      | Progreso por sección (no por pregunta individual)               |
 
 ### Reglas de calidad de la interfaz
 
-- Responsive desde 360 px.
+- Responsive desde 360 px. Sin desbordamiento horizontal; tablas del panel pasan a tarjetas en móvil.
+- Objetivos táctiles de 44 px como mínimo (inputs, botones md, opciones de encuesta).
 - Foco de teclado visible en todo control interactivo.
 - Contraste WCAG AA en todos los textos.
 - Respetar `prefers-reduced-motion` (CSS global en `app.css`).
