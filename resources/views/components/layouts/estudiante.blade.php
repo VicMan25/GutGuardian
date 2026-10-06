@@ -1,8 +1,12 @@
 @props([
     // 'estrecho' (640 px): encuesta, resultado y formularios — lectura enfocada.
     // 'amplio' (1040 px): inicio y seguimiento — tableros con varias columnas.
-    'ancho'  => 'estrecho',
-    'titulo' => null,
+    'ancho'   => 'estrecho',
+    'titulo'  => null,
+    // Modo enfoque (encuesta): sin barra de pestañas inferior en móvil, para
+    // que la barra de acciones de la encuesta quede al alcance del pulgar.
+    // La salida sigue disponible en la cabecera (logo y menú de cuenta).
+    'enfoque' => false,
 ])
 <!DOCTYPE html>
 <html lang="es" class="h-full">
@@ -172,7 +176,7 @@
     </main>
 
     {{-- Pie: aviso legal siempre visible --}}
-    <footer class="{{ $anchoContenido }} mx-auto px-4 sm:px-6 pb-28 md:pb-10">
+    <footer class="{{ $anchoContenido }} mx-auto px-4 sm:px-6 {{ $enfoque ? 'pb-8' : 'pb-28' }} md:pb-10">
         <p class="text-xs text-gg-tinta-suave text-center">
             GutGuardián no emite diagnóstico clínico.
             Res. 3100 de 2019 · Universidad Mariana, Pasto.
@@ -183,7 +187,7 @@
          Barra de pestañas inferior — solo móvil. Objetivos táctiles de
          56 px, al alcance del pulgar, respetando el área segura del iPhone.
     ============================================================ --}}
-    @if($esEstudiante)
+    @if($esEstudiante && ! $enfoque)
     <nav aria-label="Navegación principal móvil"
          class="md:hidden fixed bottom-0 inset-x-0 z-30 bg-gg-superficie/95 backdrop-blur-md border-t border-gg-borde
                 pb-[env(safe-area-inset-bottom)]">

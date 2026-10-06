@@ -9,6 +9,7 @@
       valor      int|null Valor seleccionado (1-5), null si sin respuesta
       requerido  bool
       error      string
+      destacada  bool     Enunciado grande (encuesta guiada); el código lo muestra el paso
 --}}
 @props([
     'nombre',
@@ -17,6 +18,7 @@
     'valor'    => null,
     'requerido'=> false,
     'error'    => null,
+    'destacada'=> false,
 ])
 
 @php
@@ -42,8 +44,8 @@ $opciones = [
     @keydown.arrow-up.prevent="anterior()"
 >
 
-    <p id="{{ $uid }}-label" class="text-base font-medium text-gg-tinta leading-snug mb-2">
-        @if($codigo)
+    <p id="{{ $uid }}-label" class="{{ $destacada ? 'font-display text-xl sm:text-2xl font-medium text-gg-tinta leading-snug mb-5' : 'text-base font-medium text-gg-tinta leading-snug mb-2' }}">
+        @if($codigo && ! $destacada)
             <span class="font-mono text-2xs text-gg-tinta-suave mr-1.5 select-none">{{ $codigo }}</span>
         @endif
         {{ $pregunta }}

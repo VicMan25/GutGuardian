@@ -11,6 +11,7 @@
       seleccionados array    IDs de opciones ya seleccionadas
       requerido     bool
       error         string
+      destacada     bool     Enunciado grande (encuesta guiada); el código lo muestra el paso
 --}}
 @props([
     'nombre',
@@ -20,6 +21,7 @@
     'seleccionados'=> [],
     'requerido'    => false,
     'error'        => null,
+    'destacada'    => false,
 ])
 
 @php
@@ -34,8 +36,8 @@ $idNinguna = collect($opciones)->firstWhere('es_ninguna', true)['id'] ?? null;
     aria-required="{{ $requerido ? 'true' : 'false' }}"
 >
     @if($pregunta)
-    <p id="{{ $uid }}-label" class="text-base font-medium text-gg-tinta leading-snug mb-3">
-        @if($codigo)
+    <p id="{{ $uid }}-label" class="{{ $destacada ? 'font-display text-xl sm:text-2xl font-medium text-gg-tinta leading-snug mb-5' : 'text-base font-medium text-gg-tinta leading-snug mb-3' }}">
+        @if($codigo && ! $destacada)
             <span class="font-mono text-2xs text-gg-tinta-suave mr-1.5 select-none">{{ $codigo }}</span>
         @endif
         {{ $pregunta }}
@@ -50,14 +52,15 @@ $idNinguna = collect($opciones)->firstWhere('es_ninguna', true)['id'] ?? null;
         Puede seleccionar varias opciones.
     </p>
 
-    <div class="space-y-2" aria-describedby="{{ $uid }}-hint">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2" aria-describedby="{{ $uid }}-hint">
         @foreach($opciones as $opcion)
 
         @php $esNinguna = $opcion['es_ninguna'] ?? false; @endphp
 
         <label
             class="flex items-start gap-3 min-h-[48px] px-3.5 py-3 rounded-control border cursor-pointer select-none
-                   transition-[background-color,border-color,box-shadow] duration-150 group"
+                   transition-[background-color,border-color,box-shadow,transform] duration-150 active:scale-[0.99] group
+                   {{ $esNinguna ? 'sm:col-span-2 mt-1' : '' }}"
             :class="marcado({{ $opcion['id'] }})
                 ? 'border-gg-primario bg-gg-primario-suave shadow-[inset_0_0_0_1px_var(--gg-primario)]'
                 : 'border-gg-borde bg-gg-superficie hover:border-[#C7D0C9] hover:bg-gg-papel'"

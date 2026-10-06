@@ -239,6 +239,42 @@
         to   { opacity: 1; transform: translateY(0); }
     }
 
+    /* ----------------------------------------------------------------
+       Encuesta guiada — transición entre preguntas según la dirección.
+       Se dispara sola al pasar el paso de display:none a visible.
+    ---------------------------------------------------------------- */
+    .gg-paso-adelante { animation: gg-paso-adelante 320ms var(--gg-curva) both; }
+    .gg-paso-atras    { animation: gg-paso-atras 320ms var(--gg-curva) both; }
+
+    @keyframes gg-paso-adelante {
+        from { opacity: 0; transform: translateX(28px); }
+        to   { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes gg-paso-atras {
+        from { opacity: 0; transform: translateX(-28px); }
+        to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Ítem de matriz que entra */
+    .gg-item-entra { animation: gg-entrada 260ms var(--gg-curva) both; }
+
+    /* Aviso de pregunta sin responder: un vaivén corto, no un temblor */
+    .gg-sacudir { animation: gg-sacudir 360ms var(--gg-curva); }
+
+    @keyframes gg-sacudir {
+        0%, 100% { transform: translateX(0); }
+        20% { transform: translateX(-6px); }
+        40% { transform: translateX(5px); }
+        60% { transform: translateX(-3px); }
+        80% { transform: translateX(2px); }
+    }
+
+    /* Botón de envío cuando la sección quedó completa */
+    .gg-listo {
+        box-shadow: 0 0 0 4px rgba(207, 227, 180, 0.9), 0 1px 2px rgba(19, 61, 48, 0.25), 0 4px 12px -4px rgba(19, 61, 48, 0.35);
+    }
+
     /* Tarjeta clicable: se eleva un poco al pasar el cursor */
     .gg-interactiva {
         transition: transform 200ms var(--gg-curva), box-shadow 200ms var(--gg-curva), border-color 200ms;

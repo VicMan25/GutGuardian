@@ -310,6 +310,9 @@ histórica** de los registros del estudiante y ajustar la redacción en la monog
       (2×2 en móvil). Corrigió además: navegación del layout estudiante que llevaba a
       profesionales/admin a rutas 403 al abrir `/resultado`, `<select>` del registro sin
       `<label for>`, y modificadores de opacidad de Tailwind que no funcionaban con los tokens.
+- [x] Encuesta guiada: una pregunta por paso, matriz ítem a ítem, índice lateral en desktop,
+      avance automático en respuestas únicas. Solo presentación (sin cambios en
+      `EncuestaController`); tests en `tests/Feature/Sprint2/EncuestaGuiadaTest.php`.
 
 ---
 
@@ -409,7 +412,7 @@ Los tres layouts abren con un enlace «Saltar al contenido» (`sr-only` hasta re
 |-------------------------|----------------------------------|-----------------------------------------------------------------|
 | `escala-frecuencia`     | `components/escala-frecuencia`   | Selector segmentado 4 niveles; Nunca=0…Siempre=3                |
 | `escala-dolor`          | `components/escala-dolor`        | Variante 1-5 para P13                                           |
-| `matriz-sintomas`       | `components/matriz-sintomas`     | Acordeón (móvil) / tabla (desktop) para P11, P12, P16, P17     |
+| `matriz-sintomas`       | `components/matriz-sintomas`     | Un ítem a la vez (todas las pantallas) con chips de avance y resumen editable. P09, P11, P12, P16, P17 |
 | `opcion-multiple`       | `components/opcion-multiple`     | Checkboxes con "Ninguna" excluyente. Para P14, P15, P18, P20   |
 | `pista-riesgo`          | `components/pista-riesgo`        | 3 segmentos + marcador + contribuciones + aviso-no-diagnostico  |
 | `tarjeta`               | `components/tarjeta`             | Contenedor superficie, `elev-1`; prop `interactiva` para clicables |
@@ -420,7 +423,24 @@ Los tres layouts abren con un enlace «Saltar al contenido» (`sr-only` hasta re
 | `icono`                 | `components/icono`               | Juego único de íconos de trazo (24 px, 1.75) para nav y acciones |
 | `alerta`               | `components/alerta`              | Tipos: exito, error, aviso, info. Cierre opcional con Alpine    |
 | `aviso-no-diagnostico`  | `components/aviso-no-diagnostico`| **Obligatorio** junto a todo resultado. Res. 3100/2019          |
-| `barra-progreso`        | `components/barra-progreso`      | Progreso por sección (no por pregunta individual)               |
+| `barra-progreso`        | `components/barra-progreso`      | Progreso por sección (en la cabecera); el progreso por pregunta lo dibuja la sección guiada |
+
+Los componentes de pregunta aceptan `destacada` (enunciado grande, sin código: lo muestra el paso).
+
+### Encuesta guiada (`estudiante/encuesta/seccion`)
+
+Una pregunta por paso dentro del **mismo** `<form>` por sección (Alpine `encuestaGuiada` en
+`app.js`): los pasos ocultos siguen en el DOM y se envían, y el servidor valida y guarda igual.
+- Paso inicial calculado en el servidor: primera pregunta con error de validación, si no la
+  primera sin responder.
+- Escala y single avanzan solas **solo tras toque/clic** (nunca con flechas del teclado);
+  múltiple y matriz avanzan con «Siguiente». Enter avanza de pregunta.
+- `novalidate`: el `required` nativo no puede mostrarse en un paso oculto; `enviar()` lleva a la
+  primera pendiente. La validación del servidor sigue siendo la red de seguridad.
+- Desktop: índice lateral de la sección. Móvil: layout en modo `enfoque` (sin barra inferior),
+  barra de acciones fija al pulgar. Aviso del navegador al salir con respuestas sin guardar.
+- El contenedor de pasos usa `overflow-x-clip`: la transición horizontal ensanchaba el viewport
+  en móvil. Demo navegable en `/ui-kit#guiada`.
 
 ### Reglas de calidad de la interfaz
 

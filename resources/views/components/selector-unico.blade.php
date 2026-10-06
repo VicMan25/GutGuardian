@@ -12,6 +12,7 @@
       seleccionado int|null  ID de la opción ya guardada
       requerido  bool
       error      string
+      destacada  bool     Enunciado grande (encuesta guiada); el código lo muestra el paso
 --}}
 @props([
     'nombre',
@@ -21,10 +22,17 @@
     'seleccionado'=> null,
     'requerido'   => false,
     'error'       => null,
+    'destacada'   => false,
 ])
 
 @php
 $uid = 'su-' . Str::random(8);
+
+// Opciones cortas (semestres, tiempos de comida, rangos de edad) caben en
+// mosaicos de 2-3 columnas; las largas (programas) en 1 columna en móvil.
+// Así SD4 (10 opciones) o P08 (7) no ocupan media pantalla en vertical.
+$cortas = collect($opciones)->every(fn ($o) => mb_strlen($o['etiqueta']) <= 18);
+$rejilla = $cortas ? 'grid grid-cols-2 sm:grid-cols-3 gap-2' : 'grid grid-cols-1 sm:grid-cols-2 gap-2';
 @endphp
 
 <div
@@ -34,8 +42,8 @@ $uid = 'su-' . Str::random(8);
     aria-required="{{ $requerido ? 'true' : 'false' }}"
 >
     @if($pregunta)
-    <p id="{{ $uid }}-label" class="text-base font-medium text-gg-tinta leading-snug mb-3">
-        @if($codigo)
+    <p id="{{ $uid }}-label" class="{{ $destacada ? 'font-display text-xl sm:text-2xl font-medium text-gg-tinta leading-snug mb-5' : 'text-base font-medium text-gg-tinta leading-snug mb-3' }}">
+        @if($codigo && ! $destacada)
             <span class="font-mono text-2xs text-gg-tinta-suave mr-1.5 select-none">{{ $codigo }}</span>
         @endif
         {{ $pregunta }}
@@ -45,7 +53,7 @@ $uid = 'su-' . Str::random(8);
     </p>
     @endif
 
-    <div class="space-y-2">
+    <div class="{{ $rejilla }}">
         @foreach($opciones as $opcion)
         <label
             class="flex items-center gap-3 min-h-[48px] px-3.5 py-3 rounded-control border cursor-pointer select-none
