@@ -1,7 +1,7 @@
 """Prepara los datos crudos del instrumento para entrenamiento:
 
 1. Aplica criterios de inclusión/exclusión.
-2. Deriva la variable dependiente Y con la regla placeholder de comun.py.
+2. Deriva la variable dependiente Y con la regla validada de comun.py.
 3. Codifica los predictores (ordinales ya vienen numéricos desde el
    instrumento; P14/P15/P16/P17/P18 se resumen en conteos; género se
    dummy-codifica) en el orden fijo ORDEN_VARIABLES.
@@ -12,13 +12,9 @@ Entrada:  ml/datos/dataset_real.csv (los 347 registros reales, generados por
           apuntar ENTRADA a dataset_sintetico.csv.
 Salida:   ml/datos/dataset_preparado.csv
 
-IMPORTANTE: `derivar_categoria_riesgo` (comun.py) sigue siendo la regla
-PLACEHOLDER documentada en CLAUDE.md §7/§11 — apuntar aquí al dataset real
-sirve para seguir ejercitando el pipeline de ingeniería (VIF, entrenamiento,
-exportación) con la forma real de los datos, no habilita uso clínico. Ver
-distribución de clases al correr este script: bajo la regla placeholder
-queda muy desbalanceada (clase 2 casi vacía), señal adicional de que la
-regla debe reemplazarse antes de reportar cualquier métrica como válida.
+Nota: con la regla validada, la categoría 2 queda con muy pocos casos en los
+datos reales. El script imprime la distribución de clases para que ese
+desbalance quede siempre a la vista antes de entrenar.
 """
 
 from __future__ import annotations

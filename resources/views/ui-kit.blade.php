@@ -33,6 +33,7 @@
             ['#escala-frecuencia','Escala frecuencia'],
             ['#escala-dolor',    'Escala dolor'],
             ['#matriz',          'Matriz'],
+            ['#guiada',          'Encuesta guiada'],
             ['#multiple',        'Opción múltiple'],
             ['#pista-riesgo',    'Pista de riesgo'],
             ['#tarjeta',         'Tarjeta'],
@@ -403,6 +404,72 @@
                     />
                 </div>
             </div>
+        </section>
+
+        {{-- ============================================================ --}}
+        {{-- ENCUESTA GUIADA (demo con la misma lógica encuestaGuiada)     --}}
+        {{-- ============================================================ --}}
+        <section id="guiada">
+            <x-ui-kit-seccion titulo="Encuesta guiada (una pregunta por paso)" />
+            <p class="text-sm text-gg-tinta-suave mb-4">
+                Demo de la presentación de estudiante/encuesta/seccion: mismos componentes y mismo
+                componente Alpine <span class="font-mono">encuestaGuiada</span>. Escala y selección única
+                avanzan solas al tocar; múltiple y matriz con «Siguiente». Este formulario no guarda nada.
+            </p>
+
+            @php
+            $demoSemestres = collect(range(1, 10))->map(fn ($n) => ['id' => 100 + $n, 'etiqueta' => "Semestre $n"])->all();
+            $demoPasos = ['escala', 'single', 'multiple', 'matriz'];
+            $demoMultiple = collect(['Parásitos intestinales', 'Inflamación del intestino', 'Infecciones bacterianas digestivas',
+                'Úlceras digestivas', 'Estrés', 'Sobrepeso', 'Gastroenteritis', 'Hipersensibilidad visceral', 'Ninguna'])
+                ->map(fn ($e, $k) => ['id' => 200 + $k, 'etiqueta' => $e, 'es_ninguna' => $e === 'Ninguna'])->all();
+            @endphp
+
+            <form method="GET" action="#guiada" novalidate
+                  x-data="encuestaGuiada({ total: 4, inicial: 0 })"
+                  @change="alCambiar($event)" @keyup="revisar()"
+                  @keydown.enter="alEnter($event)" @submit="enviar($event)">
+                <div x-ref="inicio" class="mb-4">
+                    <p class="text-sm text-gg-tinta mb-2">Pregunta <span class="font-medium" x-text="paso + 1">1</span> de 4</p>
+                    <div class="flex gap-1" aria-hidden="true">
+                        @foreach($demoPasos as $i => $t)
+                        <span class="flex-1 h-1.5 rounded-full transition-colors duration-300"
+                              :class="paso === {{ $i }} ? 'bg-gg-primario' : (respondidas[{{ $i }}] ? 'bg-[#8DB3A2]' : 'bg-gg-borde')"></span>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="overflow-x-clip -mx-2 px-2 pb-2">
+                @foreach($demoPasos as $i => $tipo)
+                <section data-paso="{{ $i }}" data-tipo="{{ $tipo }}" x-show="paso === {{ $i }}"
+                         @if($i !== 0) style="display: none" @endif
+                         :class="direccion > 0 ? 'gg-paso-adelante' : 'gg-paso-atras'">
+                    <x-tarjeta padding="p-5 sm:p-8" class="rounded-bloque shadow-elev-2"
+                               x-bind:class="sacudir && paso === {{ $i }} && aviso ? 'gg-sacudir' : ''">
+                        <p id="paso-{{ $i }}-titulo" tabindex="-1" class="text-sm text-gg-tinta-suave mb-3 focus:outline-none">Pregunta {{ $i + 1 }} de 4</p>
+                        @if($tipo === 'escala')
+                            <x-escala-frecuencia nombre="demo_p07" codigo="P07" pregunta="¿Con qué frecuencia consume frituras?" destacada />
+                        @elseif($tipo === 'single')
+                            <x-selector-unico nombre="demo_sd4" codigo="SD4" pregunta="¿En qué semestre se encuentra actualmente?" :opciones="$demoSemestres" destacada />
+                        @elseif($tipo === 'multiple')
+                            <x-opcion-multiple nombre="demo_p14" codigo="P14" pregunta="¿Ha padecido o le han diagnosticado alguna de las siguientes condiciones?" :opciones="$demoMultiple" destacada />
+                        @else
+                            <x-matriz-sintomas nombre="demo_p12" codigo="P12" pregunta="¿Con qué frecuencia ha presentado los siguientes síntomas en el último mes?"
+                                               :items="$itemsSintomas" :opciones="$opcionesFrecuencia" destacada />
+                        @endif
+                        <p class="mt-4 text-sm font-medium text-gg-riesgo-alto" role="alert" x-show="aviso && paso === {{ $i }}" x-cloak x-text="aviso"></p>
+                    </x-tarjeta>
+                </section>
+                @endforeach
+                </div>
+
+                <div class="mt-5 flex items-center gap-2 p-2 rounded-[18px] bg-gg-superficie border border-gg-borde shadow-elev-3">
+                    <x-boton variante="fantasma" icono="atras" x-show="paso > 0" x-cloak x-on:click="anterior()">Anterior</x-boton>
+                    <span class="flex-1"></span>
+                    <x-boton variante="primario" icono-final="flecha" x-show="!esUltimo" x-on:click="siguiente()" data-demo="siguiente">Siguiente</x-boton>
+                    <x-boton variante="primario" tipo="submit" icono-final="flecha" x-show="esUltimo" x-cloak x-bind:class="completo && 'gg-listo'">Siguiente sección</x-boton>
+                </div>
+            </form>
         </section>
 
         {{-- ============================================================ --}}

@@ -10,6 +10,7 @@
       valor      int|null Valor seleccionado actualmente (0-3), null si sin respuesta
       requerido  bool     Agrega el atributo required a los inputs
       error      string   Mensaje de error a mostrar debajo del selector
+      destacada  bool     Enunciado grande (encuesta guiada); el código lo muestra el paso
 --}}
 @props([
     'nombre',
@@ -18,6 +19,7 @@
     'valor'    => null,
     'requerido'=> false,
     'error'    => null,
+    'destacada'=> false,
 ])
 
 @php
@@ -43,8 +45,8 @@ $opciones = [
 >
 
     @if($pregunta)
-    <p id="{{ $uid }}-label" class="text-base font-medium text-gg-tinta leading-snug mb-3">
-        @if($codigo)
+    <p id="{{ $uid }}-label" class="{{ $destacada ? 'font-display text-xl sm:text-2xl font-medium text-gg-tinta leading-snug mb-5' : 'text-base font-medium text-gg-tinta leading-snug mb-3' }}">
+        @if($codigo && ! $destacada)
             <span class="font-mono text-2xs text-gg-tinta-suave mr-1.5 select-none">{{ $codigo }}</span>
         @endif
         {{ $pregunta }}

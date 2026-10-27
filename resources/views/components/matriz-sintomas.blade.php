@@ -1,7 +1,14 @@
 {{--
-    Matriz de ítems × escala — para P11, P12, P16, P17.
-    Móvil (<640 px): acordeón — un ítem por vez, selector de escala debajo.
-    Desktop (≥640 px): tabla clásica con columnas de opciones.
+    Matriz de ítems × escala — para P09, P11, P12, P16, P17.
+
+    Un ítem (síntoma, medicamento, sustancia) a la vez, en todos los tamaños
+    de pantalla: el enunciado y sus opciones siempre caben juntos, sin la
+    tabla de 7 columnas que obligaba a desplazarse en horizontal. Arriba,
+    chips con todos los ítems muestran el avance y permiten saltar a
+    cualquiera; al responder el último aparece un resumen editable.
+
+    Una sola copia de cada input (name="nombre[item_id]"): los ítems que no
+    están a la vista siguen en el DOM y se envían con el formulario.
 
     Props:
       nombre    string   Prefijo para los name de los inputs: nombre[item_id]
@@ -12,6 +19,7 @@
       respuestas array   [item_id => valor, ...] — valores ya guardados (opcional)
       requerido bool
       error     string
+      destacada bool     Enunciado grande (encuesta guiada); el código lo muestra el paso
 --}}
 @props([
     'nombre',
@@ -22,6 +30,7 @@
     'respuestas'=> [],
     'requerido' => false,
     'error'     => null,
+    'destacada' => false,
 ])
 
 @php
@@ -37,14 +46,25 @@ foreach ($items as $idx => $item) {
         $respuestasPorIndice[$idx] = $respuestas[$item['id']];
     }
 }
+
+// Ítem que se abre al cargar (lo mismo que calcula matrizSintomas.init),
+// para que el HTML del servidor ya muestre el panel correcto.
+$itemInicial = collect(array_keys($items))->first(fn ($i) => ! array_key_exists($i, $respuestasPorIndice));
+
+// Clases literales (no interpoladas) para que Tailwind no las purgue.
+$columnasOpciones = match (true) {
+    count($opciones) <= 4 => 'grid-cols-2 sm:grid-cols-4',
+    default               => 'grid-cols-2 sm:grid-cols-3',
+};
 @endphp
 
 <div x-data="matrizSintomas({{ $totalItems }}, {{ json_encode($respuestasPorIndice) }})" class="w-full">
 
     {{-- Encabezado de pregunta --}}
     @if($pregunta)
-    <p id="{{ $uid }}-label" class="text-base font-medium text-gg-tinta leading-snug mb-4">
-        @if($codigo)
+    <p id="{{ $uid }}-label"
+       class="{{ $destacada ? 'font-display text-xl sm:text-2xl font-medium text-gg-tinta leading-snug mb-4' : 'text-base font-medium text-gg-tinta leading-snug mb-4' }}">
+        @if($codigo && ! $destacada)
             <span class="font-mono text-2xs text-gg-tinta-suave mr-1.5 select-none">{{ $codigo }}</span>
         @endif
         {{ $pregunta }}
@@ -55,9 +75,9 @@ foreach ($items as $idx => $item) {
     @endif
 
     {{-- Progreso: N de M ítems respondidos (accesible) --}}
-    <div class="flex items-center justify-between mb-3">
+    <div class="flex items-center justify-between gap-3 mb-3">
         <span class="text-sm text-gg-tinta-suave" aria-live="polite" aria-atomic="true">
-            <span x-text="totalRespondidos()">0</span> de {{ $totalItems }} respondidos
+            <span x-text="totalRespondidos()">{{ count($respuestasPorIndice) }}</span> de {{ $totalItems }} respondidos
         </span>
         <span
             class="inline-flex items-center gap-1 text-sm font-medium text-gg-primario"
@@ -66,164 +86,109 @@ foreach ($items as $idx => $item) {
         ><x-icono nombre="check" class="w-4 h-4" />Completado</span>
     </div>
 
-    {{-- ============================================================
-         VISTA MÓVIL — acordeón (bloque sm:hidden)
-    ============================================================ --}}
-    <div class="sm:hidden space-y-1.5" role="list" aria-label="{{ $pregunta }}">
-
+    {{-- Chips: todos los ítems a la vista, con su estado; tocar uno lo abre --}}
+    <div class="flex flex-wrap gap-1.5 mb-4" aria-label="Ítems de la pregunta">
         @foreach($items as $idx => $item)
-        <div role="listitem" class="border border-gg-borde rounded-control overflow-hidden transition-shadow duration-200" :class="expandido === {{ $idx }} ? 'shadow-elev-2' : ''">
-
-            {{-- Cabecera del ítem --}}
-            <button
-                type="button"
-                class="w-full flex items-center justify-between gap-3 px-4 min-h-[52px] py-3 text-left
-                       transition-colors duration-100
-                       hover:bg-gg-papel focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gg-primario"
-                :class="expandido === {{ $idx }} ? 'bg-gg-primario-suave' : 'bg-gg-superficie'"
-                @click="expandir({{ $idx }})"
-                :aria-expanded="expandido === {{ $idx }}"
-                aria-controls="{{ $uid }}-item-{{ $idx }}"
-            >
-                <span
-                    class="text-sm leading-snug transition-colors duration-100"
-                    :class="expandido === {{ $idx }} ? 'text-gg-primario font-medium' : 'text-gg-tinta'"
-                >{{ $item['etiqueta'] }}</span>
-
-                <span class="shrink-0 flex items-center gap-2">
-                    {{-- Tick si ya respondido --}}
-                    <span
-                        x-show="respondido({{ $idx }})"
-                        class="text-gg-primario"
-                        aria-label="Respondido"
-                    >
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                        </svg>
-                    </span>
-                    {{-- Chevron --}}
-                    <svg class="w-4 h-4 text-gg-tinta-suave transition-transform duration-200"
-                         :class="expandido === {{ $idx }} ? 'rotate-180' : ''"
-                         fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-                    </svg>
-                </span>
-            </button>
-
-            {{-- Panel de opciones --}}
-            <div
-                id="{{ $uid }}-item-{{ $idx }}"
-                x-show="expandido === {{ $idx }}"
-                x-transition:enter="transition-all duration-150 ease-out"
-                x-transition:enter-start="opacity-0 -translate-y-1"
-                x-transition:enter-end="opacity-100 translate-y-0"
-                x-transition:leave="transition-all duration-100 ease-in"
-                x-transition:leave-start="opacity-100 translate-y-0"
-                x-transition:leave-end="opacity-0 -translate-y-1"
-                class="border-t border-gg-borde bg-gg-papel"
-                role="radiogroup"
-                :aria-label="'Frecuencia de: {{ $item['etiqueta'] }}'"
-            >
-                {{-- Clases literales (no interpoladas) para que Tailwind no las purgue.
-                     Escala de 4 niveles → 2×2; temporalidad de 6 → 2×3. --}}
-                <div class="grid {{ count($opciones) <= 2 ? 'grid-cols-2' : (count($opciones) === 3 ? 'grid-cols-3' : 'grid-cols-2') }} gap-1.5 p-1.5">
-                    @foreach($opciones as $j => $opcion)
-                    <label
-                        class="relative cursor-pointer select-none rounded-control transition-[background-color,box-shadow,transform] duration-150 active:scale-[0.98]"
-                        :class="respuestas[{{ $idx }}] === {{ $opcion['valor'] }} ? 'gg-seg-activo' : 'bg-gg-superficie hover:shadow-elev-1'"
-                    >
-                        <input
-                            type="radio"
-                            name="{{ $nombre }}[{{ $item['id'] }}]"
-                            value="{{ $opcion['valor'] }}"
-                            class="sr-only"
-                            {{ $requerido ? 'required' : '' }}
-                            :checked="respuestas[{{ $idx }}] === {{ $opcion['valor'] }}"
-                            @change="responder({{ $idx }}, {{ $opcion['valor'] }})"
-                        />
-                        <div class="flex flex-col items-center justify-center gap-0.5 py-3 px-1 text-center min-h-[3.5rem]">
-                            <span
-                                class="text-sm leading-tight transition-colors duration-100"
-                                :class="respuestas[{{ $idx }}] === {{ $opcion['valor'] }} ? 'text-gg-primario font-medium' : 'text-gg-tinta'"
-                            >{{ $opcion['etiqueta'] }}</span>
-                            @if(isset($opcion['equiv']))
-                            <span class="text-2xs text-gg-tinta-suave font-mono">{{ $opcion['equiv'] }}</span>
-                            @endif
-                        </div>
-                    </label>
-                    @endforeach
-                </div>
-            </div>
-
-        </div>
+        <button
+            type="button"
+            @click="expandido = {{ $idx }}"
+            :aria-pressed="(expandido === {{ $idx }}).toString()"
+            class="inline-flex items-center gap-1.5 min-h-[36px] px-3 rounded-full border text-sm transition-[background-color,border-color,color] duration-150"
+            :class="expandido === {{ $idx }}
+                ? 'bg-gg-primario border-gg-primario text-white'
+                : (respondido({{ $idx }})
+                    ? 'bg-gg-primario-suave border-[#CFE0D6] text-gg-primario'
+                    : 'bg-gg-superficie border-gg-borde text-gg-tinta-suave hover:border-[#C7D0C9] hover:text-gg-tinta')"
+        >
+            <x-icono nombre="check" class="w-3.5 h-3.5" x-show="respondido({{ $idx }})" />
+            {{ $item['etiqueta'] }}
+            <span class="sr-only" x-text="respondido({{ $idx }}) ? '(respondido)' : '(sin responder)'"></span>
+        </button>
         @endforeach
-
     </div>
 
-    {{-- ============================================================
-         VISTA DESKTOP — tabla (bloque hidden sm:block)
-    ============================================================ --}}
-    <div class="hidden sm:block overflow-x-auto -mx-1">
-        <table class="w-full min-w-max text-left border-collapse" role="table" aria-label="{{ $pregunta }}">
-            <thead>
-                <tr>
-                    <th class="py-2 pr-4 w-48 text-xs font-medium text-gg-tinta-suave border-b border-gg-borde" scope="col">
-                        Síntoma / Factor
-                    </th>
+    {{-- Un panel por ítem; solo el abierto es visible --}}
+    @foreach($items as $idx => $item)
+    <div
+        x-show="expandido === {{ $idx }}"
+        @if($idx !== $itemInicial) style="display: none" @endif
+        class="gg-item-entra rounded-tarjeta bg-gg-papel border border-gg-borde p-3 sm:p-4"
+        role="radiogroup"
+        aria-labelledby="{{ $uid }}-item-{{ $idx }}"
+    >
+        <p id="{{ $uid }}-item-{{ $idx }}" class="flex items-baseline justify-between gap-3 px-1 mb-3">
+            <span class="text-md font-medium text-gg-tinta">{{ $item['etiqueta'] }}</span>
+            <span class="font-mono text-xs text-gg-tinta-suave shrink-0">{{ $idx + 1 }}/{{ $totalItems }}</span>
+        </p>
+
+        <div class="grid {{ $columnasOpciones }} gap-2">
+            @foreach($opciones as $opcion)
+            <label
+                class="relative cursor-pointer select-none rounded-control transition-[background-color,box-shadow,transform] duration-150 active:scale-[0.98]"
+                :class="respuestas[{{ $idx }}] === {{ $opcion['valor'] }} ? 'gg-seg-activo' : 'bg-gg-superficie border border-gg-borde hover:shadow-elev-1'"
+            >
+                <input
+                    type="radio"
+                    name="{{ $nombre }}[{{ $item['id'] }}]"
+                    value="{{ $opcion['valor'] }}"
+                    class="peer sr-only"
+                    :checked="respuestas[{{ $idx }}] === {{ $opcion['valor'] }}"
+                    @change="responder({{ $idx }}, {{ $opcion['valor'] }})"
+                />
+                <span class="pointer-events-none absolute inset-0 rounded-control peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-gg-primario" aria-hidden="true"></span>
+                <span class="flex flex-col items-center justify-center gap-0.5 px-2 py-2.5 text-center min-h-[3.5rem]">
+                    <span
+                        class="text-sm leading-tight transition-colors duration-100"
+                        :class="respuestas[{{ $idx }}] === {{ $opcion['valor'] }} ? 'text-gg-primario font-medium' : 'text-gg-tinta'"
+                    >{{ $opcion['etiqueta'] }}</span>
+                    @if(isset($opcion['equiv']))
+                    <span class="text-2xs text-gg-tinta-suave font-mono">{{ $opcion['equiv'] }}</span>
+                    @endif
+                </span>
+            </label>
+            @endforeach
+        </div>
+
+        {{-- Control explícito: teclado y corrección de un ítem ya respondido --}}
+        <div class="mt-3 flex items-center justify-between gap-2" x-show="respondido({{ $idx }})" x-cloak>
+            <span class="text-xs text-gg-tinta-suave px-1">Toca otra opción para cambiarla.</span>
+            <button type="button"
+                    @click="avanzarItem({{ $idx }})"
+                    class="inline-flex items-center gap-1 min-h-[36px] px-3 rounded-full text-sm font-medium text-gg-primario hover:bg-gg-primario-suave transition-colors">
+                <span x-text="siguientePendiente({{ $idx }}) === null ? 'Ver resumen' : 'Siguiente'"></span>
+                <x-icono nombre="flecha" class="w-4 h-4" />
+            </button>
+        </div>
+    </div>
+    @endforeach
+
+    {{-- Resumen: aparece cuando ya no hay ítem abierto --}}
+    <div x-show="expandido === null"
+         @if($itemInicial !== null) style="display: none" @endif
+         class="gg-item-entra grid sm:grid-cols-2 gap-2">
+        @foreach($items as $idx => $item)
+        <button type="button"
+                @click="expandido = {{ $idx }}"
+                class="group flex items-center justify-between gap-3 min-h-[48px] px-3.5 py-2 rounded-control border text-left transition-colors"
+                :class="respondido({{ $idx }}) ? 'bg-gg-superficie border-gg-borde hover:border-[#B9CBBF]' : 'bg-[#FDF6F3] border-[#EBD3CB]'">
+            <span class="text-sm text-gg-tinta">{{ $item['etiqueta'] }}</span>
+            <span class="flex items-center gap-2 shrink-0">
+                <span class="text-sm font-medium text-gg-primario">
                     @foreach($opciones as $opcion)
-                    <th class="py-2 px-3 text-center text-xs font-medium text-gg-tinta-suave border-b border-gg-borde whitespace-nowrap" scope="col">
-                        {{ $opcion['etiqueta'] }}
-                        @if(isset($opcion['equiv']))
-                        <br><span class="font-mono font-normal text-2xs">{{ $opcion['equiv'] }}</span>
-                        @endif
-                    </th>
+                        <span x-show="respuestas[{{ $idx }}] === {{ $opcion['valor'] }}"
+                              @if(($respuestasPorIndice[$idx] ?? null) != $opcion['valor'] || ! array_key_exists($idx, $respuestasPorIndice)) style="display: none" @endif>{{ $opcion['etiqueta'] }}</span>
                     @endforeach
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($items as $idx => $item)
-                <tr
-                    class="border-b border-gg-borde last:border-b-0 transition-colors duration-75"
-                    :class="{ 'bg-gg-papel': {{ $idx }} % 2 === 1 }"
-                    role="radiogroup"
-                    :aria-label="'{{ $item['etiqueta'] }}'"
-                >
-                    <td class="py-3 pr-4 text-base text-gg-tinta leading-snug">
-                        {{ $item['etiqueta'] }}
-                    </td>
-                    @foreach($opciones as $opcion)
-                    <td class="py-2.5 px-3 text-center">
-                        <label class="inline-flex items-center justify-center cursor-pointer group">
-                            <input
-                                type="radio"
-                                name="{{ $nombre }}[{{ $item['id'] }}]"
-                                value="{{ $opcion['valor'] }}"
-                                class="sr-only peer"
-                                {{ $requerido ? 'required' : '' }}
-                                :checked="respuestas[{{ $idx }}] === {{ $opcion['valor'] }}"
-                                @change="respuestas[{{ $idx }}] = {{ $opcion['valor'] }}"
-                                @focus="expandido = {{ $idx }}"
-                            />
-                            {{-- Círculo visual de radio --}}
-                            <span class="w-6 h-6 rounded-full border-2 border-[#C7D0C9] flex items-center justify-center
-                                         group-hover:border-gg-primario transition-colors duration-100
-                                         peer-checked:border-gg-primario peer-checked:bg-gg-primario
-                                         peer-focus-visible:ring-2 peer-focus-visible:ring-gg-primario peer-focus-visible:ring-offset-1"
-                                  aria-hidden="true">
-                                <span class="w-2 h-2 rounded-full bg-gg-superficie opacity-0 peer-checked:opacity-100 transition-opacity"
-                                      x-show="respuestas[{{ $idx }}] === {{ $opcion['valor'] }}"></span>
-                            </span>
-                        </label>
-                    </td>
-                    @endforeach
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+                    <span x-show="!respondido({{ $idx }})" class="text-gg-riesgo-alto font-normal"
+                          @if(array_key_exists($idx, $respuestasPorIndice)) style="display: none" @endif>Sin responder</span>
+                </span>
+                <x-icono nombre="editar" class="w-4 h-4 text-gg-tinta-suave opacity-60 group-hover:opacity-100" />
+            </span>
+        </button>
+        @endforeach
     </div>
 
     @if($error)
-    <p class="mt-2 text-sm text-gg-riesgo-alto" role="alert">{{ $error }}</p>
+    <p class="mt-3 text-sm text-gg-riesgo-alto" role="alert">{{ $error }}</p>
     @endif
 
 </div>

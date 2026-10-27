@@ -4,16 +4,18 @@ Centraliza los nombres de columna crudas del instrumento (deben coincidir con
 InstrumentoSeeder), el orden fijo de predictores del modelo y la regla de
 derivación de la variable dependiente Y.
 
-IMPORTANTE — BLOQUEANTE DOCUMENTADO EN CLAUDE.md §7 y §11:
-La función `derivar_categoria_riesgo` de este módulo es un PLACEHOLDER de
-ingeniería, no un criterio clínico validado. El documento de tesis indica
-explícitamente que la regla operativa para derivar Y a partir de P11-P13 y
-P20 debe construirse con el equipo de Enfermería antes de considerar el
-modelo entrenable para uso real. Los umbrales de abajo son arbitrarios
-(elegidos solo para producir tres clases no degeneradas sobre datos
-sintéticos) y DEBEN reemplazarse cuando exista el criterio clínico oficial.
-Todo `modelo_v1.json` generado con esta versión debe documentarse como
-provisional en la monografía (dominio "análisis estadístico" de PROBAST+AI).
+REGLA DE DERIVACIÓN DE Y — VALIDADA:
+`derivar_categoria_riesgo` implementa la regla operativa que deriva Y a partir
+de P11, P12, P13 y P20 (CLAUDE.md §7). Nació como placeholder de ingeniería y
+los equipos de Enfermería y de Nutrición y Dietética la revisaron y aprobaron
+sin cambios (reportado el 2026-10-15), junto con la codificación numérica de
+las respuestas. Cualquier cambio de umbrales o cortes es un cambio de criterio
+clínico: requiere nueva aprobación y produce una versión nueva del modelo.
+
+Sobre los 347 registros reales la regla deja muy pocos casos en la categoría 2
+(ver `preparar_datos.py`). Por eso el entrenamiento usa regularización y pesos
+por clase (ver `entrenar_modelo.py`), y la calibración de los cortes a la
+población real quedó en consulta con Enfermería (docs/consulta-cortes-riesgo.md).
 """
 
 from __future__ import annotations
@@ -39,7 +41,7 @@ ENFERMEDADES = [
 ]
 
 # ----------------------------------------------------------------
-# Orden fijo de predictores (X) del modelo — ~22 variables.
+# Orden fijo de predictores (X) del modelo — 21 variables.
 #
 # P11, P12, P13 y P20 quedan FUERA de X a propósito: son la fuente de la
 # etiqueta Y (ver derivar_categoria_riesgo). Incluirlas como predictores
@@ -51,9 +53,13 @@ ENFERMEDADES = [
 # (ver limitación de eventos-por-variable documentada en CLAUDE.md §7).
 # El programa académico (SD3) se excluye por la misma razón (8 categorías
 # nominales inflarían el modelo sin aporte claro al riesgo digestivo).
+#
+# `genero_otro` salió en la versión 2.0: ningún participante real marcó
+# «otro», así que la columna es constante y su coeficiente no es estimable.
+# PredictorService la sigue calculando; simplemente no está en el modelo.
 # ----------------------------------------------------------------
 ORDEN_VARIABLES = [
-    'edad', 'semestre', 'genero_femenino', 'genero_otro',
+    'edad', 'semestre', 'genero_femenino',
     'p01_frutas', 'p02_ensaladas', 'p03_integrales', 'p04_embutidos',
     'p05_empaquetados', 'p06_azucares', 'p07_frituras', 'p08_tiempos_comida',
     'p09_alcohol', 'p09_tabaco', 'p10_lavado_manos',
@@ -91,10 +97,9 @@ CATEGORIA_BASE = 0
 CATEGORIAS = [0, 1, 2]
 
 # ----------------------------------------------------------------
-# Regla PLACEHOLDER de derivación de Y — sistema de puntaje sobre P11-P13/P20.
-# Ver docstring del módulo. Los cortes de puntaje se eligieron para producir
-# tres clases no degeneradas sobre el dataset sintético, no por criterio
-# clínico.
+# Regla de derivación de Y — sistema de puntaje sobre P11-P13/P20.
+# Aprobada por Enfermería y Nutrición (ver docstring del módulo). Cambiar
+# un umbral o un corte requiere nueva aprobación y una versión nueva del modelo.
 # ----------------------------------------------------------------
 RECIENCIA_ALTA = 4  # valor_numerico de P11 (0-5) que cuenta como "reciente" (Último mes o Última semana)
 
