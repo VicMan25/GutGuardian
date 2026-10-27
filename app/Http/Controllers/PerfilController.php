@@ -37,4 +37,16 @@ class PerfilController extends Controller
 
         return Redirect::route('perfil.edit')->with('status', 'perfil-actualizado');
     }
+
+    /**
+     * Preferencia de recordatorios por correo de la encuesta por jornadas
+     * (comando gutguardian:enviar-recordatorios). Un checkbox desmarcado no
+     * se envía, por eso se lee con boolean() y no se valida como requerido.
+     */
+    public function recordatorios(Request $request): RedirectResponse
+    {
+        $request->user()->update(['recibir_recordatorios' => $request->boolean('recibir_recordatorios')]);
+
+        return Redirect::route('perfil.edit')->with('status', 'recordatorios-actualizados');
+    }
 }

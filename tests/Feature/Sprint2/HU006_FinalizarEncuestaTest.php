@@ -4,43 +4,8 @@ use App\Models\User;
 use App\Modules\Auth\Models\Consentimiento;
 use App\Modules\Encuestas\Models\Diligenciamiento;
 use App\Modules\Encuestas\Models\Instrumento;
-use App\Modules\Encuestas\Models\Opcion;
-use App\Modules\Encuestas\Models\Pregunta;
-use App\Modules\Encuestas\Models\Seccion;
 use Database\Seeders\InstrumentoSeeder;
 use Database\Seeders\RolesPermisosSeeder;
-
-function hu006ValorValido(Pregunta $pregunta): int|array
-{
-    return match ($pregunta->tipo) {
-        'escala' => Opcion::where('pregunta_id', $pregunta->id)->first()->valor_numerico,
-        'single' => Opcion::where('pregunta_id', $pregunta->id)->first()->id,
-        'multiple' => [
-            (Opcion::where('pregunta_id', $pregunta->id)->where('etiqueta', 'Ninguna')->first()
-                ?? Opcion::where('pregunta_id', $pregunta->id)->first())->id,
-        ],
-        'matriz' => $pregunta->items->mapWithKeys(fn ($item) => [
-            $item->id => Opcion::where('pregunta_id', $pregunta->id)->first()->valor_numerico,
-        ])->all(),
-    };
-}
-
-function hu006PayloadSeccion(Seccion $seccion): array
-{
-    $respuestas = [];
-    foreach ($seccion->preguntas as $pregunta) {
-        $respuestas[$pregunta->id] = hu006ValorValido($pregunta);
-    }
-
-    return ['respuestas' => $respuestas];
-}
-
-function hu006CompletarTodasLasSecciones($actor, Diligenciamiento $diligenciamiento): void
-{
-    foreach (Seccion::where('instrumento_id', $diligenciamiento->instrumento_id)->orderBy('orden')->get() as $seccion) {
-        $actor->post(route('encuesta.guardar', [$diligenciamiento, $seccion->orden]), hu006PayloadSeccion($seccion));
-    }
-}
 
 describe('HU-006 — Confirmar y finalizar la encuesta', function () {
 
@@ -60,7 +25,7 @@ describe('HU-006 — Confirmar y finalizar la encuesta', function () {
         ]);
     });
 
-    it('finalizar sin haber completado todas las secciones no cambia el estado y muestra un error', function () {
+    it('finalizar sin haber completado todos los días no cambia el estado y muestra un error', function () {
         $this->actingAs($this->estudiante)
             ->post(route('encuesta.finalizar', $this->diligenciamiento))
             ->assertRedirect(route('encuesta.confirmar', $this->diligenciamiento))
@@ -70,9 +35,9 @@ describe('HU-006 — Confirmar y finalizar la encuesta', function () {
             ->and($this->diligenciamiento->fresh()->completado_at)->toBeNull();
     });
 
-    it('finalizar con todas las secciones completas marca el diligenciamiento como completado', function () {
+    it('finalizar con todos los días completos marca el diligenciamiento como completado', function () {
         $actor = $this->actingAs($this->estudiante);
-        hu006CompletarTodasLasSecciones($actor, $this->diligenciamiento);
+        encuestaCompletarCiclo($actor, $this->diligenciamiento);
 
         $actor->post(route('encuesta.finalizar', $this->diligenciamiento))
             ->assertRedirect(route('resultado.show', $this->diligenciamiento));
@@ -89,7 +54,7 @@ describe('HU-006 — Confirmar y finalizar la encuesta', function () {
             ->assertOk()
             ->assertDontSee('Enviar encuesta');
 
-        hu006CompletarTodasLasSecciones($actor, $this->diligenciamiento);
+        encuestaCompletarCiclo($actor, $this->diligenciamiento);
 
         $actor->get(route('encuesta.confirmar', $this->diligenciamiento))
             ->assertOk()
@@ -98,25 +63,25 @@ describe('HU-006 — Confirmar y finalizar la encuesta', function () {
 
     it('un diligenciamiento completado ya no se puede editar (policy bloquea update)', function () {
         $actor = $this->actingAs($this->estudiante);
-        hu006CompletarTodasLasSecciones($actor, $this->diligenciamiento);
+        encuestaCompletarCiclo($actor, $this->diligenciamiento);
         $actor->post(route('encuesta.finalizar', $this->diligenciamiento));
 
         $actor->post(route('encuesta.guardar', [$this->diligenciamiento, 1]), [])
             ->assertForbidden();
     });
 
-    it('revisitar la URL de una sección de un diligenciamiento completado redirige al resultado, sin dar 403', function () {
+    it('revisitar la URL de un día de un diligenciamiento completado redirige al resultado, sin dar 403', function () {
         $actor = $this->actingAs($this->estudiante);
-        hu006CompletarTodasLasSecciones($actor, $this->diligenciamiento);
+        encuestaCompletarCiclo($actor, $this->diligenciamiento);
         $actor->post(route('encuesta.finalizar', $this->diligenciamiento));
 
-        $actor->get(route('encuesta.seccion', [$this->diligenciamiento, 1]))
+        $actor->get(route('encuesta.jornada', [$this->diligenciamiento, 1]))
             ->assertRedirect(route('resultado.show', $this->diligenciamiento));
     });
 
     it('finalizar dos veces es idempotente: la segunda vez redirige al resultado sin error', function () {
         $actor = $this->actingAs($this->estudiante);
-        hu006CompletarTodasLasSecciones($actor, $this->diligenciamiento);
+        encuestaCompletarCiclo($actor, $this->diligenciamiento);
         $actor->post(route('encuesta.finalizar', $this->diligenciamiento));
 
         $actor->post(route('encuesta.finalizar', $this->diligenciamiento))

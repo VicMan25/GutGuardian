@@ -15,8 +15,11 @@ use Spatie\Activitylog\Models\Activity;
  *  - System Usability Scale (SUS, Brooke, 1996): 10 ítems Likert 1–5,
  *    puntaje 0–100. Ítems impares aportan (respuesta − 1); pares, (5 − respuesta);
  *    la suma se multiplica por 2,5.
- *  - Tiempo de diligenciamiento de la encuesta (creación → completado).
- *  - Tasa de errores al ingresar datos: proporción de envíos de sección
+ *  - Tiempo de diligenciamiento de la encuesta: suma del tiempo activo de
+ *    cada jornada (inicio → completada). El ciclo dura varios días, así que
+ *    creación → cierre ya no mide el esfuerzo; ese cálculo solo queda para
+ *    diligenciamientos anteriores a las jornadas.
+ *  - Tasa de errores al ingresar datos: proporción de envíos de jornada
  *    rechazados por las reglas de validación.
  *
  * Los rangos de aceptabilidad siguen a Bangor, Kortum y Miller (2008):
@@ -86,21 +89,27 @@ class UsabilidadService
     }
 
     /**
-     * Deja constancia de un envío de sección de la encuesta y de si pasó la
+     * Eventos de envío de la encuesta. 'envio_seccion' es el nombre anterior a
+     * las jornadas y se sigue contando para no perder registros previos.
+     */
+    private const EVENTOS_ENVIO = ['envio_jornada', 'envio_seccion'];
+
+    /**
+     * Deja constancia de un envío de jornada de la encuesta y de si pasó la
      * validación. No guarda respuestas: solo el resultado del envío.
      */
-    public function registrarEnvioSeccion(User $user, Diligenciamiento $diligenciamiento, int $orden, int $camposConError): void
+    public function registrarEnvioJornada(User $user, Diligenciamiento $diligenciamiento, int $jornada, int $camposConError): void
     {
         activity(self::LOG)
             ->causedBy($user)
             ->performedOn($diligenciamiento)
-            ->event('envio_seccion')
+            ->event('envio_jornada')
             ->withProperties([
-                'seccion' => $orden,
+                'jornada' => $jornada,
                 'valido' => $camposConError === 0,
                 'campos_con_error' => $camposConError,
             ])
-            ->log($camposConError === 0 ? 'Envió una sección válida' : 'Envió una sección con errores de validación');
+            ->log($camposConError === 0 ? 'Envió una jornada válida' : 'Envió una jornada con errores de validación');
     }
 
     /**
@@ -143,10 +152,11 @@ class UsabilidadService
     {
         $minutos = Diligenciamiento::where('estado', 'completado')
             ->whereNotNull('completado_at')
-            ->get(['created_at', 'completado_at'])
-            ->map(fn ($d) => $d->created_at->diffInSeconds($d->completado_at) / 60);
+            ->with('jornadas')
+            ->get(['id', 'created_at', 'completado_at'])
+            ->map(fn ($d) => $this->segundosActivos($d) / 60);
 
-        $envios = Activity::inLog(self::LOG)->where('event', 'envio_seccion')->get(['properties']);
+        $envios = Activity::inLog(self::LOG)->whereIn('event', self::EVENTOS_ENVIO)->get(['properties']);
         $conError = $envios->filter(fn ($a) => ! $a->properties->get('valido'))->count();
 
         return [
@@ -162,6 +172,17 @@ class UsabilidadService
                 'tasa' => $envios->isEmpty() ? null : round($conError / $envios->count() * 100, 1),
             ],
         ];
+    }
+
+    private function segundosActivos(Diligenciamiento $diligenciamiento): float
+    {
+        $medidas = $diligenciamiento->jornadas->filter(fn ($j) => $j->iniciada_at && $j->completada_at);
+
+        if ($medidas->isEmpty()) {
+            return $diligenciamiento->created_at->diffInSeconds($diligenciamiento->completado_at);
+        }
+
+        return $medidas->sum(fn ($j) => $j->iniciada_at->diffInSeconds($j->completada_at));
     }
 
     /**

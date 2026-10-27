@@ -12,6 +12,7 @@ class Pregunta extends Model
 
     protected $fillable = [
         'seccion_id',
+        'jornada',
         'codigo',
         'enunciado',
         'tipo',
@@ -21,6 +22,7 @@ class Pregunta extends Model
     protected function casts(): array
     {
         return [
+            'jornada' => 'integer',
             'orden' => 'integer',
         ];
     }

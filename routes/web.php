@@ -64,14 +64,18 @@ Route::middleware(['auth', 'consentimiento', 'role:estudiante'])->group(function
     Route::get('/usabilidad', [UsabilidadController::class, 'show'])->name('usabilidad.show');
     Route::post('/usabilidad', [UsabilidadController::class, 'store'])->name('usabilidad.store');
 
-    // Captura y persistencia de encuestas (HU-004, HU-005, HU-006)
+    // Recordatorios por correo de la encuesta por jornadas (activar/desactivar)
+    Route::put('/perfil/recordatorios', [PerfilController::class, 'recordatorios'])->name('perfil.recordatorios');
+
+    // Captura y persistencia de encuestas por jornadas (HU-004, HU-005, HU-006)
     Route::get('/encuesta', [EncuestaController::class, 'iniciar'])->name('encuesta.iniciar');
     Route::get('/encuesta/{diligenciamiento}/confirmar', [EncuestaController::class, 'confirmar'])->name('encuesta.confirmar');
     Route::post('/encuesta/{diligenciamiento}/finalizar', [EncuestaController::class, 'finalizar'])->name('encuesta.finalizar');
-    Route::get('/encuesta/{diligenciamiento}/{orden}', [EncuestaController::class, 'seccion'])
-        ->whereNumber('orden')->name('encuesta.seccion');
-    Route::post('/encuesta/{diligenciamiento}/{orden}', [EncuestaController::class, 'guardar'])
-        ->whereNumber('orden')->name('encuesta.guardar');
+    Route::get('/encuesta/{diligenciamiento}/listo', [EncuestaController::class, 'pausa'])->name('encuesta.pausa');
+    Route::get('/encuesta/{diligenciamiento}/dia/{jornada}', [EncuestaController::class, 'jornada'])
+        ->whereNumber('jornada')->name('encuesta.jornada');
+    Route::post('/encuesta/{diligenciamiento}/dia/{jornada}', [EncuestaController::class, 'guardar'])
+        ->whereNumber('jornada')->name('encuesta.guardar');
 });
 
 // Resultado de riesgo — accesible a estudiante (propio), profesional_salud y admin.

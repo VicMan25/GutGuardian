@@ -31,6 +31,7 @@ class User extends Authenticatable
         'password',
         'codigo_participante',
         'activo',
+        'recibir_recordatorios',
     ];
 
     protected $hidden = [
@@ -44,6 +45,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'activo' => 'boolean',
+            'recibir_recordatorios' => 'boolean',
         ];
     }
 
