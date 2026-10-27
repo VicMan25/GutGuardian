@@ -46,7 +46,8 @@ MAIL_MAILER=smtp                 # necesario para la recuperación de contraseñ
 ```
 
 Crear la base de datos y cargar los datos mínimos (roles, programas,
-instrumento de 20 preguntas y la versión inicial del modelo):
+instrumento de 20 preguntas y la versión inicial del modelo, `1.0`, de datos
+sintéticos):
 
 ```bash
 php artisan migrate --force
@@ -55,6 +56,10 @@ php artisan db:seed --force
 
 > **No ejecutar** `UsuariosTestSeeder` en producción: crea cuentas de prueba con
 > contraseñas conocidas.
+
+> El seeder deja activa la versión `1.0`. **Antes de abrir el piloto** hay que cargar y
+> activar la versión vigente, `storage/app/models/modelo_v2.json` (datos reales), desde
+> **Modelo predictivo** como se explica en la sección 5.
 
 Optimizar y dar permisos de escritura:
 
@@ -87,16 +92,17 @@ php artisan gutguardian:verificar-despliegue
 El comando revisa HTTPS, modo depuración, cifrado de sesión, conexión a la base
 de datos, instrumento activo, roles, existencia de un administrador y validez de
 la versión activa del modelo. Termina con error si algo impide operar y con
-**avisos** para lo que conviene corregir. Mientras el modelo activo sea el
-provisional (datos sintéticos y regla Y provisional) aparecerá el aviso «Modelo
-entrenado con datos reales»: es esperado hasta que Enfermería defina la regla
-clínica (ver `CLAUDE.md` §7).
+**avisos** para lo que conviene corregir. Si sigue activa la versión `1.0`
+(datos sintéticos) aparecerá el aviso «Modelo entrenado con datos reales»:
+significa que falta cargar `modelo_v2.json` (sección 5).
 
 ## 5. Actualizar el modelo predictivo (rol admin)
 
 1. Fuera de la aplicación, en la carpeta `ml/`, ejecutar el pipeline
-   (`preparar_datos.py` → `entrenar_modelo.py` → `exportar_modelo.py`). Genera
-   un archivo JSON con coeficientes, métricas y orden de variables.
+   (`preparar_datos.py` → `entrenar_modelo.py` → `exportar_modelo.py`, con el
+   entorno `ml/.venv`). Genera `storage/app/models/modelo_v{N}.json` con
+   coeficientes, métricas y orden de variables. La versión vigente ya está
+   generada: `modelo_v2.json`.
 2. Ingresar como administrador → **Modelo predictivo** → «Registrar una
    versión» y cargar el JSON. El sistema lo valida (categorías, coeficientes
    completos, variables calculables); si falla, explica el motivo y no lo guarda.

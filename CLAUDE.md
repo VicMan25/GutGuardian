@@ -159,16 +159,25 @@ Escala de 4 niveles salvo indicación:
 - `1` — síntomas recurrentes o combinación de factores de riesgo nutricionales y clínicos
 - `2` — sintomatología persistente + múltiples antecedentes médicos + patrones alimentarios de riesgo
 
-**PENDIENTE BLOQUEANTE:** la regla operativa que deriva Y a partir de P11–P13 y P20 aún no
-está definida en el documento. Debe construirse con el equipo de Enfermería y quedar escrita
-como algoritmo determinista antes del Sprint 4. Sin eso no hay modelo entrenable.
+**Regla operativa de Y (aprobada):** puntaje de 6 señales sobre P11–P13 y P20
+(`ml/comun.py::derivar_categoria_riesgo`, tabla en `docs/regresion-logistica.md` §3.1),
+aprobado sin cambios por Enfermería y Nutrición (reportado 2026-10-15), junto con la
+codificación numérica de las respuestas. Cambiar un umbral o un corte es un cambio de
+criterio clínico: requiere nueva aprobación y una versión nueva del modelo. Sobre los 347
+registros reales deja 298 / 47 / 2 (bajo / medio / alto); los cortes están en consulta
+(`docs/consulta-cortes-riesgo.md`).
 
 **Flujo del modelo:**
 
 1. *Offline (Python, carpeta `ml/` del repo, fuera del runtime de Laravel):*
-   entrenar `statsmodels.MNLogit` sobre los 347 registros → exportar
-   `storage/app/models/modelo_v1.json` con: coeficientes por categoría, intercepto,
-   orden y codificación de variables, métricas de desempeño.
+   entrenar la regresión multinomial sobre los 347 registros → exportar
+   `storage/app/models/modelo_v{N}.json` con: coeficientes por categoría, intercepto,
+   orden y codificación de variables, métricas de desempeño. Desde v2.0 el ajuste es
+   **L2 + pesos balanceados por clase** (scikit-learn, variables estandarizadas solo para
+   ajustar, coeficientes exportados en escala original con base 0). MLE pura
+   (`statsmodels.MNLogit`, v1.0) separa la categoría 2 con los datos reales. **No usar
+   aumento de datos** (SMOTE, etc.): con tan pocos casos solo clona participantes e infla
+   métricas. Entorno: `ml/.venv` (`pip install -r ml/requirements.txt`).
 
 2. *Online (Laravel, `app/Modules/Analitica`):*
    `PredictorService` carga el JSON de la versión activa, arma el vector de predictores
@@ -180,9 +189,11 @@ como algoritmo determinista antes del Sprint 4. Sin eso no hay modelo entrenable
    Ejemplo: "El consumo diario de frituras multiplica por 2.3 la probabilidad de
    clasificarse en riesgo alto."
 
-**Limitación conocida a documentar:** 347 registros con 3 clases y ~25 predictores es un
-ratio de eventos-por-variable ajustado. Se requiere reducción de variables o regularización,
-y debe reportarse honestamente en la monografía (PROBAST+AI, dominio "análisis estadístico").
+**Limitación conocida a documentar:** 347 registros, 21 predictores y solo 2 casos de
+riesgo alto: la ecuación de esa categoría no es interpretable, y los pesos por clase
+sobrestiman las probabilidades de medio y alto (hallazgos D10–D12 de
+`docs/regresion-logistica.md`). Debe reportarse honestamente en la monografía (PROBAST+AI,
+dominio "análisis estadístico").
 
 ---
 
@@ -257,10 +268,10 @@ histórica** de los registros del estudiante y ajustar la redacción en la monog
       `/seguimiento`, son funcionalidad complementaria del módulo `Reportes` sin HU numerada en
       el documento fuente. Paleta de las gráficas de síntomas validada con la skill dataviz
       (`scripts/validate_palette.js`) para no chocar con la escala de riesgo.
-- [~] Sprint 4 — pipeline `ml/` (preparación, entrenamiento MNLogit, VIF, exportación) y
+- [x] Sprint 4 — pipeline `ml/` (preparación, entrenamiento, VIF, exportación) y
       `PredictorService`/`ExplicabilidadService` en Laravel implementados y con tests Pest
-      (casos conocidos de softmax). Corre de punta a punta sobre datos **sintéticos**; no
-      reemplaza el modelo real. Ver bloqueante abajo.
+      (casos conocidos de softmax). **Modelo v2.0 activo**, entrenado con los 347 registros
+      reales y la regla de Y aprobada (ver «Modelo v2.0» abajo).
 - [x] Sprint 5 — panel institucional y reportes (HU-014/015/016/017/018/019/022/023/024;
       el alcance se infirió en `docs/AVANCE_PROYECTO.md` y la tesis ya lo formalizó en
       §2.4.1.4.5, Tablas 62–75, con los mismos criterios): `EstudianteController` (consulta individual y listado con
@@ -292,13 +303,18 @@ histórica** de los registros del estudiante y ajustar la redacción en la monog
       estaba registrado en `app.js`. Comando solo-desarrollo `gutguardian:simular-seguimiento`
       (usa `EvaluacionService`, extraído de `ResultadoController`). Suite: 230 tests. **Pendiente de campo:** ejecutar la prueba piloto
       con estudiantes y desplegar en el servidor institucional.
-- [ ] **BLOQUEANTE (sigue abierto):** regla operativa real de la variable dependiente Y
-      (requiere a Enfermería). `ml/comun.py::derivar_categoria_riesgo` implementa una regla
-      PLACEHOLDER documentada solo para poder ejercitar el pipeline de ingeniería — no usar
-      para tamizaje real.
-- [~] Dataset de 347 registros: ETL listo (`ml/etl_datos_reales.py` → `ml/datos/dataset_real.csv`,
-      ignorado por git). La versión activa del modelo (v1.0) sigue siendo la entrenada con datos
-      sintéticos; reentrenar con los datos reales depende de la regla Y.
+- [x] Regla de Y y codificación de respuestas aprobadas por Enfermería y Nutrición
+      (2026-10-15). Bloqueante cerrado.
+- [x] Modelo v2.0 (2026-10-15): `ml/datos/dataset_real.csv` (ETL, ignorado por git) →
+      `storage/app/models/modelo_v2.json`, registrado y activado con `ImportadorModeloService`.
+      L2 (C = 0.01 por VC 5×5) + pesos balanceados; `genero_otro` retirado (constante).
+      AUC macro en VC 0.81; en prueba detecta 8/12 de riesgo medio. `modelo_v1.json`
+      (sintético) se conserva: lo usan `VersionModeloSeeder` y los tests de HU-009/HU-026, así
+      que en un despliegue nuevo la v2.0 se sube desde `/admin/modelos`. Detalle completo en
+      `docs/regresion-logistica.md`.
+- [ ] Pendientes del modelo: respuesta de Enfermería a `docs/consulta-cortes-riesgo.md`
+      (si cambian los cortes → v2.1), decidir si se recalibran las probabilidades mostradas
+      (D10) y reentrenar con los datos de la prueba piloto si el consentimiento lo permite.
 - [ ] Monografía: el complemento con los cambios resaltados está en `docs/monografia/`
       (Sprint 6, HU-026, objetivo 1.3.2.4, conclusiones y recomendaciones de Ingeniería,
       marcadores pendientes del documento).

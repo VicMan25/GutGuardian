@@ -564,19 +564,20 @@ tests/Feature/
 
 ## 9. Pendientes abiertos
 
-> Actualizado el 2026-09-29. El texto original de esta sección (Sprint 4) decía
-> que el dataset real y los Sprints 5 y 6 estaban pendientes; ya no es así.
+> Actualizado el 2026-10-15 (ver §13). Versiones anteriores de esta sección
+> listaban como abiertos la regla de Y, el dataset real y el reentrenamiento.
 
-1. **Bloqueante — regla clínica de derivación de Y**, pendiente del equipo de
-   Enfermería (sección 5 de este documento). Sigue abierto.
+1. ~~Bloqueante — regla clínica de derivación de Y~~ — **cerrado**: Enfermería y
+   Nutrición aprobaron la regla tal cual y la codificación de las respuestas.
 2. ~~Dataset real de 347 registros~~ — ETL construido (`ml/etl_datos_reales.py`,
    commit `c6abfe9`); produce `ml/datos/dataset_real.csv` (ignorado por git).
-   Falta entrenar con él, lo que depende del punto 1.
 3. ~~Sprint 5~~ — completado (§11). ~~Sprint 6~~ — componente de software
    completado (§12); faltan las actividades de campo: prueba piloto con
    estudiantes y despliegue en el servidor institucional.
-4. Reentrenar con (1) y (2), registrar la versión desde `/admin/modelos`
-   (HU-026) y reemplazar en la monografía las métricas sintéticas de la Tabla 60.
+4. ~~Reentrenar con (1) y (2)~~ — **modelo v2.0 activo** (§13). Falta reemplazar
+   en la monografía las métricas sintéticas de la Tabla 60.
+5. Respuesta de Enfermería a `docs/consulta-cortes-riesgo.md` (solo 2 casos de
+   riesgo alto con los cortes aprobados).
 
 *Lista original (Sprint 4):*
 
@@ -1024,4 +1025,48 @@ Suite: 230 tests.
 - **Despliegue en el servidor institucional:** requiere dominio, certificado
   TLS y el visto bueno de la universidad.
 - **Modelo final:** depende de la regla Y de Enfermería (bloqueante §5).
+
+---
+
+## 13. Modelo v2.0 — datos reales y regla de Y aprobada (2026-10-15)
+
+Enfermería y Nutrición revisaron el pipeline y aprobaron **sin cambios** la
+codificación de las respuestas y la regla de derivación de Y. Con eso se cerró el
+bloqueante de §5 y se reentrenó sobre los 347 registros reales.
+
+### 13.1 Hallazgo: riesgo alto casi vacío
+
+La regla aprobada deja 298 / 47 / 2 (bajo / medio / alto). Un ensayo con el método
+de la v1.0 (MLE pura con `statsmodels.MNLogit`) dio coeficientes de ±49 en la
+ecuación de riesgo alto (separación), una matriz singular (`genero_otro` constante)
+y una exactitud en prueba (0.851) menor que clasificar a todos como riesgo bajo (0.862).
+
+### 13.2 Decisiones
+
+| Decisión | Razón |
+|---|---|
+| Ajuste L2 + `class_weight='balanced'` (scikit-learn), C por VC 5×5 | Coeficientes finitos y detección de riesgo medio (8/12 en prueba, frente a 4/12 con MLE) |
+| Estandarizar solo para ajustar; exportar en escala original con base 0 | `PredictorService` y la tabla `versiones_modelo` no cambian |
+| Sin aumento de datos (SMOTE) | Con 2 casos solo clonaría participantes e inflaría métricas (PROBAST+AI) |
+| Retirar `genero_otro` | Constante en los datos reales; `PredictorService` la sigue calculando pero no entra |
+| Ajuste final con los 347 registros; métricas de prueba con un ajuste 260/87 aparte | No desperdiciar los casos de riesgo alto |
+| `modelo_v2.json` aparte; `modelo_v1.json` intacto | Lo usan `VersionModeloSeeder` y los tests de HU-009/HU-026; trazabilidad |
+| Consultar los cortes a Enfermería (`docs/consulta-cortes-riesgo.md`) | Calibrar a la población real es un criterio clínico, no de ingeniería |
+
+### 13.3 Resultado
+
+- AUC macro en VC 0.813 (bajo 0.78, medio 0.76; alto 0.90 sobre 2 casos, no confiable).
+- Prueba: exactitud 0.816, balanceada 0.753, matriz `[[63, 12, 0], [3, 8, 1], [0, 0, 0]]`.
+- Registrada y activada con `ImportadorModeloService`; `gutguardian:verificar-despliegue`
+  ya no da el aviso de modelo provisional.
+- Verificado: BD = JSON = scikit-learn; PHP = Python (diferencia 1.1 × 10⁻¹⁶).
+- Suite Pest: 234 tests en verde (sin cambios en PHP).
+- Revisión técnica completa, con coeficientes, ejemplo y hallazgos D1–D12:
+  `docs/regresion-logistica.md`.
+
+### 13.4 Limitaciones a declarar
+
+- La ecuación de riesgo alto no es interpretable (2 casos).
+- Los pesos por clase sobrestiman las probabilidades mostradas de medio y alto (D10).
+- Sin valores p (la estimación penalizada no los da); si hacen falta intervalos, bootstrap.
 

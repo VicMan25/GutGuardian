@@ -1,9 +1,14 @@
-"""Exporta el resultado de entrenamiento a storage/app/models/modelo_v1.json,
+"""Exporta el resultado de entrenamiento a storage/app/models/modelo_v{N}.json,
 en el formato que consume PredictorService (Laravel): coeficientes por
 categoría (con intercepto), orden y mapa de variables, y métricas.
 
+Cada versión se escribe en su propio archivo: los JSON anteriores (p. ej.
+modelo_v1.json, el de datos sintéticos) se conservan como evidencia de
+trazabilidad y siguen sirviendo a VersionModeloSeeder y a los tests.
+Para publicar una versión nueva: cambiar VERSION, NOMBRE y LIMITACIONES.
+
 Entrada:  ml/datos/resultado_entrenamiento.pkl
-Salida:   storage/app/models/modelo_v1.json
+Salida:   storage/app/models/modelo_v{N}.json
 """
 
 from __future__ import annotations
@@ -16,14 +21,17 @@ from pathlib import Path
 from comun import CATEGORIA_BASE, CATEGORIAS, ETIQUETAS_VARIABLES, ORDEN_VARIABLES
 
 ENTRADA = Path(__file__).parent / 'datos' / 'resultado_entrenamiento.pkl'
-SALIDA = Path(__file__).parent.parent / 'storage' / 'app' / 'models' / 'modelo_v1.json'
+VERSION = '2.0'
+NOMBRE = 'Modelo multinomial GutGuardián — datos reales (347), regla de riesgo validada'
+SALIDA = Path(__file__).parent.parent / 'storage' / 'app' / 'models' / f'modelo_v{VERSION.split(".")[0]}.json'
 
 LIMITACIONES = (
-    'Modelo entrenado sobre un dataset SINTÉTICO de prueba de concepto, no sobre los '
-    '347 registros reales de participantes. La variable dependiente se derivó con una '
-    'regla PLACEHOLDER (ver ml/comun.py) pendiente de validación por el equipo de '
-    'Enfermería (bloqueante documentado en CLAUDE.md §7 y §11). No usar para tamizaje '
-    'real hasta reentrenar con datos y regla clínica definitivos.'
+    'Entrenado sobre los 347 registros reales de participantes, con la regla de nivel de '
+    'riesgo aprobada por Enfermería y Nutrición. Con esa regla solo 2 participantes quedan '
+    'en riesgo alto: la ecuación de esa categoría se apoya sobre todo en la regularización '
+    'y sus resultados son poco estables. Se ajustó con penalización L2 y pesos por clase, '
+    'sin generar registros artificiales. Es una herramienta de tamizaje y autocuidado; no '
+    'emite diagnósticos. Se recomienda reentrenar con los datos de la prueba piloto.'
 )
 
 
@@ -31,19 +39,7 @@ def exportar() -> dict:
     with open(ENTRADA, 'rb') as f:
         entrenamiento = pickle.load(f)
 
-    resultado = entrenamiento['resultado_statsmodels']
-    params = resultado.params.copy()
-
-    categorias_no_base = [c for c in CATEGORIAS if c != CATEGORIA_BASE]
-    params.columns = categorias_no_base
-
-    coeficientes = {}
-    for categoria in categorias_no_base:
-        columna = params[categoria]
-        coeficientes[str(categoria)] = {
-            'intercepto': float(columna.loc['const']),
-            'beta': {var: float(columna.loc[var]) for var in ORDEN_VARIABLES},
-        }
+    coeficientes = entrenamiento['coeficientes']
 
     mapa_variables = {
         var: {'etiqueta': ETIQUETAS_VARIABLES[var]}
@@ -51,8 +47,8 @@ def exportar() -> dict:
     }
 
     return {
-        'version': '1.0',
-        'nombre': 'Modelo multinomial GutGuardián — placeholder de ingeniería (Sprint 4)',
+        'version': VERSION,
+        'nombre': NOMBRE,
         'entrenado_at': datetime.now(timezone.utc).isoformat(),
         'categoria_base': CATEGORIA_BASE,
         'categorias': CATEGORIAS,

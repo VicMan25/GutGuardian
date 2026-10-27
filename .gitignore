@@ -41,6 +41,7 @@ docs/*.xlsx
 # Artefactos de Python (ml/)
 # ------------------------------------------------------------
 ml/__pycache__/
+ml/.venv/
 *.pyc
 
 # Monografía: .docx/.pdf de la tesis pesan decenas de MB; se versionan solo las capturas.
