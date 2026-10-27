@@ -7,7 +7,7 @@ use App\Modules\Encuestas\Models\Instrumento;
 use App\Modules\Encuestas\Models\Opcion;
 use App\Modules\Encuestas\Models\Pregunta;
 use App\Modules\Encuestas\Models\Respuesta;
-use App\Modules\Encuestas\Models\Seccion;
+use App\Modules\Encuestas\Services\JornadaService;
 use App\Modules\Reportes\Services\UsabilidadService;
 use App\Modules\Usuarios\Models\Perfil;
 use App\Modules\Usuarios\Models\Programa;
@@ -20,12 +20,16 @@ use Illuminate\View\View;
 
 class EncuestaController extends Controller
 {
-    public function __construct(private readonly UsabilidadService $usabilidad) {}
+    public function __construct(
+        private readonly UsabilidadService $usabilidad,
+        private readonly JornadaService $jornadas,
+    ) {}
 
     /**
      * HU-004/HU-005: encuentra el diligenciamiento pendiente/en_progreso del
      * estudiante para el instrumento activo (o crea uno), y lo lleva a la
-     * primera sección con preguntas sin responder.
+     * primera jornada con preguntas sin responder. El ciclo no vence: un
+     * diligenciamiento abierto se retoma el día que el estudiante vuelva.
      */
     public function iniciar(): RedirectResponse
     {
@@ -46,16 +50,16 @@ class EncuestaController extends Controller
             ]);
         }
 
-        $ordenPendiente = $this->primeraSeccionPendiente($diligenciamiento);
+        $jornadaPendiente = $this->jornadas->primeraPendiente($diligenciamiento);
 
-        if ($ordenPendiente === null) {
+        if ($jornadaPendiente === null) {
             return redirect()->route('encuesta.confirmar', $diligenciamiento);
         }
 
-        return redirect()->route('encuesta.seccion', [$diligenciamiento, $ordenPendiente]);
+        return redirect()->route('encuesta.jornada', [$diligenciamiento, $jornadaPendiente]);
     }
 
-    public function seccion(Diligenciamiento $diligenciamiento, int $orden): View|RedirectResponse
+    public function jornada(Diligenciamiento $diligenciamiento, int $jornada): View|RedirectResponse
     {
         // 'view' (no 'update'): un diligenciamiento completado ya no es editable
         // (DiligenciamientoPolicy::update lo bloquea), pero revisitar su URL debe
@@ -66,72 +70,97 @@ class EncuestaController extends Controller
             return redirect()->route('resultado.show', $diligenciamiento);
         }
 
-        $seccion = Seccion::where('instrumento_id', $diligenciamiento->instrumento_id)
-            ->where('orden', $orden)
-            ->with(['preguntas.opciones', 'preguntas.items'])
-            ->firstOrFail();
+        $preguntas = $this->jornadas->preguntas($diligenciamiento->instrumento_id, $jornada);
+        abort_if($preguntas->isEmpty(), 404);
 
-        $totalSecciones = Seccion::where('instrumento_id', $diligenciamiento->instrumento_id)->count();
+        $this->jornadas->registrarInicio($diligenciamiento, $jornada);
 
         $respuestasPorPregunta = Respuesta::where('diligenciamiento_id', $diligenciamiento->id)
-            ->whereIn('pregunta_id', $seccion->preguntas->pluck('id'))
+            ->whereIn('pregunta_id', $preguntas->pluck('id'))
             ->get()
             ->groupBy('pregunta_id');
 
         $perfil = $diligenciamiento->usuario->perfil;
 
-        $campos = $seccion->preguntas->map(
+        $campos = $preguntas->map(
             fn (Pregunta $p) => $this->construirCampo($p, $respuestasPorPregunta->get($p->id, collect()), $perfil)
         );
 
-        return view('estudiante.encuesta.seccion', [
+        $totalJornadas = $this->jornadas->total($diligenciamiento->instrumento_id);
+
+        return view('estudiante.encuesta.jornada', [
             'diligenciamiento' => $diligenciamiento,
-            'seccion' => $seccion,
             'campos' => $campos,
-            'seccionActual' => $orden,
-            'totalSecciones' => $totalSecciones,
-            'esUltima' => $orden === $totalSecciones,
+            'jornadaActual' => $jornada,
+            'totalJornadas' => $totalJornadas,
+            'esUltima' => $jornada === $totalJornadas,
         ]);
     }
 
-    public function guardar(Request $request, Diligenciamiento $diligenciamiento, int $orden): RedirectResponse
+    public function guardar(Request $request, Diligenciamiento $diligenciamiento, int $jornada): RedirectResponse
     {
         $this->authorize('update', $diligenciamiento);
 
-        $seccion = Seccion::where('instrumento_id', $diligenciamiento->instrumento_id)
-            ->where('orden', $orden)
-            ->with(['preguntas.opciones', 'preguntas.items'])
-            ->firstOrFail();
+        $preguntas = $this->jornadas->preguntas($diligenciamiento->instrumento_id, $jornada);
+        abort_if($preguntas->isEmpty(), 404);
 
         // Indicador de validación del piloto (tasa de errores al ingresar datos,
-        // §1.5.5.5): se registra cada envío y si superó las reglas de la sección.
+        // §1.5.5.5): se registra cada envío y si superó las reglas de la jornada.
         try {
-            $datos = $request->validate($this->reglasSeccion($seccion));
+            $datos = $request->validate($this->reglasJornada($preguntas));
         } catch (ValidationException $e) {
-            $this->usabilidad->registrarEnvioSeccion($request->user(), $diligenciamiento, $orden, count($e->errors()));
+            $this->usabilidad->registrarEnvioJornada($request->user(), $diligenciamiento, $jornada, count($e->errors()));
 
             throw $e;
         }
 
-        $this->usabilidad->registrarEnvioSeccion($request->user(), $diligenciamiento, $orden, 0);
+        $this->usabilidad->registrarEnvioJornada($request->user(), $diligenciamiento, $jornada, 0);
 
-        foreach ($seccion->preguntas as $pregunta) {
+        foreach ($preguntas as $pregunta) {
             $this->guardarRespuesta($diligenciamiento, $pregunta, $datos['respuestas'][$pregunta->id]);
         }
 
-        $this->sincronizarPerfilDesdeSociodemografico($diligenciamiento, $seccion->preguntas, $datos['respuestas']);
+        $this->sincronizarPerfilDesdeSociodemografico($diligenciamiento, $preguntas, $datos['respuestas']);
+        $this->jornadas->registrarCompletada($diligenciamiento, $jornada);
 
         if ($diligenciamiento->estado === 'pendiente') {
             $diligenciamiento->update(['estado' => 'en_progreso']);
         }
 
-        $totalSecciones = Seccion::where('instrumento_id', $diligenciamiento->instrumento_id)->count();
-
-        if ($orden < $totalSecciones) {
-            return redirect()->route('encuesta.seccion', [$diligenciamiento, $orden + 1]);
+        if ($this->jornadas->primeraPendiente($diligenciamiento) === null) {
+            return redirect()->route('encuesta.confirmar', $diligenciamiento);
         }
 
-        return redirect()->route('encuesta.confirmar', $diligenciamiento);
+        return redirect()->route('encuesta.pausa', $diligenciamiento);
+    }
+
+    /**
+     * Fin de una jornada con el ciclo aún abierto: «listo por hoy». El
+     * desbloqueo es flexible, así que se ofrece seguir de inmediato.
+     */
+    public function pausa(Diligenciamiento $diligenciamiento): View|RedirectResponse
+    {
+        $this->authorize('view', $diligenciamiento);
+
+        if ($diligenciamiento->estado === 'completado') {
+            return redirect()->route('resultado.show', $diligenciamiento);
+        }
+
+        $siguiente = $this->jornadas->primeraPendiente($diligenciamiento);
+
+        if ($siguiente === null) {
+            return redirect()->route('encuesta.confirmar', $diligenciamiento);
+        }
+
+        $diligenciamiento->load('jornadas');
+
+        return view('estudiante.encuesta.pausa', [
+            'diligenciamiento' => $diligenciamiento,
+            'siguiente' => $siguiente,
+            'totalJornadas' => $this->jornadas->total($diligenciamiento->instrumento_id),
+            'completadas' => $siguiente - 1,
+            'sugeridaDesde' => $this->jornadas->sugeridaDesde($diligenciamiento, $siguiente),
+        ]);
     }
 
     public function confirmar(Diligenciamiento $diligenciamiento): View|RedirectResponse
@@ -144,7 +173,7 @@ class EncuestaController extends Controller
 
         return view('estudiante.encuesta.confirmar', [
             'diligenciamiento' => $diligenciamiento,
-            'todoCompleto' => $this->primeraSeccionPendiente($diligenciamiento) === null,
+            'todoCompleto' => $this->jornadas->primeraPendiente($diligenciamiento) === null,
         ]);
     }
 
@@ -162,7 +191,7 @@ class EncuestaController extends Controller
             return redirect()->route('resultado.show', $diligenciamiento);
         }
 
-        if ($this->primeraSeccionPendiente($diligenciamiento) !== null) {
+        if ($this->jornadas->primeraPendiente($diligenciamiento) !== null) {
             return redirect()->route('encuesta.confirmar', $diligenciamiento)
                 ->with('error', 'Aún tienes preguntas sin responder.');
         }
@@ -176,34 +205,11 @@ class EncuestaController extends Controller
     }
 
     /**
-     * Las secciones se guardan de forma atómica (todas sus preguntas a la vez,
-     * ver reglasSeccion), así que basta con verificar que cada pregunta tenga
-     * al menos una respuesta para saber si la sección quedó completa.
-     */
-    private function primeraSeccionPendiente(Diligenciamiento $diligenciamiento): ?int
-    {
-        $instrumento = Instrumento::with('secciones.preguntas')->findOrFail($diligenciamiento->instrumento_id);
-
-        $preguntasRespondidas = Respuesta::where('diligenciamiento_id', $diligenciamiento->id)
-            ->distinct()
-            ->pluck('pregunta_id');
-
-        foreach ($instrumento->secciones as $seccion) {
-            $idsPreguntas = $seccion->preguntas->pluck('id');
-            if ($idsPreguntas->diff($preguntasRespondidas)->isNotEmpty()) {
-                return $seccion->orden;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Si la sección se recarga tras un fallo de validación (ej. un ítem de
+     * Si la jornada se recarga tras un fallo de validación (ej. un ítem de
      * matriz sin responder), Laravel ya deja la entrada anterior en old().
      * Se prioriza sobre lo guardado en BD para que el estudiante no vea su
      * respuesta recién marcada "desaparecer" — solo quedó sin persistir
-     * porque otra pregunta de la misma sección falló.
+     * porque otra pregunta de la misma jornada falló.
      */
     private function construirCampo(Pregunta $pregunta, Collection $respuestas, ?Perfil $perfil = null): array
     {
@@ -367,13 +373,14 @@ class EncuestaController extends Controller
     }
 
     /**
+     * @param  Collection<int, Pregunta>  $preguntas
      * @return array<string, array<int, string>>
      */
-    private function reglasSeccion(Seccion $seccion): array
+    private function reglasJornada(Collection $preguntas): array
     {
         $reglas = [];
 
-        foreach ($seccion->preguntas as $pregunta) {
+        foreach ($preguntas as $pregunta) {
             $campo = "respuestas.{$pregunta->id}";
 
             $reglas[$campo] = match ($pregunta->tipo) {

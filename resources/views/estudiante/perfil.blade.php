@@ -106,4 +106,31 @@
         </form>
     </x-tarjeta>
 
+    {{-- Recordatorios por correo de la encuesta por jornadas --}}
+    <x-tarjeta class="mt-6">
+        <h2 class="font-display text-xl font-medium text-gg-tinta">Recordatorios</h2>
+        <p class="text-sm text-gg-tinta-suave mt-1 leading-relaxed">
+            Cuando dejas la encuesta a mitad, te enviamos un único correo por día pendiente para
+            avisarte que la siguiente parte está disponible. No incluye tus respuestas ni tu resultado.
+        </p>
+
+        @if(session('status') === 'recordatorios-actualizados')
+            <x-alerta tipo="exito" class="mt-4">Tu preferencia se guardó.</x-alerta>
+        @endif
+
+        <form method="POST" action="{{ route('perfil.recordatorios') }}" class="mt-4">
+            @csrf
+            @method('PUT')
+            <label for="recibir_recordatorios" class="flex items-center gap-3 min-h-[44px] cursor-pointer">
+                <input type="checkbox" id="recibir_recordatorios" name="recibir_recordatorios" value="1"
+                       @checked(Auth::user()->recibir_recordatorios)
+                       class="w-5 h-5 rounded border-gg-borde text-gg-primario focus:ring-gg-primario">
+                <span class="text-base text-gg-tinta">Recibir recordatorios en {{ Auth::user()->email }}</span>
+            </label>
+            <x-boton variante="secundario" tipo="submit" class="mt-3">
+                Guardar preferencia
+            </x-boton>
+        </form>
+    </x-tarjeta>
+
 </x-layouts.estudiante>

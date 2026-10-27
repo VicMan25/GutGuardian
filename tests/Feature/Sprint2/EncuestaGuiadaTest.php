@@ -6,15 +6,16 @@ use App\Modules\Encuestas\Models\Diligenciamiento;
 use App\Modules\Encuestas\Models\Instrumento;
 use App\Modules\Encuestas\Models\Opcion;
 use App\Modules\Encuestas\Models\Respuesta;
-use App\Modules\Encuestas\Models\Seccion;
+use App\Modules\Encuestas\Services\JornadaService;
 use Database\Seeders\InstrumentoSeeder;
 use Database\Seeders\RolesPermisosSeeder;
 
 /**
  * Encuesta guiada (una pregunta por paso). Es solo presentación: estos tests
- * fijan que el formulario de la sección sigue conteniendo TODAS las preguntas
- * con sus inputs (los pasos ocultos también se envían) y que el paso inicial
- * respeta el reanudar y los errores de validación.
+ * fijan que el formulario del día sigue conteniendo TODAS sus preguntas con
+ * sus inputs (los pasos ocultos también se envían) y que el paso inicial
+ * respeta el reanudar y los errores de validación. Se usa el día 2 (P09,
+ * P11, P12, P13, P20): tiene matrices, escala de dolor y selección múltiple.
  */
 describe('Encuesta guiada — presentación por pasos sin cambiar el envío', function () {
 
@@ -32,21 +33,20 @@ describe('Encuesta guiada — presentación por pasos sin cambiar el envío', fu
         $this->diligenciamiento = Diligenciamiento::create([
             'user_id' => $this->estudiante->id, 'instrumento_id' => $this->instrumento->id, 'estado' => 'pendiente',
         ]);
-        $this->clinica = Seccion::where('instrumento_id', $this->instrumento->id)
-            ->where('orden', 3)->with('preguntas.items')->firstOrFail();
+        $this->preguntas = app(JornadaService::class)->preguntas($this->instrumento->id, 2);
     });
 
     it('mantiene un único formulario con un paso y los inputs de cada pregunta', function () {
         $html = $this->actingAs($this->estudiante)
-            ->get(route('encuesta.seccion', [$this->diligenciamiento, 3]))
+            ->get(route('encuesta.jornada', [$this->diligenciamiento, 2]))
             ->assertOk()
-            ->assertSee('encuestaGuiada({ total: '.$this->clinica->preguntas->count().', inicial: 0 })', false)
+            ->assertSee('encuestaGuiada({ total: '.$this->preguntas->count().', inicial: 0 })', false)
             ->getContent();
 
-        expect(substr_count($html, '<form method="POST"'))->toBe(2) // la sección + cerrar sesión
-            ->and(substr_count($html, 'data-paso="'))->toBe($this->clinica->preguntas->count());
+        expect(substr_count($html, '<form method="POST"'))->toBe(2) // el día + cerrar sesión
+            ->and(substr_count($html, 'data-paso="'))->toBe($this->preguntas->count());
 
-        foreach ($this->clinica->preguntas as $pregunta) {
+        foreach ($this->preguntas as $pregunta) {
             expect($html)->toContain("name=\"respuestas[{$pregunta->id}]");
 
             // Matrices: un grupo de radios por ítem, una sola vez (sin la tabla duplicada).
@@ -57,8 +57,15 @@ describe('Encuesta guiada — presentación por pasos sin cambiar el envío', fu
         }
     });
 
+    it('cada pregunta muestra la sección temática a la que pertenece', function () {
+        $this->actingAs($this->estudiante)
+            ->get(route('encuesta.jornada', [$this->diligenciamiento, 2]))
+            ->assertSee('Hábitos Nutricionales · 1 de '.$this->preguntas->count())
+            ->assertSee('Información Clínica · 2 de '.$this->preguntas->count());
+    });
+
     it('al reanudar abre la primera pregunta sin responder', function () {
-        $primera = $this->clinica->preguntas->first();
+        $primera = $this->preguntas->first();
         foreach ($primera->items as $item) {
             $opcion = Opcion::where('pregunta_id', $primera->id)->first();
             Respuesta::create([
@@ -68,38 +75,33 @@ describe('Encuesta guiada — presentación por pasos sin cambiar el envío', fu
         }
 
         $this->actingAs($this->estudiante)
-            ->get(route('encuesta.seccion', [$this->diligenciamiento, 3]))
+            ->get(route('encuesta.jornada', [$this->diligenciamiento, 2]))
             ->assertOk()
             ->assertSee('inicial: 1 })', false);
     });
 
     it('tras un error de validación abre la pregunta con el error', function () {
-        // Todo respondido salvo la tercera pregunta (P13).
-        $payload = ['respuestas' => []];
-        foreach ($this->clinica->preguntas as $i => $pregunta) {
-            if ($i === 2) {
-                continue;
-            }
-            $payload['respuestas'][$pregunta->id] = hu004ValorValido($pregunta);
-        }
+        // Todo respondido salvo la cuarta pregunta del día (P13).
+        $payload = encuestaPayloadJornada($this->instrumento->id, 2);
+        unset($payload['respuestas'][$this->preguntas[3]->id]);
 
         $this->actingAs($this->estudiante)
-            ->from(route('encuesta.seccion', [$this->diligenciamiento, 3]))
-            ->post(route('encuesta.guardar', [$this->diligenciamiento, 3]), $payload)
-            ->assertRedirect(route('encuesta.seccion', [$this->diligenciamiento, 3]));
+            ->from(route('encuesta.jornada', [$this->diligenciamiento, 2]))
+            ->post(route('encuesta.guardar', [$this->diligenciamiento, 2]), $payload)
+            ->assertRedirect(route('encuesta.jornada', [$this->diligenciamiento, 2]));
 
         $this->actingAs($this->estudiante)
-            ->get(route('encuesta.seccion', [$this->diligenciamiento, 3]))
-            ->assertSee('inicial: 2 })', false)
+            ->get(route('encuesta.jornada', [$this->diligenciamiento, 2]))
+            ->assertSee('inicial: 3 })', false)
             ->assertSee('Revisa las preguntas marcadas');
     });
 
-    it('la sección completa se sigue guardando en un solo envío', function () {
+    it('el día completo se sigue guardando en un solo envío', function () {
         $this->actingAs($this->estudiante)
-            ->post(route('encuesta.guardar', [$this->diligenciamiento, 3]), hu004PayloadSeccion($this->clinica))
-            ->assertRedirect(route('encuesta.confirmar', $this->diligenciamiento));
+            ->post(route('encuesta.guardar', [$this->diligenciamiento, 2]), encuestaPayloadJornada($this->instrumento->id, 2))
+            ->assertRedirect(route('encuesta.pausa', $this->diligenciamiento));
 
         expect(Respuesta::where('diligenciamiento_id', $this->diligenciamiento->id)
-            ->distinct()->count('pregunta_id'))->toBe($this->clinica->preguntas->count());
+            ->distinct()->count('pregunta_id'))->toBe($this->preguntas->count());
     });
 });

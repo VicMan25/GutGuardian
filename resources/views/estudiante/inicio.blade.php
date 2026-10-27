@@ -26,23 +26,34 @@
                         <x-icono nombre="hoja" class="w-4 h-4" />
                         Tu punto de partida
                     </span>
-                    <h2 class="mt-3 font-display text-2xl sm:text-3xl font-medium text-white">
-                        Aún no tienes registros
-                    </h2>
-                    <p class="mt-3 text-base text-white/80 max-w-md leading-relaxed">
-                        Completa tu primera encuesta para conocer tu nivel de riesgo digestivo
-                        y recibir orientación de autocuidado.
-                    </p>
+                    @if($ciclo)
+                        <h2 class="mt-3 font-display text-2xl sm:text-3xl font-medium text-white">
+                            Vas en el día {{ $ciclo['jornada'] }} de {{ $ciclo['total'] }}
+                        </h2>
+                        <p class="mt-3 text-base text-white/80 max-w-md leading-relaxed">
+                            Tus respuestas anteriores están guardadas.
+                            {{ $ciclo['es_hoy'] ? 'La parte de hoy ya está disponible.' : 'La siguiente parte se sugiere desde mañana, pero puedes seguir ahora si quieres.' }}
+                        </p>
+                        <x-avance-ciclo :ciclo="$ciclo" class="mt-6 max-w-sm" />
+                    @else
+                        <h2 class="mt-3 font-display text-2xl sm:text-3xl font-medium text-white">
+                            Aún no tienes registros
+                        </h2>
+                        <p class="mt-3 text-base text-white/80 max-w-md leading-relaxed">
+                            Completa tu primera encuesta para conocer tu nivel de riesgo digestivo
+                            y recibir orientación de autocuidado.
+                        </p>
+                    @endif
                     <div class="mt-7">
                         <x-boton variante="claro" tamano="lg" href="{{ route('encuesta.iniciar') }}" icono-final="flecha">
-                            Comenzar encuesta
+                            {{ $ciclo ? 'Continuar con el día '.$ciclo['jornada'] : 'Comenzar encuesta' }}
                         </x-boton>
                     </div>
                 </div>
 
                 <ol class="grid gap-3 self-center" role="list">
                     @foreach([
-                        ['n' => '1', 'titulo' => 'Responde tres secciones', 'texto' => 'Datos generales, hábitos alimentarios y síntomas. Puedes pausar y continuar después.'],
+                        ['n' => '1', 'titulo' => 'Responde en tres días', 'texto' => 'Unas pocas preguntas cada día. Si tienes tiempo, puedes adelantar; la encuesta no vence.'],
                         ['n' => '2', 'titulo' => 'Conoce tu nivel de riesgo', 'texto' => 'Bajo, medio o alto, con los factores que más influyeron.'],
                         ['n' => '3', 'titulo' => 'Sigue tu evolución', 'texto' => 'Repite la encuesta y compara tus resultados en el tiempo.'],
                     ] as $paso)
@@ -114,16 +125,24 @@
 
             {{-- Columna de acciones --}}
             <div class="grid gap-5 content-start">
-                {{-- Nueva encuesta --}}
+                {{-- Nueva encuesta o ciclo en curso --}}
                 <section class="gg-marca rounded-bloque overflow-hidden p-6 sm:p-7 shadow-elev-2">
                     <x-icono nombre="encuesta" class="w-7 h-7 text-gg-acento" />
-                    <p class="mt-4 font-display text-xl font-medium text-white">¿Listo para una nueva encuesta?</p>
-                    <p class="text-sm text-white/75 mt-1.5 leading-relaxed">
-                        Vuelve a diligenciar el instrumento para ver tu evolución.
-                    </p>
+                    @if($ciclo)
+                        <p class="mt-4 font-display text-xl font-medium text-white">Día {{ $ciclo['jornada'] }} de {{ $ciclo['total'] }}</p>
+                        <p class="text-sm text-white/75 mt-1.5 leading-relaxed">
+                            {{ $ciclo['es_hoy'] ? 'Tu siguiente parte ya está disponible.' : 'Se sugiere desde mañana; puedes adelantarla si quieres.' }}
+                        </p>
+                        <x-avance-ciclo :ciclo="$ciclo" class="mt-4" />
+                    @else
+                        <p class="mt-4 font-display text-xl font-medium text-white">¿Listo para una nueva encuesta?</p>
+                        <p class="text-sm text-white/75 mt-1.5 leading-relaxed">
+                            Vuelve a diligenciar el instrumento para ver tu evolución. Son tres días con pocas preguntas cada uno.
+                        </p>
+                    @endif
                     <div class="mt-5">
                         <x-boton variante="claro" href="{{ route('encuesta.iniciar') }}" icono-final="flecha">
-                            Comenzar
+                            {{ $ciclo ? 'Continuar' : 'Comenzar' }}
                         </x-boton>
                     </div>
                 </section>

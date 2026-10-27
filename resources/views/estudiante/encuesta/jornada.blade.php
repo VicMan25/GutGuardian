@@ -1,17 +1,17 @@
-<x-layouts.estudiante :titulo="$seccion->nombre" ancho="amplio" enfoque>
+<x-layouts.estudiante :titulo="'Día '.$jornadaActual.' de '.$totalJornadas" ancho="amplio" enfoque>
 
     <x-slot:progreso>
         <x-barra-progreso
-            :seccion-actual="$seccionActual"
-            :total-secciones="$totalSecciones"
+            :seccion-actual="$jornadaActual"
+            :total-secciones="$totalJornadas"
             :pregunta-actual="1"
-            :total-preguntas="$seccion->preguntas->count()"
-            :nombre-seccion="$seccion->nombre"
+            :total-preguntas="$campos->count()"
+            :nombre-seccion="'Día '.$jornadaActual.' de '.$totalJornadas"
         />
     </x-slot:progreso>
 
     @php
-        $esSociodemografica = $seccion->preguntas->contains(fn ($p) => str_starts_with($p->codigo, 'SD'));
+        $esSociodemografica = $campos->contains(fn ($c) => str_starts_with($c['pregunta']->codigo, 'SD'));
         $campos = $campos->values();
         $total = $campos->count();
 
@@ -48,7 +48,7 @@
 
     {{--
         Encuesta guiada: una pregunta por paso. Es solo presentación —
-        sigue siendo UN formulario por sección con todas las preguntas
+        sigue siendo UN formulario por jornada con todas sus preguntas
         (los pasos ocultos también se envían) y el servidor valida y guarda
         igual que antes. `novalidate`: el `required` nativo no puede
         mostrarse en un paso oculto y bloquearía el envío en silencio;
@@ -56,7 +56,7 @@
         validación del servidor sigue siendo la red de seguridad.
     --}}
     <form method="POST"
-          action="{{ route('encuesta.guardar', [$diligenciamiento, $seccionActual]) }}"
+          action="{{ route('encuesta.guardar', [$diligenciamiento, $jornadaActual]) }}"
           novalidate
           x-data="encuestaGuiada({ total: {{ $total }}, inicial: {{ $pasoInicial }} })"
           @change="alCambiar($event)"
@@ -69,20 +69,20 @@
         <div class="grid lg:grid-cols-[260px_minmax(0,1fr)] gap-6 lg:gap-10 items-start">
 
             {{-- ========================================================
-                 Índice de la sección — desktop. Aprovecha el ancho para
+                 Índice de la jornada — desktop. Aprovecha el ancho para
                  mostrar el mapa completo: qué falta, dónde estoy, volver.
             ======================================================== --}}
             <aside class="hidden lg:block sticky top-36">
-                <p class="gg-rotulo">Sección {{ $seccionActual }} de {{ $totalSecciones }}</p>
-                <h1 class="mt-1 font-display text-2xl font-medium text-gg-tinta">{{ $seccion->nombre }}</h1>
+                <p class="gg-rotulo">Encuesta en {{ $totalJornadas }} días</p>
+                <h1 class="mt-1 font-display text-2xl font-medium text-gg-tinta">Día {{ $jornadaActual }} de {{ $totalJornadas }}</h1>
                 <p class="text-sm text-gg-tinta-suave mt-2 leading-relaxed">
-                    Todas las preguntas de esta sección son obligatorias.
+                    Todas las preguntas de hoy son obligatorias.
                     @if($esSociodemografica)
-                        Ya completamos estas respuestas con los datos de tu registro — revísalas y ajústalas si algo cambió.
+                        Los datos generales ya vienen de tu registro — revísalos y ajústalos si algo cambió.
                     @endif
                 </p>
 
-                <ol class="mt-6 space-y-0.5" aria-label="Preguntas de la sección">
+                <ol class="mt-6 space-y-0.5" aria-label="Preguntas de hoy">
                     @foreach($campos as $i => $campo)
                     <li>
                         <button type="button"
@@ -115,18 +115,18 @@
 
                 {{-- Encabezado compacto — móvil y tablet --}}
                 <div class="lg:hidden mb-4">
-                    <h1 class="font-display text-2xl font-medium text-gg-tinta">{{ $seccion->nombre }}</h1>
+                    <h1 class="font-display text-2xl font-medium text-gg-tinta">Día {{ $jornadaActual }} de {{ $totalJornadas }}</h1>
                     <p class="text-sm text-gg-tinta-suave mt-1">
-                        Todas las preguntas de esta sección son obligatorias.
+                        Todas las preguntas de hoy son obligatorias.
                         @if($esSociodemografica)
-                            Ya completamos estas respuestas con los datos de tu registro — revísalas y ajústalas si algo cambió.
+                            Los datos generales ya vienen de tu registro — revísalos y ajústalos si algo cambió.
                         @endif
                     </p>
                 </div>
 
                 @if($errors->any())
                     <x-alerta tipo="error" titulo="Revisa las preguntas marcadas" class="mb-4">
-                        Hay respuestas pendientes o incompletas en esta sección. Te llevamos a la primera; las demás aparecen marcadas en el progreso.
+                        Hay respuestas pendientes o incompletas en la parte de hoy. Te llevamos a la primera; las demás aparecen marcadas en el progreso.
                     </x-alerta>
                 @endif
 
@@ -139,7 +139,7 @@
                         <p class="text-sm text-gg-tinta-suave">
                             <span x-show="!completo"><span x-text="totalRespondidas">{{ $estado->where('respondida', true)->count() }}</span> respondidas</span>
                             <span x-show="completo" x-cloak class="inline-flex items-center gap-1 font-medium text-gg-primario animate-gg-entrada">
-                                <x-icono nombre="check" class="w-4 h-4" /> Sección completa
+                                <x-icono nombre="check" class="w-4 h-4" /> Todo respondido
                             </span>
                         </p>
                     </div>
@@ -189,7 +189,7 @@
                                x-bind:class="sacudir && paso === {{ $i }} && aviso ? 'gg-sacudir' : ''">
                         <p id="paso-{{ $i }}-titulo" tabindex="-1" class="flex items-center gap-2 mb-3 focus:outline-none">
                             <span class="font-mono text-xs text-gg-primario bg-gg-primario-suave rounded-full px-2 py-0.5">{{ $campo['pregunta']->codigo }}</span>
-                            <span class="text-sm text-gg-tinta-suave">Pregunta {{ $i + 1 }} de {{ $total }}</span>
+                            <span class="text-sm text-gg-tinta-suave">{{ $campo['pregunta']->seccion->nombre }} · {{ $i + 1 }} de {{ $total }}</span>
                         </p>
 
                         @switch($campo['tipo'])
@@ -283,21 +283,21 @@
                 <div class="sticky bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] md:bottom-4 z-20 mt-5">
                     <div class="flex items-center gap-2 p-2 rounded-[18px] bg-gg-superficie/90 backdrop-blur-md border border-gg-borde shadow-elev-3">
 
-                        {{-- Anterior (dentro de la sección) --}}
+                        {{-- Anterior (dentro de la jornada) --}}
                         <x-boton variante="fantasma" icono="atras" x-show="paso > 0" x-cloak x-on:click="anterior()">
                             Anterior
                         </x-boton>
 
-                        {{-- Atrás (sección anterior), solo en la primera pregunta --}}
-                        @if($seccionActual > 1)
-                            <x-boton variante="fantasma" href="{{ route('encuesta.seccion', [$diligenciamiento, $seccionActual - 1]) }}" icono="atras"
+                        {{-- Día anterior (ya guardado), solo en la primera pregunta --}}
+                        @if($jornadaActual > 1)
+                            <x-boton variante="fantasma" href="{{ route('encuesta.jornada', [$diligenciamiento, $jornadaActual - 1]) }}" icono="atras"
                                      x-show="paso === 0" :style="$pasoInicial !== 0 ? 'display: none' : null">
-                                Atrás
+                                Día anterior
                             </x-boton>
                         @else
                             <span x-show="paso === 0" class="hidden sm:block pl-3 text-sm text-gg-tinta-suave"
                                   @if($pasoInicial !== 0) style="display: none" @endif>
-                                Tus respuestas se guardan por sección.
+                                Tus respuestas se guardan al terminar el día.
                             </span>
                         @endif
 
@@ -310,11 +310,11 @@
                             Siguiente
                         </x-boton>
 
-                        {{-- Envío de la sección (último paso) --}}
+                        {{-- Envío de la jornada (último paso) --}}
                         <x-boton variante="primario" tipo="submit" icono-final="flecha" class="flex-1 sm:flex-none"
                                  x-show="esUltimo" x-bind:class="completo && 'gg-listo'"
                                  :style="$pasoInicial !== $total - 1 ? 'display: none' : null">
-                            {{ $esUltima ? 'Continuar a confirmación' : 'Siguiente sección' }}
+                            {{ $esUltima ? 'Continuar a confirmación' : 'Guardar el día '.$jornadaActual }}
                         </x-boton>
                     </div>
                 </div>

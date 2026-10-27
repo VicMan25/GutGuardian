@@ -4,43 +4,13 @@ use App\Models\User;
 use App\Modules\Auth\Models\Consentimiento;
 use App\Modules\Encuestas\Models\Diligenciamiento;
 use App\Modules\Encuestas\Models\Instrumento;
-use App\Modules\Encuestas\Models\Opcion;
 use App\Modules\Encuestas\Models\Pregunta;
 use App\Modules\Encuestas\Models\Respuesta;
-use App\Modules\Encuestas\Models\Seccion;
+use App\Modules\Encuestas\Services\JornadaService;
 use Database\Seeders\InstrumentoSeeder;
 use Database\Seeders\RolesPermisosSeeder;
 
-/**
- * Construye un valor de envío VÁLIDO para cualquier pregunta, en el mismo
- * formato que enviaría el formulario (ver EncuestaController::reglasSeccion).
- */
-function hu004ValorValido(Pregunta $pregunta): int|array
-{
-    return match ($pregunta->tipo) {
-        'escala' => Opcion::where('pregunta_id', $pregunta->id)->first()->valor_numerico,
-        'single' => Opcion::where('pregunta_id', $pregunta->id)->first()->id,
-        'multiple' => [
-            (Opcion::where('pregunta_id', $pregunta->id)->where('etiqueta', 'Ninguna')->first()
-                ?? Opcion::where('pregunta_id', $pregunta->id)->first())->id,
-        ],
-        'matriz' => $pregunta->items->mapWithKeys(fn ($item) => [
-            $item->id => Opcion::where('pregunta_id', $pregunta->id)->first()->valor_numerico,
-        ])->all(),
-    };
-}
-
-function hu004PayloadSeccion(Seccion $seccion): array
-{
-    $respuestas = [];
-    foreach ($seccion->preguntas as $pregunta) {
-        $respuestas[$pregunta->id] = hu004ValorValido($pregunta);
-    }
-
-    return ['respuestas' => $respuestas];
-}
-
-describe('HU-004 — Captura de la encuesta por secciones', function () {
+describe('HU-004 — Captura de la encuesta por jornadas', function () {
 
     beforeEach(function () {
         $this->seed([RolesPermisosSeeder::class, InstrumentoSeeder::class]);
@@ -53,10 +23,13 @@ describe('HU-004 — Captura de la encuesta por secciones', function () {
         ]);
 
         $this->instrumento = Instrumento::where('activo', true)->firstOrFail();
+        $this->diligenciamiento = Diligenciamiento::create([
+            'user_id' => $this->estudiante->id, 'instrumento_id' => $this->instrumento->id, 'estado' => 'pendiente',
+        ]);
     });
 
-    it('GET /encuesta crea un diligenciamiento y redirige a la primera sección', function () {
-        $primeraSeccion = Seccion::where('instrumento_id', $this->instrumento->id)->where('orden', 1)->first();
+    it('GET /encuesta crea un diligenciamiento y redirige al día 1', function () {
+        $this->diligenciamiento->forceDelete();
 
         $this->actingAs($this->estudiante)
             ->get(route('encuesta.iniciar'))
@@ -67,109 +40,92 @@ describe('HU-004 — Captura de la encuesta por secciones', function () {
         expect($diligenciamiento)->not->toBeNull()
             ->and($diligenciamiento->estado)->toBe('pendiente')
             ->and($diligenciamiento->instrumento_id)->toBe($this->instrumento->id);
+
+        $this->actingAs($this->estudiante)
+            ->get(route('encuesta.iniciar'))
+            ->assertRedirect(route('encuesta.jornada', [$diligenciamiento, 1]));
     });
 
-    it('muestra las preguntas de la sección solicitada', function () {
-        $diligenciamiento = Diligenciamiento::create([
-            'user_id' => $this->estudiante->id, 'instrumento_id' => $this->instrumento->id, 'estado' => 'pendiente',
-        ]);
-        $seccion = Seccion::where('instrumento_id', $this->instrumento->id)->where('orden', 1)->first();
-
+    it('muestra las preguntas del día solicitado', function () {
         $respuesta = $this->actingAs($this->estudiante)
-            ->get(route('encuesta.seccion', [$diligenciamiento, 1]));
+            ->get(route('encuesta.jornada', [$this->diligenciamiento, 1]));
 
-        $respuesta->assertOk();
-        foreach ($seccion->preguntas as $pregunta) {
+        $respuesta->assertOk()->assertSee('Día 1 de 3');
+        foreach (app(JornadaService::class)->preguntas($this->instrumento->id, 1) as $pregunta) {
             $respuesta->assertSee($pregunta->enunciado);
         }
     });
 
-    it('guardar la sección persiste una respuesta por pregunta de tipo escala/single y avanza a la siguiente sección', function () {
-        $diligenciamiento = Diligenciamiento::create([
-            'user_id' => $this->estudiante->id, 'instrumento_id' => $this->instrumento->id, 'estado' => 'pendiente',
-        ]);
-        $seccion1 = Seccion::where('instrumento_id', $this->instrumento->id)->where('orden', 1)->first();
+    it('guardar el día persiste una respuesta por pregunta y lleva a «listo por hoy»', function () {
+        $preguntas = app(JornadaService::class)->preguntas($this->instrumento->id, 1);
 
         $this->actingAs($this->estudiante)
-            ->post(route('encuesta.guardar', [$diligenciamiento, 1]), hu004PayloadSeccion($seccion1))
-            ->assertRedirect(route('encuesta.seccion', [$diligenciamiento, 2]));
+            ->post(route('encuesta.guardar', [$this->diligenciamiento, 1]), encuestaPayloadJornada($this->instrumento->id, 1))
+            ->assertRedirect(route('encuesta.pausa', $this->diligenciamiento));
 
-        expect(Respuesta::where('diligenciamiento_id', $diligenciamiento->id)->count())->toBe($seccion1->preguntas->count())
-            ->and($diligenciamiento->fresh()->estado)->toBe('en_progreso');
+        // Las múltiples del día 1 (P14, P15) marcan solo «Ninguna»: una fila cada una.
+        expect(Respuesta::where('diligenciamiento_id', $this->diligenciamiento->id)->count())->toBe($preguntas->count())
+            ->and($this->diligenciamiento->fresh()->estado)->toBe('en_progreso');
     });
 
     it('guarda correctamente una pregunta de tipo matriz (una respuesta por ítem)', function () {
-        $diligenciamiento = Diligenciamiento::create([
-            'user_id' => $this->estudiante->id, 'instrumento_id' => $this->instrumento->id, 'estado' => 'pendiente',
-        ]);
-        $seccion2 = Seccion::where('instrumento_id', $this->instrumento->id)->where('orden', 2)->first();
-
         $this->actingAs($this->estudiante)
-            ->post(route('encuesta.guardar', [$diligenciamiento, 2]), hu004PayloadSeccion($seccion2))
+            ->post(route('encuesta.guardar', [$this->diligenciamiento, 2]), encuestaPayloadJornada($this->instrumento->id, 2))
             ->assertRedirect();
 
         $p09 = Pregunta::where('codigo', 'P09')->first();
-        expect(Respuesta::where('diligenciamiento_id', $diligenciamiento->id)->where('pregunta_id', $p09->id)->count())
+        expect(Respuesta::where('diligenciamiento_id', $this->diligenciamiento->id)->where('pregunta_id', $p09->id)->count())
             ->toBe($p09->items->count());
     });
 
     it('guarda correctamente una pregunta de selección múltiple', function () {
-        $diligenciamiento = Diligenciamiento::create([
-            'user_id' => $this->estudiante->id, 'instrumento_id' => $this->instrumento->id, 'estado' => 'pendiente',
-        ]);
-        $seccion3 = Seccion::where('instrumento_id', $this->instrumento->id)->where('orden', 3)->first();
-
         $this->actingAs($this->estudiante)
-            ->post(route('encuesta.guardar', [$diligenciamiento, 3]), hu004PayloadSeccion($seccion3))
-            ->assertRedirect(route('encuesta.confirmar', $diligenciamiento));
+            ->post(route('encuesta.guardar', [$this->diligenciamiento, 3]), encuestaPayloadJornada($this->instrumento->id, 3))
+            ->assertRedirect(route('encuesta.pausa', $this->diligenciamiento));
 
-        $p14 = Pregunta::where('codigo', 'P14')->first();
-        $respuestaP14 = Respuesta::where('diligenciamiento_id', $diligenciamiento->id)->where('pregunta_id', $p14->id)->first();
+        $p18 = Pregunta::where('codigo', 'P18')->first();
 
-        expect($respuestaP14)->not->toBeNull();
+        expect(Respuesta::where('diligenciamiento_id', $this->diligenciamiento->id)->where('pregunta_id', $p18->id)->exists())->toBeTrue();
     });
 
     it('rechaza el envío si falta una pregunta requerida', function () {
-        $diligenciamiento = Diligenciamiento::create([
-            'user_id' => $this->estudiante->id, 'instrumento_id' => $this->instrumento->id, 'estado' => 'pendiente',
-        ]);
-        $seccion1 = Seccion::where('instrumento_id', $this->instrumento->id)->where('orden', 1)->first();
-
-        $payload = hu004PayloadSeccion($seccion1);
-        $primeraPregunta = $seccion1->preguntas->first();
+        $payload = encuestaPayloadJornada($this->instrumento->id, 1);
+        $primeraPregunta = app(JornadaService::class)->preguntas($this->instrumento->id, 1)->first();
         unset($payload['respuestas'][$primeraPregunta->id]);
 
         $this->actingAs($this->estudiante)
-            ->post(route('encuesta.guardar', [$diligenciamiento, 1]), $payload)
+            ->post(route('encuesta.guardar', [$this->diligenciamiento, 1]), $payload)
             ->assertSessionHasErrors("respuestas.{$primeraPregunta->id}");
 
-        expect(Respuesta::where('diligenciamiento_id', $diligenciamiento->id)->count())->toBe(0);
+        expect(Respuesta::where('diligenciamiento_id', $this->diligenciamiento->id)->count())->toBe(0);
     });
 
-    it('si falta un ítem de una pregunta matriz, el error queda visible al recargar la sección y no avanza', function () {
-        $diligenciamiento = Diligenciamiento::create([
-            'user_id' => $this->estudiante->id, 'instrumento_id' => $this->instrumento->id, 'estado' => 'pendiente',
-        ]);
-        $seccionClinica = Seccion::where('instrumento_id', $this->instrumento->id)->where('orden', 3)->first();
+    it('si falta un ítem de una pregunta matriz, el error queda visible al recargar el día y no avanza', function () {
         $p11 = Pregunta::where('codigo', 'P11')->first();
 
-        $payload = hu004PayloadSeccion($seccionClinica);
+        $payload = encuestaPayloadJornada($this->instrumento->id, $p11->jornada);
         $itemFaltante = $p11->items->first();
         unset($payload['respuestas'][$p11->id][$itemFaltante->id]);
 
         $this->actingAs($this->estudiante)
-            ->from(route('encuesta.seccion', [$diligenciamiento, 3]))
-            ->post(route('encuesta.guardar', [$diligenciamiento, 3]), $payload)
+            ->from(route('encuesta.jornada', [$this->diligenciamiento, $p11->jornada]))
+            ->post(route('encuesta.guardar', [$this->diligenciamiento, $p11->jornada]), $payload)
             ->assertSessionHasErrors("respuestas.{$p11->id}.{$itemFaltante->id}")
-            ->assertRedirect(route('encuesta.seccion', [$diligenciamiento, 3]));
+            ->assertRedirect(route('encuesta.jornada', [$this->diligenciamiento, $p11->jornada]));
 
-        expect(Respuesta::where('diligenciamiento_id', $diligenciamiento->id)->count())->toBe(0);
+        expect(Respuesta::where('diligenciamiento_id', $this->diligenciamiento->id)->count())->toBe(0);
 
         $this->actingAs($this->estudiante)
-            ->from(route('encuesta.guardar', [$diligenciamiento, 3]))
+            ->from(route('encuesta.jornada', [$this->diligenciamiento, $p11->jornada]))
             ->followingRedirects()
-            ->post(route('encuesta.guardar', [$diligenciamiento, 3]), $payload)
+            ->post(route('encuesta.guardar', [$this->diligenciamiento, $p11->jornada]), $payload)
             ->assertSee('Falta responder uno o más ítems de esta pregunta.');
+    });
+
+    it('un día que no existe en el instrumento responde 404', function () {
+        $this->actingAs($this->estudiante)
+            ->get(route('encuesta.jornada', [$this->diligenciamiento, 9]))
+            ->assertNotFound();
     });
 
     it('un estudiante no puede diligenciar el instrumento de otro estudiante — 403', function () {
@@ -179,12 +135,8 @@ describe('HU-004 — Captura de la encuesta por secciones', function () {
             'user_id' => $otro->id, 'version_politica' => '1.0', 'aceptado_at' => now(), 'ip' => '127.0.0.1',
         ]);
 
-        $diligenciamiento = Diligenciamiento::create([
-            'user_id' => $this->estudiante->id, 'instrumento_id' => $this->instrumento->id, 'estado' => 'pendiente',
-        ]);
-
         $this->actingAs($otro)
-            ->get(route('encuesta.seccion', [$diligenciamiento, 1]))
+            ->get(route('encuesta.jornada', [$this->diligenciamiento, 1]))
             ->assertForbidden();
     });
 

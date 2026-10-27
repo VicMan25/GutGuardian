@@ -412,7 +412,7 @@
         <section id="guiada">
             <x-ui-kit-seccion titulo="Encuesta guiada (una pregunta por paso)" />
             <p class="text-sm text-gg-tinta-suave mb-4">
-                Demo de la presentación de estudiante/encuesta/seccion: mismos componentes y mismo
+                Demo de la presentación de estudiante/encuesta/jornada: mismos componentes y mismo
                 componente Alpine <span class="font-mono">encuestaGuiada</span>. Escala y selección única
                 avanzan solas al tocar; múltiple y matriz con «Siguiente». Este formulario no guarda nada.
             </p>

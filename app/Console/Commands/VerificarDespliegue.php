@@ -38,6 +38,8 @@ class VerificarDespliegue extends Command
         $this->revisar('URL con HTTPS', Str::startsWith((string) config('app.url'), 'https://'), (string) config('app.url'), grave: $produccion);
         $this->revisar('Cookie de sesión solo por HTTPS', (bool) config('session.secure'), 'SESSION_SECURE_COOKIE=true', grave: false);
         $this->revisar('Sesión cifrada', (bool) config('session.encrypt'), 'SESSION_ENCRYPT=true', grave: false);
+        $correoReal = ! in_array(config('mail.default'), ['log', 'array'], true);
+        $this->revisar('Correo para recordatorios', $correoReal, 'MAIL_MAILER='.config('mail.default').' (con log no se envía nada)', grave: false);
 
         try {
             DB::connection()->getPdo();

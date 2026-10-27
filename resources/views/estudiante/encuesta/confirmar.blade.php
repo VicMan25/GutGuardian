@@ -6,7 +6,7 @@
         <p class="gg-rotulo">Último paso</p>
         <h1 class="mt-1 font-display text-3xl font-medium text-gg-tinta">Confirmar y enviar</h1>
         <p class="text-base text-gg-tinta-suave mt-2">
-            Revisa que hayas completado todas las secciones antes de enviar tu encuesta.
+            Revisa que hayas completado los tres días antes de enviar tu encuesta.
         </p>
     </div>
 

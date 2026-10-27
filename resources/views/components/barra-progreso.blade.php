@@ -1,17 +1,17 @@
 {{--
-    Barra de progreso por sección — muestra dónde está el estudiante en el instrumento.
+    Barra de progreso por bloque — muestra dónde está el estudiante en el instrumento.
     Diseñada para el layout estudiante (max-w-640px).
 
-    La unidad de progreso es la SECCIÓN (no la pregunta individual),
-    porque el instrumento tiene sentido narrativo por secciones:
-    Sociodemográfico → Hábitos → Clínico.
+    La unidad de progreso es el BLOQUE (no la pregunta individual). En la
+    encuesta por jornadas el bloque es el día (1 a 3); el nombre de las props
+    se conserva de cuando el bloque era la sección temática.
 
     Props:
-      seccionActual   int    Sección activa: 1, 2 o 3
-      totalSecciones  int    Total de secciones (3)
+      seccionActual   int    Bloque activo: 1, 2 o 3
+      totalSecciones  int    Total de bloques (3)
       preguntaActual  int    Pregunta activa dentro de la sección
       totalPreguntas  int    Total de preguntas en la sección
-      nombreSeccion   string Nombre de la sección actual
+      nombreSeccion   string Nombre del bloque actual (p. ej. «Día 2 de 3»)
 --}}
 @props([
     'seccionActual'  => 1,
@@ -37,7 +37,7 @@ $seccionPct = round(($preguntaActual - 1) / max($totalPreguntas, 1) * 100);
             @endif
         </p>
         <span class="font-mono text-xs text-gg-tinta-suave whitespace-nowrap shrink-0">
-            <span class="sr-only">Sección</span>
+            <span class="sr-only">Bloque</span>
             {{ $seccionActual }}/{{ $totalSecciones }}
         </span>
     </div>
@@ -71,8 +71,7 @@ $seccionPct = round(($preguntaActual - 1) / max($totalPreguntas, 1) * 100);
 
     {{-- Texto accesible oculto para lectores de pantalla --}}
     <p class="sr-only">
-        Sección {{ $seccionActual }} de {{ $totalSecciones }}:
-        {{ $nombreSeccion }}.
+        {{ $nombreSeccion ?: 'Bloque '.$seccionActual.' de '.$totalSecciones }}.
         Pregunta {{ $preguntaActual }} de {{ $totalPreguntas }}.
     </p>
 

@@ -44,6 +44,11 @@ class Diligenciamiento extends Model
         return $this->hasMany(Respuesta::class);
     }
 
+    public function jornadas(): HasMany
+    {
+        return $this->hasMany(JornadaDiligenciamiento::class)->orderBy('jornada');
+    }
+
     public function evaluaciones(): HasMany
     {
         return $this->hasMany(EvaluacionRiesgo::class);

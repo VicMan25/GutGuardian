@@ -8,6 +8,18 @@ use Illuminate\Support\Facades\DB;
 
 class InstrumentoSeeder extends Seeder
 {
+    /**
+     * Jornada (día) en que se presenta cada pregunta. Mismo reparto que la
+     * migración add_jornada_to_preguntas_table, que lo aplica a bases ya
+     * sembradas: preguntas con ítems compartidos van juntas y las cuatro que
+     * definen Y (P11, P12, P13, P20) quedan en la misma jornada.
+     */
+    public const JORNADAS = [
+        1 => ['SD1', 'SD2', 'SD3', 'SD4', 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P10', 'P14', 'P15'],
+        2 => ['P09', 'P11', 'P12', 'P13', 'P20'],
+        3 => ['P16', 'P17', 'P18', 'P19'],
+    ];
+
     private Carbon $ahora;
 
     public function run(): void
@@ -72,6 +84,7 @@ class InstrumentoSeeder extends Seeder
     {
         return DB::table('preguntas')->insertGetId([
             'seccion_id' => $seccionId,
+            'jornada' => $this->jornadaDe($codigo),
             'codigo' => $codigo,
             'enunciado' => $enunciado,
             'tipo' => $tipo,
@@ -79,6 +92,17 @@ class InstrumentoSeeder extends Seeder
             'created_at' => $this->ahora,
             'updated_at' => $this->ahora,
         ]);
+    }
+
+    private function jornadaDe(string $codigo): int
+    {
+        foreach (self::JORNADAS as $jornada => $codigos) {
+            if (in_array($codigo, $codigos, true)) {
+                return $jornada;
+            }
+        }
+
+        return 1;
     }
 
     /** @param array<int, array{0: string, 1: int}> $opciones */

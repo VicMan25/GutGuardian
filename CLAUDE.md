@@ -82,12 +82,14 @@ programas              id, nombre
 
 instrumentos           id, nombre, version, tipo(nutricional|clinico), activo
 secciones              id, instrumento_id, nombre, orden
-preguntas              id, seccion_id, codigo(P01..P20), enunciado,
+preguntas              id, seccion_id, jornada(1..3), codigo(P01..P20), enunciado,
                        tipo(single|multiple|matriz|escala), orden
 items_pregunta         id, pregunta_id, etiqueta, orden      -- filas de matriz: "Diarrea", "Vómito"...
 opciones               id, pregunta_id, etiqueta, valor_numerico, orden
 
 diligenciamientos      id, user_id, instrumento_id, estado, completado_at
+jornadas_diligenciamiento  diligenciamiento_id, jornada, iniciada_at, completada_at,
+                       recordatorio_enviado_at
 respuestas             id, diligenciamiento_id, pregunta_id, item_pregunta_id(null),
                        opcion_id(null), valor_numerico, valor_texto
 
@@ -329,6 +331,20 @@ histórica** de los registros del estudiante y ajustar la redacción en la monog
 - [x] Encuesta guiada: una pregunta por paso, matriz ítem a ítem, índice lateral en desktop,
       avance automático en respuestas únicas. Solo presentación (sin cambios en
       `EncuestaController`); tests en `tests/Feature/Sprint2/EncuestaGuiadaTest.php`.
+- [x] Encuesta por jornadas (2026-10-27, rama `hu/encuesta-por-jornadas`): el instrumento
+      completo se responde en **3 días** con bloques fijos (`preguntas.jornada`, reparto en
+      `InstrumentoSeeder::JORNADAS` y en la migración que lo aplica a bases existentes): día 1
+      SD1–SD4, P01–P08, P10, P14, P15; día 2 P09, P11, P12, P13, P20 (las que definen Y, juntas);
+      día 3 P16–P19. Contenido, opciones y codificación sin cambios. Desbloqueo **flexible**
+      (el día siguiente se sugiere desde la medianoche de Colombia, pero se puede seguir ya),
+      sin vencimiento y con ciclos ilimitados. `JornadaService` concentra la lógica; pantalla
+      «Listo por hoy» (`encuesta.pausa`) y avance del ciclo en `/inicio`. El riesgo solo se
+      calcula con el ciclo completo. Tiempo de diligenciamiento = suma del tiempo activo por día
+      (`jornadas_diligenciamiento`). Recordatorio: un correo por día pendiente
+      (`gutguardian:enviar-recordatorios`, programado 9:00 Bogotá; cron + SMTP institucional en
+      `docs/DESPLIEGUE.md` §2.1), desactivable en `/perfil`. Suite: 255 tests.
+      **Para la monografía (solo Ingeniería):** los 347 registros se recogieron en una sesión y
+      el piloto en tres días; declararlo como diferencia en la validación temporal de la v2.0.
 
 ---
 
@@ -439,14 +455,16 @@ Los tres layouts abren con un enlace «Saltar al contenido» (`sr-only` hasta re
 | `icono`                 | `components/icono`               | Juego único de íconos de trazo (24 px, 1.75) para nav y acciones |
 | `alerta`               | `components/alerta`              | Tipos: exito, error, aviso, info. Cierre opcional con Alpine    |
 | `aviso-no-diagnostico`  | `components/aviso-no-diagnostico`| **Obligatorio** junto a todo resultado. Res. 3100/2019          |
-| `barra-progreso`        | `components/barra-progreso`      | Progreso por sección (en la cabecera); el progreso por pregunta lo dibuja la sección guiada |
+| `barra-progreso`        | `components/barra-progreso`      | Progreso por día de la encuesta (en la cabecera); el progreso por pregunta lo dibuja la jornada guiada |
+| `avance-ciclo`          | `components/avance-ciclo`        | Segmentos de días completados del ciclo, sobre superficies `.gg-marca` de `/inicio` |
 
 Los componentes de pregunta aceptan `destacada` (enunciado grande, sin código: lo muestra el paso).
 
-### Encuesta guiada (`estudiante/encuesta/seccion`)
+### Encuesta guiada (`estudiante/encuesta/jornada`)
 
-Una pregunta por paso dentro del **mismo** `<form>` por sección (Alpine `encuestaGuiada` en
+Una pregunta por paso dentro del **mismo** `<form>` por jornada (día) (Alpine `encuestaGuiada` en
 `app.js`): los pasos ocultos siguen en el DOM y se envían, y el servidor valida y guarda igual.
+Cada paso muestra la sección temática de la pregunta (las jornadas mezclan secciones).
 - Paso inicial calculado en el servidor: primera pregunta con error de validación, si no la
   primera sin responder.
 - Escala y single avanzan solas **solo tras toque/clic** (nunca con flechas del teclado);
